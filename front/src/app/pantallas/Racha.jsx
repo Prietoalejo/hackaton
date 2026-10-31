@@ -9,6 +9,56 @@ import { Encabezado, MensajeError, Pantalla, Tarjeta } from '../componentes/Base
 import { IcoCheck, IcoReloj, LogoCD } from '../componentes/Iconos.jsx'
 
 const LETRAS = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
+const num = (n) => Number(n).toLocaleString('es-VE', { maximumFractionDigits: 2 })
+
+// Razones del motor dichas al usuario (el dashboard las muestra en tercera persona)
+const SUBE = { puntualidad: 'pagas a tiempo', anticipados: 'pagas antes del vencimiento', racha: 'completaste tu racha', score: 'tienes un buen historial' }
+const BAJA = { puntualidad: 'algunos pagos llegaron tarde', score: 'tu historial aún es corto o tiene atrasos', riesgo: 'tuviste un atraso reciente' }
+const lista = (xs) => (xs.length > 1 ? `${xs.slice(0, -1).join(', ')} y ${xs[xs.length - 1]}` : xs[0])
+const porque = (b) => {
+  if (b.pausa) return 'Tus beneficios vuelven en cuanto saldes tu cuota.'
+  const sube = b.razones.filter((r) => r.efecto > 0 && SUBE[r.senal]).map((r) => SUBE[r.senal])
+  const baja = b.razones.filter((r) => r.efecto < 0 && BAJA[r.senal]).map((r) => BAJA[r.senal])
+  if (!sube.length && !baja.length) return 'Recibes el beneficio base de tu ruta. Paga a tiempo o antes y sube.'
+  return [sube.length && `Sube porque ${lista(sube)}.`, baja.length && `Baja porque ${lista(baja)}; paga a tiempo y lo recuperas.`]
+    .filter(Boolean).join(' ')
+}
+
+/** Beneficios de la ruta del Club, personalizados por el motor (base × factor + uno a tu medida) */
+function BeneficiosRuta({ b }) {
+  const pct = Math.round(b.factor * 100)
+  const tono = b.pausa ? '#D6104D' : pct > 100 ? '#3B6B00' : pct < 100 ? '#8A4B00' : '#5D5D70'
+  const fondo = b.pausa ? '#FFE3EA' : pct > 100 ? '#F1FBD2' : pct < 100 ? '#FFF1D6' : '#EEF0F5'
+  return (
+    <div style={{ padding: '12px 16px 0' }}>
+      <Tarjeta style={{ padding: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontWeight: 700, fontSize: 17 }}>Tus beneficios</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: tono, background: fondo, padding: '4px 10px', borderRadius: 999 }}>
+            {b.pausa ? 'En pausa' : `${pct} % de tu ruta`}
+          </span>
+        </div>
+        <div className="cd-mut" style={{ fontSize: 13, marginTop: 2 }}>{b.ruta}</div>
+        {b.beneficios.map((x) => (
+          <div key={x.tipo} className="cd-row" style={{ marginTop: 10, fontSize: 15, alignItems: 'baseline' }}>
+            <span>{x.nombre}</span>
+            <span style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+              {x.personal !== x.base && <span className="cd-mut" style={{ fontSize: 12, textDecoration: 'line-through', marginRight: 6 }}>{num(x.base)}{x.unidad && ` ${x.unidad}`}</span>}
+              <b>{num(x.personal)}{x.unidad && ` ${x.unidad}`}</b>
+            </span>
+          </div>
+        ))}
+        {b.a_tu_medida && (
+          <div style={{ marginTop: 12, background: '#FFE8EF', borderRadius: 14, padding: '10px 12px' }}>
+            <div style={{ fontWeight: 700, color: '#A3165E', fontSize: 15 }}>{b.a_tu_medida.nombre}</div>
+            <div style={{ fontSize: 13, color: '#6B2A4A', marginTop: 2 }}>{b.a_tu_medida.detalle}</div>
+          </div>
+        )}
+        <div className="cd-mut" style={{ fontSize: 12, marginTop: 10, lineHeight: 1.4 }}>{porque(b)}</div>
+      </Tarjeta>
+    </div>
+  )
+}
 
 export default function Racha() {
   const { ficha, hoy, recargarFicha, avisar } = useApp()
@@ -107,6 +157,8 @@ export default function Racha() {
           )}
         </Tarjeta>
       </div>
+
+      {ficha.beneficios && <BeneficiosRuta b={ficha.beneficios} />}
 
       <div style={{ padding: '24px 20px 0' }}>
         <div style={{ fontSize: 22, fontWeight: 700 }}>Paga y entra en racha</div>

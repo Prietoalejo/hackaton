@@ -146,3 +146,27 @@ def test_niveles_amarrados_a_las_rutas_del_club():
         perfil, _ = evaluar_usuario(usuario(), eventos, tickets, HOY)
         assert perfil["nivel"] == nivel_credirecto_por_club(perfil["club"]["nivel_club"]) < 3
         assert perfil["progreso"]["ruta_requerida"].startswith(C.RUTAS_CLUB[C.RUTA_MINIMA_POR_NIVEL[perfil["nivel"] + 1]]["nivel"])
+
+
+def test_motor_de_beneficios_personaliza_la_ruta():
+    from app.motor.beneficios import calcular_beneficios
+    from app.motor.club import calcular_club
+    tickets, eventos = historial_puntual()
+    club = calcular_club(eventos, tickets, HOY)
+    base = C.RUTAS_CLUB[club["nivel_club"]]["walletback_pct"]
+
+    def walletback(**perfil):
+        b = calcular_beneficios({"trust_score": 70, "segmento": C.SEG_PUNTUAL, "quincena": [], **perfil},
+                                club, eventos, tickets, HOY)
+        return b, b["beneficios"][0]["personal"]
+
+    puntual, w_puntual = walletback()
+    assert puntual["factor"] > 1 and w_puntual > base                      # paga a tiempo: más que la base
+    riesgo, w_riesgo = walletback(segmento=C.SEG_EN_RIESGO, trust_score=30)
+    assert w_riesgo < base and riesgo["factor"] >= C.VALORES["beneficio_min_pct"] / 100   # menos, con piso
+    assert {r["senal"] for r in riesgo["razones"]} >= {"riesgo", "score"}
+    mora, w_mora = walletback(modo_recuperacion=True)
+    assert mora["pausa"] and w_mora == 0 and mora["a_tu_medida"]["tipo"] == "recuperacion"
+    assert walletback(segmento=C.SEG_CONDUCTOR)[0]["a_tu_medida"]["tipo"] == "ticket_extra"
+    with C.con_valores({"beneficio_max_pct": 100}):
+        assert walletback()[0]["factor"] == 1.0                            # el tope es configurable

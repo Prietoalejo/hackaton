@@ -166,6 +166,9 @@ Recarga los datos sintéticos y vuelve el reloj al 2026-10-31. Tarda ~1 min.
 - `club` es el texto del nivel y la ruta del Club ("Viajero · Ruta del Café"); `club_puntos` trae el detalle.
   `club_puntos.puntos_credirecto`: la parte de esos puntos que vino de cuotas de Credirecto.
 - `progreso` trae además `ruta_requerida` y `faltan_pts_club`: la ruta del Club que exige el siguiente nivel.
+- `beneficios` (motor de beneficios del Club): `{"ruta", "factor" (0–1,5), "pausa", "razones": [{"senal", "efecto", "texto"}],
+  "beneficios": [{"tipo": "walletback" | "tickets_gratis", "nombre", "unidad", "base", "personal", "estimado_mes"?}],
+  "a_tu_medida": {"tipo", "nombre", "detalle"} | null}`.
 
 ### `GET /config` / `PUT /config`  (vista 06)
 ```json

@@ -178,6 +178,7 @@ def _ficha(conn, user_id) -> dict:
                            "usados": servicios_usados, "disponibles": decision["prestar"]["servicios_cupo"],
                            "cubre": [s for s in decision["prestar"]["servicios"] if s in C.SERVICIOS_FACTURA]},
         "club_puntos": perfil["club"],
+        "beneficios": perfil["beneficios"],
         "progreso": perfil["progreso"],
         "racha": racha(eventos, hoy),
         "deuda_total": round(sum(max(deuda(t), 0.0) for t in vivos), 2),

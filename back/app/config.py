@@ -48,6 +48,15 @@ EDITABLES = [
     ("ruta_confiable", "Ruta del Club para cada nivel", "Confiable desde", "nivel", 3, 1),
     ("ruta_premium", "Ruta del Club para cada nivel", "Premium desde", "nivel", 4, 1),
 
+    # Motor de beneficios del Club: el beneficio de cada ruta × un factor personal acotado
+    ("beneficio_min_pct", "Motor de beneficios del Club", "Beneficio mínimo de la ruta", "%", 50, 5),
+    ("beneficio_max_pct", "Motor de beneficios del Club", "Beneficio máximo de la ruta", "%", 150, 5),
+    ("bono_puntualidad_pct", "Motor de beneficios del Club", "Puntualidad (± si paga a tiempo o no)", "%", 15, 5),
+    ("bono_anticipados_pct", "Motor de beneficios del Club", "Paga antes del vencimiento", "%", 15, 5),
+    ("bono_racha_pct", "Motor de beneficios del Club", "Racha de la semana completa", "%", 10, 5),
+    ("bono_score_pct", "Motor de beneficios del Club", "Trust Score alto (± si es bajo)", "%", 10, 5),
+    ("castigo_riesgo_pct", "Motor de beneficios del Club", "Segmento En riesgo", "%", 30, 5),
+
     ("repagos_basico", "Repagos a tiempo para subir", "Básico", "", 1, 1),
     ("repagos_confiable", "Repagos a tiempo para subir", "Confiable", "", 3, 1),
     ("repagos_premium", "Repagos a tiempo para subir", "Premium", "", 10, 1),
@@ -143,15 +152,18 @@ PUNTOS_POR_PAGO = 100        # pts del Club por pago (servicio en PagoDirecto o 
 BONO_RUTA_COMPLETADA = 500   # "+500 puntos obtenidos" al completar una ruta
 # Niveles y rutas del Club tal como están en la app (pts para desbloquear cada ruta). El Club anuncia
 # 10 niveles "de Turista a Leyenda"; la app muestra hoy estos 7, los 3 últimos aún no están publicados.
+# walletback_pct y tickets_gratis son el beneficio BASE de cada ruta (supuesto: el Club no publica los
+# valores). El motor de beneficios (motor/beneficios.py) lo personaliza por usuario.
 RUTAS_CLUB = [
-    {"nivel": "Turista", "ruta": "Ruta Colonial", "desde": 0},
-    {"nivel": "Caminante", "ruta": "Ruta Falcón", "desde": 1000},
-    {"nivel": "Viajero", "ruta": "Ruta del Café", "desde": 4000},
-    {"nivel": "Conocedor", "ruta": "Ruta de Paria", "desde": 11000},
-    {"nivel": "Explorador", "ruta": "Ruta de Los Llanos", "desde": 24000},
-    {"nivel": "Trotamundo", "ruta": "Ruta Andina", "desde": 45000},
-    {"nivel": "Baqueano", "ruta": "Ruta del Zulia", "desde": 76000},
+    {"nivel": "Turista", "ruta": "Ruta Colonial", "desde": 0, "walletback_pct": 1.0, "tickets_gratis": 0},
+    {"nivel": "Caminante", "ruta": "Ruta Falcón", "desde": 1000, "walletback_pct": 1.5, "tickets_gratis": 1},
+    {"nivel": "Viajero", "ruta": "Ruta del Café", "desde": 4000, "walletback_pct": 2.0, "tickets_gratis": 1},
+    {"nivel": "Conocedor", "ruta": "Ruta de Paria", "desde": 11000, "walletback_pct": 2.5, "tickets_gratis": 2},
+    {"nivel": "Explorador", "ruta": "Ruta de Los Llanos", "desde": 24000, "walletback_pct": 3.0, "tickets_gratis": 2},
+    {"nivel": "Trotamundo", "ruta": "Ruta Andina", "desde": 45000, "walletback_pct": 3.5, "tickets_gratis": 3},
+    {"nivel": "Baqueano", "ruta": "Ruta del Zulia", "desde": 76000, "walletback_pct": 4.0, "tickets_gratis": 4},
 ]
+BENEFICIO_MIN_PAGOS = 3      # pagos en la ventana para que la puntualidad y los anticipados cuenten
 MULTIPLICADOR_PUNTOS = 1.5   # pagar antes del vencimiento o con la racha completa
 META_RACHA = 3               # pagos en la semana para activar el ×1,5 (la misma racha del Club)
 
@@ -258,6 +270,8 @@ def validar(valores: dict) -> dict:
     rutas = [candidato["ruta_basico"], candidato["ruta_confiable"], candidato["ruta_premium"]]
     if rutas != sorted(rutas) or not 1 <= rutas[0] or rutas[-1] > len(RUTAS_CLUB):
         raise ValueError(f"Las rutas del Club van de menor a mayor, entre 1 y {len(RUTAS_CLUB)}.")
+    if not candidato["beneficio_min_pct"] <= 100 <= candidato["beneficio_max_pct"]:
+        raise ValueError("El beneficio mínimo debe ser ≤ 100 % y el máximo ≥ 100 %.")
     if candidato["mora_dia"] <= candidato["gracia_dias"]:
         raise ValueError("La mora debe empezar después de los días de gracia.")
     return limpios

@@ -71,6 +71,38 @@ function Cupo({ u }) {
   )
 }
 
+/** Motor de beneficios: base de la ruta del Club × factor personal, con el porqué */
+function Beneficios({ b }) {
+  const pct = Math.round(b.factor * 100)
+  const tono = b.pausa || pct < 100 ? '#B42318' : pct > 100 ? '#3F6212' : '#15152B'
+  const num = (n) => Number(n).toLocaleString('es-VE', { maximumFractionDigits: 2 })
+  return (
+    <div style={{ border: '1px solid #E3E5EA', borderRadius: 10, padding: 18 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
+        <div>
+          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '.06em', color: '#6B6B80' }}>BENEFICIOS DEL CLUB · {b.ruta}</div>
+          <div style={{ fontSize: 22, fontWeight: 700, color: tono }}>{b.pausa ? 'En pausa (modo recuperación)' : `${pct} % del beneficio de la ruta`}</div>
+        </div>
+        {b.a_tu_medida && <Chip tono="positivo">A su medida: {b.a_tu_medida.nombre}</Chip>}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10, marginTop: 12 }}>
+        {b.beneficios.map((x) => (
+          <div key={x.tipo} style={{ background: '#F5F6F8', borderRadius: 8, padding: 12 }}>
+            <div className="rt-lbl">{x.nombre}</div>
+            <div style={{ fontSize: 18, fontWeight: 700 }}>{num(x.personal)}{x.unidad && ` ${x.unidad}`} <span className="rt-lbl" style={{ fontWeight: 400 }}>base {num(x.base)}{x.unidad && ` ${x.unidad}`}</span></div>
+            {x.estimado_mes > 0 && <div className="rt-lbl">≈ {usd(x.estimado_mes)} al mes · {bs(x.estimado_mes)}</div>}
+          </div>
+        ))}
+      </div>
+      <ul style={{ margin: '12px 0 0', paddingLeft: 18, fontSize: 13, color: '#4A4A5E' }}>
+        {b.razones.length
+          ? b.razones.map((r) => <li key={r.senal}><b style={{ color: r.efecto >= 0 ? '#3F6212' : '#B42318' }}>{r.efecto >= 0 ? '+' : MENOS}{Math.round(Math.abs(r.efecto) * 100)} %</b> {r.texto}</li>)
+          : <li>Sin señales a favor ni en contra: recibe la base de su ruta.</li>}
+      </ul>
+    </div>
+  )
+}
+
 function Progreso({ u }) {
   if (!u.habilitado) {
     const listos = u.checklist.filter((c) => c.ok).length
@@ -263,6 +295,7 @@ export default function FichaUsuario({ id }) {
             <Comunicar c={u.decisiones.comunicar} />
             <Premiar premios={u.decisiones.premiar || []} vence={vence} />
           </div>
+          {u.beneficios && <Beneficios b={u.beneficios} />}
           {u.deuda_total > 0 && (
             <div className="rt-lbl" style={{ fontSize: 14 }}>
               Deuda total: <b style={{ color: '#15152B' }}>{usd(u.deuda_total)}</b> · {bs(u.deuda_total)}

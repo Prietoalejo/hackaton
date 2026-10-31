@@ -71,6 +71,17 @@ Son HTML exportados de una herramienta de diseño. No se ejecutan tal cual:
   El Club anuncia 10 niveles (de Turista a Leyenda); la app muestra hoy estos 7. Puntos del Club: 100 por pago
   (servicio o cuota a tiempo, ×1,5 si se paga antes) y +500 al completar una ruta.
 
+### Motor de beneficios del Club
+El beneficio de cada ruta **no es fijo**: la ruta da una base (walletback % y tickets gratis de estacionamiento
+al mes; valores supuestos, de 1 % / 0 en Turista a 4 % / 4 en Baqueano) y el motor la multiplica por un
+factor personal, acotado entre 50 % y 150 %:
+- \+ paga a tiempo ≥ 95 % (−15 % si < 80 %), + paga antes ≥ 50 % de sus cuotas (15 %), + racha completa (10 %),
+  \+ Trust Score ≥ 80 (−10 % si < 40), − segmento En riesgo (30 %). Modo recuperación: beneficios en pausa (0 %).
+- Además, un beneficio **a su medida** por segmento: Conductor diario +1 ticket gratis, Puntual 1 cuota al mes
+  sin gasto administrativo, Nuevo walletback doble el primer mes, En enfriamiento walletback doble en el
+  próximo pago de servicio, En riesgo "recupera tu beneficio completo", quincenero cuotas en su quincena.
+- Premia lo que reduce el riesgo, nunca usar más crédito. Pesos y topes editables en Configuración.
+
 ### Trust Score (0–100)
 Puntualidad 40 + Constancia 20 + Antigüedad 15 + Anticipados 15 + Verificación 10 − Fricción (hasta 10). Todos los pesos son configurables.
 

@@ -1,4 +1,5 @@
 """Junta las piezas del motor: usuario + historial → perfil y decisiones. Función pura."""
+from app.motor.beneficios import calcular_beneficios
 from app.motor.club import calcular_club
 from app.motor.decisiones import decidir
 from app.motor.habilitacion import evaluar_habilitacion
@@ -49,5 +50,7 @@ def evaluar_usuario(usuario, eventos, tickets, hoy, nivel_anterior=None, score_h
         "habilitado_desde": habilitado_desde,
         "club": club,
     }
+    perfil["beneficios"] = calcular_beneficios(
+        {**perfil, "modo_recuperacion": usuario.get("modo_recuperacion")}, club, eventos, tickets, hoy)
     contexto = {**perfil, "usuario": usuario, "nivel_anterior": nivel_anterior}
     return perfil, decidir(contexto, tickets, eventos, hoy)
