@@ -6,7 +6,7 @@ import { bs, fechaCorta, fechaLarga, fechaNumerica, NIVELES } from '../../format
 import { useApp } from '../contexto.js'
 import { datos, mensajeError } from '../datos.js'
 import {
-  BENEFICIO_NIVEL, cupoServicios, descripcionTicket, esDiaDeCobro, horaAhora, numeroTicket, plural, SERVICIOS_NIVEL, ticketsOrdenados,
+  BENEFICIO_NIVEL, cupoServicios, descripcionTicket, esFactura, esDiaDeCobro, horaAhora, numeroTicket, plural, SERVICIOS_NIVEL, ticketsOrdenados,
 } from '../util.js'
 import { BotonPildora, Encabezado, MensajeError, Pantalla, Tarjeta } from '../componentes/Base.jsx'
 import { IcoCandado, IcoCheck, IcoFlecha, IcoServicio, IcoTicket, LogoCD } from '../componentes/Iconos.jsx'
@@ -17,6 +17,7 @@ export default function Detalle() {
   const [pestana, setPestana] = useState('cuotas')
   const { total, usados, disponibles } = ficha.tickets
   const serv = cupoServicios(ficha)
+  const facturas = ticketsOrdenados(ficha).filter((t) => esFactura(t.servicio))
 
   if (!ficha.habilitado) {
     return (
@@ -60,21 +61,14 @@ export default function Detalle() {
       <div style={{ padding: '0 16px' }}>
         <Tarjeta style={{ marginTop: -36, padding: '50px 20px 22px', position: 'relative', zIndex: 1 }}>
           <div className="cd-mut" style={{ textAlign: 'center', fontSize: 16 }}>Tus tickets · {plural(usados, 'usado', 'usados')}</div>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: total >= 4 ? 14 : 22, marginTop: 14 }}>
-            {Array.from({ length: total }, (_, i) => {
-              const usado = i < usados
-              return (
-                <div className="cd-tc" key={i}>
-                  <span className="cd-ci" style={usado
-                    ? { background: '#E2E4EA', color: '#5D5D70' }
-                    : { background: '#C6F432', color: '#2A2D2A', boxShadow: '0 6px 14px rgba(160,210,20,.35)' }}>
-                    <IcoTicket w={30} h={26} sw={1.6} />
-                  </span>
-                  {usado ? 'Usado' : i + 1}
-                </div>
-              )
-            })}
-          </div>
+          <FilaCupo total={total} usados={usados} chico={total >= 5} icono={() => <IcoTicket w={30} h={26} sw={1.6} />} />
+          {serv.total > 0 && (
+            <>
+              <div className="cd-mut" style={{ textAlign: 'center', fontSize: 16, marginTop: 20 }}>Tus pagos de servicios · {plural(serv.usados, 'usado', 'usados')}</div>
+              <FilaCupo total={serv.total} usados={serv.usados} chico={total >= 5}
+                icono={(i) => <IcoServicio servicio={facturas[i]?.servicio || 'luz'} w={26} />} />
+            </>
+          )}
         </Tarjeta>
       </div>
 
@@ -187,6 +181,31 @@ function Cuotas() {
       )}
       <Nota total={ficha.tickets.total} servicios={cupoServicios(ficha).total} />
     </>
+  )
+}
+
+/** Fila de círculos de un cupo (tickets o pagos de servicios); se achica para que quepan 5 */
+function FilaCupo({ total, usados, icono, chico = total >= 5 }) {
+  const lado = chico ? 50 : 66
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', gap: chico ? 8 : total >= 4 ? 14 : 22, marginTop: 14 }}>
+      {Array.from({ length: total }, (_, i) => {
+        const usado = i < usados
+        return (
+          <div className="cd-tc" key={i} style={chico ? { fontSize: 13 } : undefined}>
+            <span className="cd-ci" style={{
+              width: lado, height: lado,
+              ...(usado
+                ? { background: '#E2E4EA', color: '#5D5D70' }
+                : { background: '#C6F432', color: '#2A2D2A', boxShadow: '0 6px 14px rgba(160,210,20,.35)' }),
+            }}>
+              {icono(i)}
+            </span>
+            {usado ? 'Usado' : i + 1}
+          </div>
+        )
+      })}
+    </div>
   )
 }
 
