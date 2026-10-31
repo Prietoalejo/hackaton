@@ -199,33 +199,56 @@ function CredirectoHabilitado({ ficha, gracia }) {
   const serv = cupoServicios(ficha)
   const proximo = proximoTicket(ficha)
   const chico = total >= 4
-  const mini = total >= 5
   return (
     <div style={{ height: '100%', borderRadius: 26, color: '#fff', background: fondoCD(), padding: '18px 18px 16px', display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ display: 'flex', alignItems: 'center', gap: 7 }}><LogoCD /><span style={{ fontWeight: 600, fontSize: 19 }}>Credirecto</span></span>
         <span style={{ fontSize: 12, fontWeight: 700, background: '#C6F432', color: '#121412', padding: '5px 11px', borderRadius: 999 }}>{ficha.nivel_nombre}</span>
       </div>
-      <div style={{ marginTop: 'auto', fontSize: 15, color: '#E4E6DE' }}>Tickets disponibles</div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 2 }}>
-        <span style={{ fontSize: 48, fontWeight: 700, lineHeight: 1 }}>{disponibles}</span>
-        <span style={{ fontSize: 16, color: '#C9CCC4', marginRight: 4, whiteSpace: 'nowrap' }}>de {total}</span>
-        <span role="img" aria-label={`${disponibles} tickets disponibles, ${total - disponibles} usados`} style={{ display: 'flex', gap: chico ? 4 : 6 }}>
-          {Array.from({ length: total }, (_, i) => (
-            <IcoTicket key={i} w={mini ? 22 : chico ? 27 : 34} h={mini ? 19 : chico ? 23 : 29} color={i < disponibles ? '#C6F432' : 'rgba(255,255,255,.28)'} />
-          ))}
-        </span>
-      </div>
+      {serv.total > 0 ? (
+        // Dos cupos: cada uno con su ícono para que se lea "3 tickets + 1 servicio"
+        <>
+          <div style={{ marginTop: 'auto', fontSize: 15, color: '#E4E6DE' }}>Disponibles</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 6 }}>
+            <Cupo icono={<IcoTicket w={26} h={22} color="#C6F432" />} libres={disponibles} total={total} nombre={total === 1 ? 'ticket' : 'tickets'} />
+            <Cupo icono={<span style={{ color: '#C6F432', display: 'flex' }}><IcoServicio servicio="factura" w={22} /></span>}
+              libres={serv.disponibles} total={serv.total} nombre={serv.total === 1 ? 'servicio' : 'servicios'} />
+          </div>
+        </>
+      ) : (
+        <>
+          <div style={{ marginTop: 'auto', fontSize: 15, color: '#E4E6DE' }}>Tickets disponibles</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 2 }}>
+            <span style={{ fontSize: 48, fontWeight: 700, lineHeight: 1 }}>{disponibles}</span>
+            <span style={{ fontSize: 16, color: '#C9CCC4', marginRight: 4, whiteSpace: 'nowrap' }}>de {total}</span>
+            <span role="img" aria-label={`${disponibles} tickets disponibles, ${total - disponibles} usados`} style={{ display: 'flex', gap: chico ? 4 : 6 }}>
+              {Array.from({ length: total }, (_, i) => (
+                <IcoTicket key={i} w={chico ? 27 : 34} h={chico ? 23 : 29} color={i < disponibles ? '#C6F432' : 'rgba(255,255,255,.28)'} />
+              ))}
+            </span>
+          </div>
+        </>
+      )}
       <div style={{ marginTop: 14, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-        {serv.total > 0 && (
-          <span style={{ fontSize: 12, background: 'rgba(198,244,50,.16)', color: '#D7F86E', padding: '5px 11px', borderRadius: 999, whiteSpace: 'nowrap' }}>
-            + {serv.disponibles} de {serv.total} servicios
-          </span>
-        )}
         <span style={{ fontSize: 12, background: gracia ? 'rgba(245,166,35,.25)' : 'rgba(18,20,18,.6)', color: gracia ? '#FFD38A' : '#fff', padding: '5px 11px', borderRadius: 999, whiteSpace: 'nowrap' }}>
           {gracia ? `Sin comisión hasta ${fechaCorta(gracia.gracia_hasta)}` : proximo ? `Cuota ${fechaCorta(proximo.vence)}` : 'Sin cuotas pendientes'}
         </span>
       </div>
+    </div>
+  )
+}
+
+/** Contador de un cupo: ícono + "2 de 3" + nombre (tickets o servicios) */
+function Cupo({ icono, libres, total, nombre }) {
+  return (
+    <div role="img" aria-label={`${libres} de ${total} ${nombre} disponibles`}
+      style={{ background: 'rgba(255,255,255,.08)', borderRadius: 16, padding: '8px 10px' }}>
+      {icono}
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginTop: 4 }}>
+        <span style={{ fontSize: 34, fontWeight: 700, lineHeight: 1 }}>{libres}</span>
+        <span style={{ fontSize: 14, color: '#C9CCC4' }}>de {total}</span>
+      </div>
+      <div style={{ fontSize: 13, color: '#E4E6DE' }}>{nombre}</div>
     </div>
   )
 }

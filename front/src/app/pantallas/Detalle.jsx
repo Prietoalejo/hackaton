@@ -66,7 +66,7 @@ export default function Detalle() {
             <>
               <div className="cd-mut" style={{ textAlign: 'center', fontSize: 16, marginTop: 20 }}>Tus pagos de servicios · {plural(serv.usados, 'usado', 'usados')}</div>
               <FilaCupo total={serv.total} usados={serv.usados} chico={total >= 5}
-                icono={(i) => <IcoServicio servicio={facturas[i]?.servicio || 'luz'} w={26} />} />
+                icono={(i) => <IcoServicio servicio={facturas[i]?.servicio || 'factura'} w={26} />} />
             </>
           )}
         </Tarjeta>
