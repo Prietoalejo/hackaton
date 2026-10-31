@@ -1,8 +1,8 @@
 // Pantalla 06 · Comprobante de pago (anticipado o normal). Recibe por navegación la respuesta de
-// POST /pagos más { numero, nivel, hora }, o { pagos: [respuesta + numero], error } cuando se pagan
+// POST /pagos más { nombre, nivel, hora }, o { pagos: [respuesta + nombre], error } cuando se pagan
 // varias cuotas a la vez. Si ningún pago es `anticipado` se omite el bloque de racha.
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
-import { bs, fechaNumerica } from '../../formato.js'
+import { bs, entero, fechaNumerica } from '../../formato.js'
 import { BotonPildora, Encabezado, MensajeError, Pantalla, TarjetaCredirecto } from '../componentes/Base.jsx'
 import { IcoCheck, IcoLlama } from '../componentes/Iconos.jsx'
 
@@ -21,8 +21,10 @@ export default function Comprobante() {
   const total = cs.reduce((s, x) => s + x.total, 0)
   const ahorro = cs.reduce((s, x) => s + x.ahorro, 0)
   const anticipados = cs.filter((x) => x.anticipado)
-  const liberados = pagos.filter((p) => p.comprobante.ticket_disponible).map((p) => p.numero ?? 1)
+  const liberados = pagos.filter((p) => p.comprobante.ticket_disponible).map((p) => p.nombre ?? 'Ticket 1')
   const parcial = !varios && (pagos[0].deuda_restante ?? 0) > 0.0001
+  const puntos = cs.reduce((s, x) => s + (x.puntos_club || 0), 0)
+  const club = cs[cs.length - 1].club
 
   return (
     <Pantalla reserva={130} pie={
@@ -53,27 +55,34 @@ export default function Comprobante() {
                 </span>
               </div>
               <div style={{ fontSize: 16, fontWeight: 500, marginTop: 6, lineHeight: 1.35 }}>
-                {anticipados.length > 1 ? `+${anticipados.length} pagos` : '+1 pago'} en tu racha y puntos ×1,5 en el Club
+                {anticipados.length > 1 ? `+${anticipados.length}` : '+1'} en tu racha y {puntos ? `+${entero(puntos)} pts (×1,5)` : 'puntos ×1,5'} en tu Club PagoDirecto
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12, fontSize: 13, fontWeight: 600 }}>
                 <span style={{ background: '#C6F432', color: '#121412', padding: '6px 10px', borderRadius: 999 }}>Racha {anticipados[0].racha_antes} → {cs[cs.length - 1].racha_despues}</span>
+                {club && <span style={{ background: 'rgba(255,255,255,.14)', padding: '6px 10px', borderRadius: 999 }}>{club}</span>}
                 {liberados.length > 0 && (
                   <span style={{ background: 'rgba(255,255,255,.14)', padding: '6px 10px', borderRadius: 999 }}>
-                    {liberados.length > 1 ? `Tickets ${unir(liberados)} disponibles otra vez` : `Ticket ${liberados[0]} disponible otra vez`}
+                    {unir(liberados)} {liberados.length > 1 ? 'disponibles' : 'disponible'} otra vez
                   </span>
                 )}
               </div>
             </TarjetaCredirecto>
           )}
 
+          {!anticipados.length && puntos > 0 && (
+            <div style={{ margin: '16px 14px 0', borderRadius: 18, padding: '12px 14px', background: '#FFE8EF', color: '#A3165E', fontWeight: 600, fontSize: 15 }}>
+              +{entero(puntos)} pts en tu Club PagoDirecto{club ? ` · ${club}` : ''}
+            </div>
+          )}
+
           <div style={{ padding: '18px 22px 0' }}>
             <div className="cd-mut" style={{ ...fila, fontSize: 12, letterSpacing: '.04em' }}><span>CONCEPTO</span><span>MONTO</span></div>
             {parcial ? (
-              <div style={{ ...fila, marginTop: 10 }}><span>Abono a tu cuota · Ticket {pagos[0].numero ?? 1}</span><span style={{ fontWeight: 600 }}>{bs(c.total)}</span></div>
+              <div style={{ ...fila, marginTop: 10 }}><span>Abono a tu cuota · {pagos[0].nombre ?? 'Ticket 1'}</span><span style={{ fontWeight: 600 }}>{bs(c.total)}</span></div>
             ) : (
               pagos.map((p, i) => (
                 <div key={p.comprobante.referencia} style={i > 0 ? { borderTop: '1px solid #F0F1F5', marginTop: 14, paddingTop: 4 } : undefined}>
-                  <Conceptos c={p.comprobante} numero={p.numero ?? 1} nivel={state.nivel} />
+                  <Conceptos c={p.comprobante} nombre={p.nombre ?? 'Ticket 1'} nivel={state.nivel} />
                 </div>
               ))
             )}
@@ -104,11 +113,11 @@ export default function Comprobante() {
 }
 
 /** Filas de cuota, gasto administrativo y comisión de un pago completo */
-function Conceptos({ c, numero, nivel }) {
+function Conceptos({ c, nombre, nivel }) {
   const gastoNeto = c.gasto_admin - c.descuento
   return (
     <>
-      <div style={{ ...fila, marginTop: 10 }}><span>Cobro crédito cuota · Ticket {numero}</span><span style={{ fontWeight: 600, whiteSpace: 'nowrap' }}>{bs(c.cuota)}</span></div>
+      <div style={{ ...fila, marginTop: 10 }}><span>Cobro crédito cuota · {nombre}</span><span style={{ fontWeight: 600, whiteSpace: 'nowrap' }}>{bs(c.cuota)}</span></div>
       <div style={{ ...fila, marginTop: 14 }}>
         <span>
           <span style={{ display: 'block' }}>Gasto administrativo</span>

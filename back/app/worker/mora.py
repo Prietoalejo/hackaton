@@ -12,7 +12,7 @@ from sqlalchemy import select
 from app import config as C
 from app import db, reloj
 from app.motor.cobros import comision_por_desfase, deuda, descuento_si_paga, estado_por_atraso, nuevo_ticket
-from app.motor.decisiones import validar_solicitud
+from app.motor.decisiones import descontar_cupo, validar_solicitud
 from app.motor.perfil import evaluar_usuario
 from app.motor.score import ESTADOS_IMPAGOS, ESTADOS_VENCIDOS
 
@@ -197,7 +197,7 @@ def simular(conn, dias: int = 1, comportamiento=None) -> dict:
                         tickets_nuevos.append(t)
                         ticket_id = t["id"]
                         nuevos.append(_evento(uid, hoy, "uso_ticket", t["monto"], t))
-                        prestar[uid]["tickets"] -= 1
+                        descontar_cupo(prestar[uid], intento["servicio"])
                         del_dia["tickets"] += 1
                     solicitudes.append({"user_id": uid, "fecha": hoy, "servicio": intento["servicio"],
                                         "monto": intento["monto"], "resultado": validacion["resultado"],

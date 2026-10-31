@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { bs, tasaBs } from '../../formato.js'
 import { useApp } from '../contexto.js'
 import { datos, mensajeError } from '../datos.js'
-import { bsAUsd, numeroTicket, parseBs, ticketsOrdenados } from '../util.js'
+import { bsAUsd, nombreCuota, parseBs, ticketsOrdenados } from '../util.js'
 import { Avatar, BotonPildora, BotonSoporte, MensajeError, Pantalla, Tarjeta, TarjetaCredirecto } from '../componentes/Base.jsx'
 import { IcoRecarga, IcoServicio, LogoCD } from '../componentes/Iconos.jsx'
 
@@ -24,7 +24,7 @@ export default function Recuperacion() {
   const sugeridaBs = Math.max(0, Math.ceil((deuda - ficha.saldo_wallet) * tasaBs() * 100) / 100)
 
   const detalleDeuda = vencidos.length === 1
-    ? `Cuota del Ticket ${numeroTicket(ficha, vencidos[0].id)} ${bs(cuotas)}`
+    ? `Cuota del ${nombreCuota(ficha, vencidos[0].id)} ${bs(cuotas)}`
     : `Cuotas de ${vencidos.length} tickets ${bs(cuotas)}`
 
   const recargar = async (montoBs) => {

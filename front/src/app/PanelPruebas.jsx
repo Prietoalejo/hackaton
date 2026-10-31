@@ -86,6 +86,9 @@ export default function PanelPruebas({ userId, elegirUsuario, hoy, avanzarDia, a
           <div className="cd-pdato"><span>Nivel</span><span>{ficha.habilitado ? ficha.nivel_nombre : 'No habilitado'}</span></div>
           <div className="cd-pdato"><span>Trust Score</span><span>{ficha.trust_score}</span></div>
           <div className="cd-pdato"><span>Tickets</span><span>{ficha.tickets.disponibles} de {ficha.tickets.total} disponibles</span></div>
+          {ficha.servicios_cupo?.total > 0 && (
+            <div className="cd-pdato"><span>Pagos de servicios</span><span>{ficha.servicios_cupo.disponibles} de {ficha.servicios_cupo.total} disponibles</span></div>
+          )}
           <div className="cd-pdato"><span>Deuda</span><span>{bs(ficha.deuda_total)}</span></div>
           <div className="cd-pdato"><span>Saldo wallet</span><span>{bs(ficha.saldo_wallet)}</span></div>
           <div className="cd-pdato"><span>Estado</span><span>{ficha.modo_recuperacion ? 'Modo recuperación' : ficha.estado_mora}</span></div>

@@ -16,12 +16,16 @@ const clonar = (x) => JSON.parse(JSON.stringify(x))
 const esperar = (ms = 180) => new Promise((ok) => setTimeout(ok, ms))
 const codigo = () => Math.random().toString(16).slice(2, 9).toUpperCase().padEnd(7, '0')
 
+// tickets = movilidad; servicios_cupo = pagos de facturas (luz, internet, teléfono, seguros)
 const NIVEL_CONF = [
-  { tickets: 1, monto_max: 5, servicios: ['estacionamiento'], descuento: 0 },
-  { tickets: 2, monto_max: 5, servicios: ['estacionamiento', 'parquimetro', 'peaje'], descuento: 0 },
-  { tickets: 3, monto_max: 10, servicios: ['estacionamiento', 'parquimetro', 'peaje', 'luz', 'internet', 'telefono'], descuento: 25 },
-  { tickets: 4, monto_max: 20, servicios: ['estacionamiento', 'parquimetro', 'peaje', 'luz', 'internet', 'telefono', 'seguro'], descuento: 50 },
+  { tickets: 1, servicios_cupo: 0, monto_max: 5, servicios: ['estacionamiento'], descuento: 0 },
+  { tickets: 2, servicios_cupo: 0, monto_max: 5, servicios: ['estacionamiento', 'parquimetro', 'peaje'], descuento: 0 },
+  { tickets: 3, servicios_cupo: 1, monto_max: 10, servicios: ['estacionamiento', 'parquimetro', 'peaje', 'luz', 'internet', 'telefono'], descuento: 25 },
+  { tickets: 5, servicios_cupo: 3, monto_max: 20, servicios: ['estacionamiento', 'parquimetro', 'peaje', 'luz', 'internet', 'telefono', 'seguro'], descuento: 50 },
 ]
+const FACTURAS = ['luz', 'internet', 'telefono', 'seguro']
+const esFactura = (s) => FACTURAS.includes(s)
+const PUNTOS_POR_PAGO = 100
 const NOMBRE_SERV = {
   estacionamiento: 'Estacionamiento', parquimetro: 'Parquímetro', peaje: 'Peaje', luz: 'Luz',
   internet: 'Internet', telefono: 'Teléfono', seguro: 'Seguro',
@@ -68,14 +72,20 @@ function ficha(p) {
     tickets: conf
       ? { total: conf.tickets, usados: 0, disponibles: conf.tickets, monto_max: conf.monto_max, servicios: [...conf.servicios] }
       : { total: 0, usados: 0, disponibles: 0, monto_max: 0, servicios: [] },
+    servicios_cupo: conf
+      ? { total: conf.servicios_cupo, usados: 0, disponibles: conf.servicios_cupo, cubre: conf.servicios.filter(esFactura) }
+      : { total: 0, usados: 0, disponibles: 0, cubre: [] },
+    club_puntos: { nombre: 'Club PagoDirecto', ruta: p.club, puntos_credirecto: p.puntos_credirecto ?? 0,
+      puntos_por_pago: PUNTOS_POR_PAGO, multiplicador: 1.5 },
+    beneficios: p.beneficios ?? null,
     progreso: p.progreso ?? null,
     racha: p.racha,
     deuda_total: 0,
     tickets_abiertos: p.tickets_abiertos || [],
     decisiones: {
       prestar: conf
-        ? { tickets: conf.tickets, plazo_dias: p.plazo_dias ?? 7, monto_max: conf.monto_max, servicios: [...conf.servicios], motivo: null }
-        : { tickets: 0, plazo_dias: 0, monto_max: 0, servicios: [], motivo: 'no_habilitado' },
+        ? { tickets: conf.tickets, servicios_cupo: conf.servicios_cupo, plazo_dias: p.plazo_dias ?? 7, monto_max: conf.monto_max, servicios: [...conf.servicios], motivo: null }
+        : { tickets: 0, servicios_cupo: 0, plazo_dias: 0, monto_max: 0, servicios: [], motivo: 'no_habilitado' },
       comunicar: p.comunicar ?? null,
       premiar: p.premiar ?? [],
     },
@@ -102,9 +112,15 @@ const checklistCompleto = [
 // ---------- Fichas de ejemplo ----------
 const maria = ficha({
   user_id: 'u_0142', nombre: 'María', alias: '@maria.r', habilitado_desde: '2026-06-02', cohorte: '2026-06',
-  nivel: 2, segmento: 'Puntual', quincena: [15, 30], club: 'Caminante · Ruta Colonial', trust_score: 76,
+  nivel: 2, segmento: 'Puntual', quincena: [15, 30], club: 'Viajero · Ruta del Café', trust_score: 76, puntos_credirecto: 650,
+  beneficios: { ruta: 'Viajero · Ruta del Café', factor: 1.15, pausa: false,
+    razones: [{ senal: 'puntualidad', efecto: 0.15, texto: 'Paga a tiempo el 100% de sus pagos' }],
+    beneficios: [{ tipo: 'walletback', nombre: 'Walletback', unidad: '%', base: 2, personal: 2.3, estimado_mes: 0.62 },
+      { tipo: 'tickets_gratis', nombre: 'Tickets gratis de estacionamiento al mes', unidad: '', base: 1, personal: 1 }],
+    a_tu_medida: { tipo: 'cuota_sin_gasto', nombre: '1 cuota al mes sin gasto administrativo', detalle: 'Porque pagas antes o el día de cobro.' } },
   razones: razones(38, 16, 9, 9, 10, -3), checklist: checklistCompleto,
-  progreso: { siguiente_nivel: 3, siguiente_nombre: 'Premium', faltan_puntos: 4, repagos_hechos: 5, repagos_requeridos: 10, faltan_repagos: 5 },
+  progreso: { siguiente_nivel: 3, siguiente_nombre: 'Premium', faltan_puntos: 4, repagos_hechos: 5, repagos_requeridos: 10, faltan_repagos: 5,
+    ruta_requerida: 'Conocedor · Ruta de Paria', faltan_pts_club: 6200 },
   racha: { pagos: 2, meta: 3, quedan_dias: 4, multiplicador: false },
   // Cuota de ejemplo de CLAUDE.md: Bs 1.655,47 + gasto adm. Bs 165,55 = Bs 1.821,02
   tickets_abiertos: [nuevoTicket({ id: 4433, codigo: '0DFF7B1', servicio: 'estacionamiento', comercio: 'C.C. El Tolón',
@@ -118,7 +134,7 @@ const maria = ficha({
     { fecha: '2026-10-29', tipo: 'falta_poco', titulo: 'Credirecto', canal: 'push',
       mensaje: 'Te falta 1 pago a tiempo para activar el ×1,5 en el Club.' },
     { fecha: '2026-10-20', tipo: 'subida_nivel', titulo: 'Nuevo nivel', canal: 'push',
-      mensaje: '¡Subiste a Credirecto Confiable! Ahora tienes 3 tickets y puedes pagar luz e internet.' },
+      mensaje: '¡Subiste a Credirecto Confiable! Ahora tienes 3 tickets y 1 pago de servicios para luz, internet y teléfono.' },
   ],
   linea_de_tiempo: [
     { fecha: '2026-10-29', tipo: 'Ticket', texto: 'Ticket · Estacionamiento C.C. El Tolón · cuota 5 nov', monto: 4.79 },
@@ -132,7 +148,7 @@ const maria = ficha({
 
 const carmen = ficha({
   user_id: 'u_0333', nombre: 'Carmen', alias: '@carmen.p', cohorte: '2026-10', nivel: null, segmento: 'Sin crédito',
-  quincena: [], club: 'Nivel Turista', trust_score: 31, saldo_wallet: 0.0036,
+  quincena: [], club: 'Turista · Ruta Colonial', trust_score: 31, saldo_wallet: 0.0036,
   razones: razones(14, 6, 1, 0, 5, -1),
   checklist: [
     { requisito: 'cedula', nombre: 'Cédula verificada', ok: true, detalle: null },
@@ -152,9 +168,10 @@ const carmen = ficha({
 
 const pedro = ficha({
   user_id: 'u_0007', nombre: 'Pedro', alias: '@pedro.g', habilitado_desde: '2026-07-14', cohorte: '2026-07',
-  nivel: 1, segmento: 'En riesgo', quincena: [15, 30], club: 'Explorador · Ruta Andina', trust_score: 41,
+  nivel: 1, segmento: 'En riesgo', quincena: [15, 30], club: 'Caminante · Ruta Falcón', trust_score: 41,
   razones: razones(12, 10, 7, 2, 10, -8), checklist: checklistCompleto,
-  progreso: { siguiente_nivel: 2, siguiente_nombre: 'Confiable', faltan_puntos: 19, repagos_hechos: 1, repagos_requeridos: 6, faltan_repagos: 5 },
+  progreso: { siguiente_nivel: 2, siguiente_nombre: 'Confiable', faltan_puntos: 19, repagos_hechos: 1, repagos_requeridos: 6, faltan_repagos: 5,
+    ruta_requerida: 'Viajero · Ruta del Café', faltan_pts_club: 1400 },
   racha: { pagos: 0, meta: 3, quedan_dias: 0, multiplicador: false },
   tickets_abiertos: [nuevoTicket({ id: 3120, codigo: 'A41C9E2', servicio: 'estacionamiento', comercio: 'C.C. Sambil Chacao',
     fecha_uso: '2026-10-16', vence: '2026-10-23', monto: 4.36, nivel: 1, quincena: [15, 30] })],
@@ -177,9 +194,10 @@ const pedro = ficha({
 
 const andrea = ficha({
   user_id: 'u_0058', nombre: 'Andrea', alias: '@andrea.m', habilitado_desde: '2026-05-11', cohorte: '2026-05',
-  nivel: 2, segmento: 'Conductor diario', quincena: [15, 30], club: 'Caminante · Ruta Oriental', trust_score: 68,
+  nivel: 2, segmento: 'Conductor diario', quincena: [15, 30], club: 'Viajero · Ruta del Café', trust_score: 68,
   razones: razones(32, 18, 10, 4, 10, -6), checklist: checklistCompleto,
-  progreso: { siguiente_nivel: 3, siguiente_nombre: 'Premium', faltan_puntos: 12, repagos_hechos: 3, repagos_requeridos: 10, faltan_repagos: 7 },
+  progreso: { siguiente_nivel: 3, siguiente_nombre: 'Premium', faltan_puntos: 12, repagos_hechos: 3, repagos_requeridos: 10, faltan_repagos: 7,
+    ruta_requerida: 'Conocedor · Ruta de Paria', faltan_pts_club: 5300 },
   racha: { pagos: 1, meta: 3, quedan_dias: 2, multiplicador: false },
   tickets_abiertos: [nuevoTicket({ id: 4290, codigo: '7BE21C0', servicio: 'estacionamiento', comercio: 'C.C. El Tolón',
     fecha_uso: '2026-10-23', vence: '2026-10-30', monto: 1655.47 / TASA, nivel: 2, quincena: [] })],
@@ -215,8 +233,10 @@ function recalcular(f) {
     t.deuda = rd(t.cuota + t.comision - t.pagado)
   }
   const ts = f.tickets_abiertos
-  f.tickets.usados = Math.min(ts.length, f.tickets.total)
+  f.tickets.usados = Math.min(ts.filter((t) => !esFactura(t.servicio)).length, f.tickets.total)
   f.tickets.disponibles = f.tickets.total - f.tickets.usados
+  f.servicios_cupo.usados = Math.min(ts.filter((t) => esFactura(t.servicio)).length, f.servicios_cupo.total)
+  f.servicios_cupo.disponibles = f.servicios_cupo.total - f.servicios_cupo.usados
   f.deuda_total = rd(ts.reduce((s, t) => s + t.deuda, 0))
   const hay = (e) => ts.some((t) => t.estado === e)
   f.modo_recuperacion = hay('mora')
@@ -229,6 +249,7 @@ Object.values(fichas).forEach(recalcular)
 const resumen = (f) => ({
   user_id: f.user_id, nombre: f.nombre, trust_score: f.trust_score, nivel: f.nivel, nivel_nombre: f.nivel_nombre,
   segmento: f.segmento, habilitado: f.habilitado, tickets_usados: f.tickets.usados, tickets_total: f.tickets.total,
+  servicios_usados: f.servicios_cupo.usados, servicios_total: f.servicios_cupo.total,
   monto_max: f.tickets.monto_max, deuda: f.deuda_total,
   dias_atraso: Math.max(0, ...f.tickets_abiertos.map((t) => t.dias_atraso)), modo_recuperacion: f.modo_recuperacion,
 })
@@ -274,7 +295,10 @@ export const apiMock = {
     if (f.modo_recuperacion) throw new ApiError(409, 'Tu Credirecto está en pausa mientras pagas tu cuota pendiente. Con una recarga lo recuperas.')
     if (f.estado_mora === 'atrasado') throw new ApiError(409, 'Tienes una cuota vencida. Págala y tus tickets vuelven a estar disponibles.')
     if (!f.tickets.servicios.includes(servicio)) throw new ApiError(409, `Tu nivel ${f.nivel_nombre} todavía no cubre ${NOMBRE_SERV[servicio] || servicio}.`)
-    if (f.tickets.disponibles <= 0) throw new ApiError(409, 'Tus tickets están en uso. Paga una cuota y tu ticket vuelve a estar disponible.')
+    if (esFactura(servicio)) {
+      if (f.servicios_cupo.total <= 0) throw new ApiError(409, `Credirecto ${f.nivel_nombre} todavía no incluye pagos de servicios.`)
+      if (f.servicios_cupo.disponibles <= 0) throw new ApiError(409, 'Ya estás usando tus pagos de servicios con crédito. Paga esa cuota y vuelve a estar disponible.')
+    } else if (f.tickets.disponibles <= 0) throw new ApiError(409, 'Tus tickets están en uso. Paga una cuota y tu ticket vuelve a estar disponible.')
     if (!(monto > 0)) throw new ApiError(422, 'Ingresa un monto mayor a cero.')
     const cubierto = Math.min(monto, f.tickets.monto_max)
     const conSaldo = rd(monto - cubierto)
@@ -318,11 +342,15 @@ export const apiMock = {
     const total = rd(Math.min(monto, aPagar))
     const completo = total >= aPagar - 0.005
     const rachaAntes = f.racha.pagos
+    let puntos = 0
     if (completo) {
       f.tickets_abiertos = f.tickets_abiertos.filter((x) => x.id !== t.id)
       if (dias >= 0) {
         f.racha.pagos = Math.min(f.racha.meta, f.racha.pagos + 1)
         f.racha.multiplicador = f.racha.pagos >= f.racha.meta
+        // Puntos del mismo Club PagoDirecto: ×1,5 si paga antes o completó la racha
+        puntos = Math.round(PUNTOS_POR_PAGO * (anticipado || f.racha.multiplicador ? 1.5 : 1))
+        f.club_puntos.puntos_credirecto += puntos
       }
       if (f.progreso) {
         f.progreso.repagos_hechos = Math.min(f.progreso.repagos_requeridos, f.progreso.repagos_hechos + 1)
@@ -338,6 +366,7 @@ export const apiMock = {
       anticipado: anticipado && completo, cuota: t.monto, gasto_admin: t.gasto_admin, descuento: completo ? descuento : 0,
       descuento_pct: NIVEL_CONF[f.nivel].descuento, comision: t.comision, total, ahorro: completo ? descuento : 0,
       racha_antes: rachaAntes, racha_despues: f.racha.pagos, ticket_disponible: completo,
+      puntos_club: puntos, club: f.club,
     }
     return { aplicado: total, deuda_restante: completo ? 0 : t.deuda, comprobante, ticket: clonar(t), usuario: clonar(f) }
   },

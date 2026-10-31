@@ -45,6 +45,8 @@ export function diferencia(unidad, antes, despues, mejorSiSube) {
 
 /** "1 ticket" / "3 tickets" */
 export const tickets = (n) => `${n} ${n === 1 ? 'ticket' : 'tickets'}`
+/** "3 tickets + 1 servicio": lo que da un nivel (tickets = movilidad, servicios = facturas) */
+export const cupo = (t, s) => (s > 0 ? `${tickets(t)} + ${s} ${s === 1 ? 'servicio' : 'servicios'}` : tickets(t))
 
 /** Lista legible: "a, b y c" */
 export const listaY = (xs) => (xs.length <= 1 ? xs.join('') : xs.slice(0, -1).join(', ') + ' y ' + xs[xs.length - 1])

@@ -257,6 +257,8 @@ def segmentos(conn, hoy) -> dict:
         "margen_bajada": C.MARGEN_BAJADA,
         "niveles": [{"nivel": n, "nombre": f"Credirecto {C.NOMBRES_NIVEL[n]}", "rango": rangos[n], "umbral": umbrales[n],
                      "usuarios": por_nivel.get(n, 0), "tickets": C.NIVELES[n]["tickets"],
+                     "servicios_cupo": C.NIVELES[n]["servicios_cupo"],
+                     "ruta_club": "{nivel} · {ruta}".format(**C.RUTAS_CLUB[C.RUTA_MINIMA_POR_NIVEL[n]]),
                      "monto_max": C.NIVELES[n]["monto_max"], "servicios": C.NIVELES[n]["servicios"],
                      "servicios_texto": C.SERVICIOS_TEXTO[n]} for n in range(4)],
         "segmentos": [{"segmento": s, "descripcion": C.DESCRIPCION_SEGMENTO[s], "usuarios": por_segmento.get(s, 0)}
@@ -354,11 +356,14 @@ def listar_usuarios(conn, q=None, nivel=None, segmento=None, limit=50, offset=0)
     u, p, t = db.usuarios, db.perfiles, db.tickets
     deuda = t.c.monto + t.c.gasto_admin + t.c.comision - t.c.descuento - t.c.monto_pagado
     hoy = conn.execute(select(db.reloj.c.fecha_actual)).scalar()
-    vivos = (select(t.c.user_id, func.count().label("usados"), func.sum(deuda).label("deuda"),
+    # "usados" cuenta solo tickets (movilidad); los pagos de servicios tienen su propio cupo
+    vivos = (select(t.c.user_id, func.count().filter(t.c.servicio.notin_(C.SERVICIOS_FACTURA)).label("usados"),
+                    func.count().filter(t.c.servicio.in_(C.SERVICIOS_FACTURA)).label("servicios_usados"),
+                    func.sum(deuda).label("deuda"),
                     func.max(hoy - t.c.fecha_vencimiento).label("atraso"))
              .where(t.c.estado != "pagado").group_by(t.c.user_id).subquery())
     consulta = (select(u.c.id, u.c.nombre, u.c.modo_recuperacion, p.c.trust_score, p.c.nivel, p.c.segmento,
-                       p.c.habilitado, vivos.c.usados, vivos.c.deuda, vivos.c.atraso)
+                       p.c.habilitado, vivos.c.usados, vivos.c.servicios_usados, vivos.c.deuda, vivos.c.atraso)
                 .join(p, p.c.user_id == u.c.id).outerjoin(vivos, vivos.c.user_id == u.c.id))
     if q:
         consulta = consulta.where((u.c.id.ilike(f"%{q}%")) | (u.c.nombre.ilike(f"%{q}%")))
@@ -376,6 +381,8 @@ def listar_usuarios(conn, q=None, nivel=None, segmento=None, limit=50, offset=0)
         "segmento": f["segmento"], "habilitado": f["habilitado"],
         "tickets_usados": int(f["usados"] or 0) if f["habilitado"] else None,
         "tickets_total": C.NIVELES[f["nivel"]]["tickets"] if f["nivel"] is not None else None,
+        "servicios_usados": int(f["servicios_usados"] or 0) if f["habilitado"] else None,
+        "servicios_total": C.NIVELES[f["nivel"]]["servicios_cupo"] if f["nivel"] is not None else None,
         "monto_max": C.NIVELES[f["nivel"]]["monto_max"] if f["nivel"] is not None else None,
         "deuda": round(float(f["deuda"] or 0), 2), "dias_atraso": max(0, int(f["atraso"] or 0)),
         "modo_recuperacion": f["modo_recuperacion"],
@@ -388,7 +395,7 @@ def simular_config(conn, hoy, cambios) -> dict:
     """Antes y después de unos parámetros, sobre los mismos usuarios y sin guardar nada.
 
     Habilitación y niveles se recalculan con el motor. Repago y mora esperados = promedio de la
-    historia de cada usuario ponderado por su exposición (tickets × monto máximo).
+    historia de cada usuario ponderado por su exposición ((tickets + pagos de servicios) × monto máximo).
     """
     usuarios = db.cargar_usuarios(conn)
     eventos = db.cargar_eventos(conn)
@@ -412,7 +419,7 @@ def simular_config(conn, hoy, cambios) -> dict:
                 continue
             habilitados += 1
             nivel = C.NIVELES[perfil["nivel"]]
-            cupo = nivel["tickets"] * nivel["monto_max"]
+            cupo = (nivel["tickets"] + nivel["servicios_cupo"]) * nivel["monto_max"]
             r, m = historia.get(uid, promedio)
             exposicion += cupo
             repago += cupo * r

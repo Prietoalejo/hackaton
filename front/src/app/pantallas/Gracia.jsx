@@ -5,7 +5,7 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { bs, fechaCorta, tasaBs } from '../../formato.js'
 import { useApp } from '../contexto.js'
 import { datos, mensajeError } from '../datos.js'
-import { bsAUsd, descripcionTicket, diasEntre, horaAhora, numeroTicket, parseBs, sumarDias } from '../util.js'
+import { bsAUsd, descripcionTicket, diasEntre, horaAhora, nombreCuota, parseBs, sumarDias } from '../util.js'
 import { BotonPildora, Encabezado, MensajeError, Pantalla, Tarjeta } from '../componentes/Base.jsx'
 import { IcoCheck, IcoInfo, IcoReloj } from '../componentes/Iconos.jsx'
 
@@ -21,7 +21,7 @@ export default function Gracia() {
   const t = ficha.tickets_abiertos.find((x) => x.id === Number(ticketId))
   if (!t) return <Navigate to="/app" replace />
 
-  const numero = numeroTicket(ficha, t.id)
+  const nombre = nombreCuota(ficha, t.id)
   const base = hoy || t.vence
   const hace = Math.max(1, diasEntre(t.vence, base))
   const quedan = Math.max(0, diasEntre(base, t.gracia_hasta) + 1)
@@ -35,7 +35,7 @@ export default function Gracia() {
     try {
       const r = await datos.pagar({ user_id: ficha.user_id, ticket_id: t.id, monto: montoUsd, origen: 'usuario' })
       // Primero navegamos (la cuota desaparece de la ficha al refrescarla)
-      navegar('/app/comprobante', { state: { ...r, numero, nivel: ficha.nivel_nombre, hora: horaAhora() } })
+      navegar('/app/comprobante', { state: { ...r, nombre, nivel: ficha.nivel_nombre, hora: horaAhora() } })
       recargarFicha()
     } catch (e) {
       setError(mensajeError(e))
@@ -80,7 +80,7 @@ export default function Gracia() {
           </div>
 
           <div style={{ background: '#F3F4F8', borderRadius: 22, padding: 16, marginTop: 18 }}>
-            <div className="cd-mut" style={{ fontSize: 14 }}>Cuota del Ticket {numero} · {descripcionTicket(t)}</div>
+            <div className="cd-mut" style={{ fontSize: 14 }}>Cuota del {nombre} · {descripcionTicket(t)}</div>
             <div style={{ fontSize: 34, fontWeight: 700 }}>{bs(t.deuda)}</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 6, marginTop: 14 }} aria-hidden="true">
               {dias.map((d, i) => <span key={d} style={{ height: 10, borderRadius: 5, background: i === 0 ? '#F5A623' : '#C6F432' }} />)}

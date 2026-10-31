@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
 import { bs, fechaCorta, SERVICIOS, usd } from '../../formato.js'
 import { Chip, ErrorCaja, Esqueleto, Segmentos } from '../componentes.jsx'
 import { useDatos } from '../datos.jsx'
-import { listaY, MENOS, numAuto, tickets } from '../util.js'
+import { cupo, listaY, MENOS, numAuto } from '../util.js'
 
 const colorGrande = (s) => (s >= 60 ? '#3F6212' : s >= 40 ? '#15152B' : '#B42318')
 const montoCorto = (n) => usd(n, Number.isInteger(n) ? 0 : 2)
@@ -62,6 +62,43 @@ function Cupo({ u }) {
       <div style={{ fontSize: 28, fontWeight: 700 }}>{t.disponibles} <span style={{ fontSize: 16, color: '#6B6B80', fontWeight: 500 }}>de {t.total}</span></div>
       <div className="rt-lbl">Hasta {montoCorto(t.monto_max)} por ticket · {bs(t.monto_max)}</div>
       <Segmentos total={t.total} llenos={t.disponibles} desde="fin" />
+      {u.servicios_cupo?.total > 0 && (
+        <div className="rt-lbl" style={{ marginTop: 8 }}>
+          Pagos de servicios: <b style={{ color: '#15152B' }}>{u.servicios_cupo.disponibles} de {u.servicios_cupo.total}</b> disponibles
+        </div>
+      )}
+    </div>
+  )
+}
+
+/** Motor de beneficios: base de la ruta del Club × factor personal, con el porqué */
+function Beneficios({ b }) {
+  const pct = Math.round(b.factor * 100)
+  const tono = b.pausa || pct < 100 ? '#B42318' : pct > 100 ? '#3F6212' : '#15152B'
+  const num = (n) => Number(n).toLocaleString('es-VE', { maximumFractionDigits: 2 })
+  return (
+    <div style={{ border: '1px solid #E3E5EA', borderRadius: 10, padding: 18 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
+        <div>
+          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '.06em', color: '#6B6B80' }}>BENEFICIOS DEL CLUB · {b.ruta}</div>
+          <div style={{ fontSize: 22, fontWeight: 700, color: tono }}>{b.pausa ? 'En pausa (modo recuperación)' : `${pct} % del beneficio de la ruta`}</div>
+        </div>
+        {b.a_tu_medida && <Chip tono="positivo">A su medida: {b.a_tu_medida.nombre}</Chip>}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10, marginTop: 12 }}>
+        {b.beneficios.map((x) => (
+          <div key={x.tipo} style={{ background: '#F5F6F8', borderRadius: 8, padding: 12 }}>
+            <div className="rt-lbl">{x.nombre}</div>
+            <div style={{ fontSize: 18, fontWeight: 700 }}>{num(x.personal)}{x.unidad && ` ${x.unidad}`} <span className="rt-lbl" style={{ fontWeight: 400 }}>base {num(x.base)}{x.unidad && ` ${x.unidad}`}</span></div>
+            {x.estimado_mes > 0 && <div className="rt-lbl">≈ {usd(x.estimado_mes)} al mes · {bs(x.estimado_mes)}</div>}
+          </div>
+        ))}
+      </div>
+      <ul style={{ margin: '12px 0 0', paddingLeft: 18, fontSize: 13, color: '#4A4A5E' }}>
+        {b.razones.length
+          ? b.razones.map((r) => <li key={r.senal}><b style={{ color: r.efecto >= 0 ? '#3F6212' : '#B42318' }}>{r.efecto >= 0 ? '+' : MENOS}{Math.round(Math.abs(r.efecto) * 100)} %</b> {r.texto}</li>)
+          : <li>Sin señales a favor ni en contra: recibe la base de su ruta.</li>}
+      </ul>
     </div>
   )
 }
@@ -95,6 +132,7 @@ function Progreso({ u }) {
   const partes = []
   if (p.faltan_puntos > 0) partes.push(plural(p.faltan_puntos, 'punto', 'puntos'))
   if (p.faltan_repagos > 0) partes.push(plural(p.faltan_repagos, 'repago', 'repagos'))
+  if (p.faltan_pts_club > 0) partes.push(`${p.faltan_pts_club.toLocaleString('es-VE')} pts del Club (${p.ruta_requerida})`)
   const texto = partes.length ? `Le faltan ${partes.join(' y ')} para ${p.siguiente_nombre}` : `Listo para subir a ${p.siguiente_nombre} en el próximo recálculo`
   return (
     <div style={caja}>
@@ -129,9 +167,9 @@ function Prestar({ p }) {
   return (
     <div style={{ borderRadius: 10, padding: 18, background: '#F5F6F8', color: '#15152B' }} title={p.plazo_dias ? `Plazo: ${p.plazo_dias} días` : undefined}>
       <div style={{ ...ROTULO, color: '#3F6212' }}>PRESTAR</div>
-      <div style={TITULO}>{p.tickets > 0 ? `Aprobado: ${tickets(p.tickets)}` : 'Sin tickets libres'}</div>
+      <div style={TITULO}>{p.tickets > 0 || p.servicios_cupo > 0 ? `Aprobado: ${cupo(p.tickets, p.servicios_cupo ?? 0)}` : 'Sin tickets libres'}</div>
       <div style={{ fontSize: 13, color: '#6B6B80' }}>
-        {p.tickets > 0
+        {p.tickets > 0 || p.servicios_cupo > 0
           ? `Hasta ${montoCorto(p.monto_max)} c/u · ${servicios.join(', ')}`
           : 'Se le renueva un ticket cuando pague su cuota'}
       </div>
@@ -241,7 +279,7 @@ export default function FichaUsuario({ id }) {
           {u.habilitado && u.racha && (
             <Chip tono={u.racha.multiplicador ? 'positivo' : 'negativo'}>Racha {u.racha.pagos} de {u.racha.meta}{u.racha.multiplicador ? ' · ×1,5' : ''}</Chip>
           )}
-          {u.club && <Chip>Club: {u.club}</Chip>}
+          {u.club && <Chip>Club: {u.club}{u.club_puntos?.puntos_credirecto ? ` · ${u.club_puntos.puntos_credirecto} pts con Credirecto` : ''}</Chip>}
         </div>
       </div>
 
@@ -257,6 +295,7 @@ export default function FichaUsuario({ id }) {
             <Comunicar c={u.decisiones.comunicar} />
             <Premiar premios={u.decisiones.premiar || []} vence={vence} />
           </div>
+          {u.beneficios && <Beneficios b={u.beneficios} />}
           {u.deuda_total > 0 && (
             <div className="rt-lbl" style={{ fontSize: 14 }}>
               Deuda total: <b style={{ color: '#15152B' }}>{usd(u.deuda_total)}</b> · {bs(u.deuda_total)}

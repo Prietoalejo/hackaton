@@ -6,7 +6,7 @@ import { bs, fechaCorta, fechaLarga, fechaNumerica, NIVELES } from '../../format
 import { useApp } from '../contexto.js'
 import { datos, mensajeError } from '../datos.js'
 import {
-  BENEFICIO_NIVEL, descripcionTicket, esDiaDeCobro, horaAhora, numeroTicket, plural, SERVICIOS_NIVEL, ticketsOrdenados,
+  BENEFICIO_NIVEL, cupoServicios, descripcionTicket, esDiaDeCobro, horaAhora, nombreCuota, plural, SERVICIOS_NIVEL, ticketsOrdenados,
 } from '../util.js'
 import { BotonPildora, Encabezado, MensajeError, Pantalla, Tarjeta } from '../componentes/Base.jsx'
 import { IcoCandado, IcoCheck, IcoFlecha, IcoServicio, IcoTicket, LogoCD } from '../componentes/Iconos.jsx'
@@ -16,6 +16,7 @@ export default function Detalle() {
   const navegar = useNavigate()
   const [pestana, setPestana] = useState('cuotas')
   const { total, usados, disponibles } = ficha.tickets
+  const serv = cupoServicios(ficha)
 
   if (!ficha.habilitado) {
     return (
@@ -43,9 +44,12 @@ export default function Detalle() {
 
       <div style={{ textAlign: 'center', marginTop: 16 }}>
         <span style={{ display: 'inline-block', fontSize: 13, color: '#5D5D70', background: '#fff', padding: '5px 16px', borderRadius: 999, boxShadow: '0 2px 10px rgba(21,21,43,.05)' }}>
-          Credirecto {ficha.nivel_nombre} · para tus pagos
+          Credirecto {ficha.nivel_nombre} · {ficha.club || 'para tus pagos'}
         </span>
         <div style={{ fontSize: 38, fontWeight: 700, marginTop: 6, letterSpacing: '-.01em' }}>{disponibles} de {total} tickets</div>
+        {serv.total > 0 && (
+          <div style={{ fontSize: 17, fontWeight: 600, color: '#3B6B00' }}>+ {serv.disponibles} de {plural(serv.total, 'pago', 'pagos')} de servicios</div>
+        )}
       </div>
 
       {/* Tarjeta en perspectiva (decorativa) */}
@@ -134,7 +138,7 @@ function Cuotas() {
     for (const t of elegidos) {
       try {
         const r = await datos.pagar({ user_id: ficha.user_id, ticket_id: t.id, monto: t.deuda, origen: 'usuario' })
-        pagos.push({ ...r, numero: numeroTicket(ficha, t.id) })
+        pagos.push({ ...r, nombre: nombreCuota(ficha, t.id) })
       } catch (e) {
         fallo = mensajeError(e)
         break
@@ -155,7 +159,7 @@ function Cuotas() {
           <div className="cd-mut" style={{ fontSize: 14, marginTop: 4 }}>Usa un ticket para pagar un servicio y lo pagas después.</div>
           <BotonPildora style={{ marginTop: 14, width: '100%', height: 52, fontSize: 17 }} onClick={() => navegar('/app/pago')}>Pagar con ticket</BotonPildora>
         </Tarjeta>
-        <Nota total={ficha.tickets.total} />
+        <Nota total={ficha.tickets.total} servicios={cupoServicios(ficha).total} />
       </>
     )
   }
@@ -174,7 +178,7 @@ function Cuotas() {
             </span>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><LogoCD w={26} h={18} color="#9CCB12" sw={3.4} /><span style={{ fontWeight: 700, fontSize: 17 }}>Credirecto</span></div>
-              <div style={{ fontSize: 14, marginTop: 2 }}>Ticket {i + 1} · {descripcionTicket(t)}</div>
+              <div style={{ fontSize: 14, marginTop: 2 }}>{nombreCuota(ficha, t.id)} · {descripcionTicket(t)}</div>
               <div style={{ fontSize: 13, color: e.c, fontWeight: 500 }}>{e.txt}</div>
               {t.oferta_quincena && t.estado === 'abierto' && (
                 <button onClick={(ev) => { ev.stopPropagation(); navegar(`/app/quincena/${t.id}`) }}
@@ -195,14 +199,14 @@ function Cuotas() {
             : `Pagar ${bs(totalElegido)}`}
         </BotonPildora>
       )}
-      <Nota total={ficha.tickets.total} />
+      <Nota total={ficha.tickets.total} servicios={cupoServicios(ficha).total} />
     </>
   )
 }
 
-const Nota = ({ total }) => (
+const Nota = ({ total, servicios }) => (
   <div className="cd-mut" style={{ textAlign: 'center', fontSize: 13, marginTop: 12, padding: '0 24px' }}>
-    Hasta {plural(total, 'ticket', 'tickets')} por período · Paga tu cuota y tu ticket vuelve a estar disponible · Todo en bolívares
+    Hasta {plural(total, 'ticket', 'tickets')}{servicios > 0 ? ` y ${plural(servicios, 'pago', 'pagos')} de servicios` : ''} por período · Paga tu cuota y vuelve a estar disponible · Todo en bolívares
   </div>
 )
 
@@ -254,10 +258,18 @@ function CaminoA({ progreso: p }) {
             <span key={i} style={{ height: 10, borderRadius: 5, background: i < p.repagos_hechos ? '#8CC20B' : '#E6E8EE' }} />
           ))}
         </div>
+        {p.faltan_pts_club > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'center', marginTop: 12, fontSize: 14, background: '#FFE8EF', color: '#A3165E', borderRadius: 14, padding: '8px 12px' }}>
+            <span>Llega a <b>{p.ruta_requerida}</b> en el Club PagoDirecto</span>
+            <b style={{ whiteSpace: 'nowrap' }}>faltan {p.faltan_pts_club.toLocaleString('es-VE')} pts</b>
+          </div>
+        )}
         <div style={{ fontSize: 15, marginTop: 10, lineHeight: 1.35 }}>
           {p.faltan_repagos > 0
             ? <>Paga a tiempo <b>{p.faltan_repagos === 1 ? '1 vez más' : `${p.faltan_repagos} veces más`}</b> para llegar a <b>Credirecto {p.siguiente_nombre}</b>.</>
-            : <>¡Ya casi! Sigue pagando a tiempo y pronto llegas a <b>Credirecto {p.siguiente_nombre}</b>.</>}
+            : p.faltan_pts_club > 0
+              ? <>Ya tienes los pagos a tiempo. Sigue sumando puntos en el Club para llegar a <b>Credirecto {p.siguiente_nombre}</b>.</>
+              : <>¡Ya casi! Sigue pagando a tiempo y pronto llegas a <b>Credirecto {p.siguiente_nombre}</b>.</>}
         </div>
         <div className="cd-mut" style={{ fontSize: 13, marginTop: 4 }}>{BENEFICIO_NIVEL[p.siguiente_nivel]}</div>
       </Tarjeta>
@@ -272,7 +284,7 @@ function ServiciosCubiertos() {
     <div style={{ padding: '14px 16px 0' }}>
       <Tarjeta style={{ padding: '18px 16px' }}>
         <div style={{ fontWeight: 700, fontSize: 16, padding: '0 4px' }}>Tu nivel cubre</div>
-        <div className="cd-mut" style={{ fontSize: 13, padding: '2px 4px 0' }}>Cada ticket paga uno de estos servicios</div>
+        <div className="cd-mut" style={{ fontSize: 13, padding: '2px 4px 0' }}>Los tickets pagan movilidad; los pagos de servicios, tus facturas</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '14px 6px', marginTop: 14 }}>
           {SERVICIOS_NIVEL.map((s) =>
             cubiertos.includes(s.clave) ? (

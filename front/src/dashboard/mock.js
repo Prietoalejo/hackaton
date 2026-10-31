@@ -27,7 +27,10 @@ function rng(semilla) {
 const HOY_INICIAL = '2026-10-31'
 const NOMBRES_NIVEL = ['Inicial', 'Básico', 'Confiable', 'Premium']
 const MAX_NIVEL = [5, 5, 10, 20]
-const TICKETS_NIVEL = [1, 2, 3, 4]
+const TICKETS_NIVEL = [1, 2, 3, 5]
+const SERVICIOS_CUPO_NIVEL = [0, 0, 1, 3]   // pagos de servicios (facturas), aparte de los tickets
+// Ruta del Club PagoDirecto que exige cada nivel de Credirecto
+const RUTA_NIVEL = ['Turista · Ruta Colonial', 'Caminante · Ruta Falcón', 'Viajero · Ruta del Café', 'Conocedor · Ruta de Paria']
 const PLAZO_NIVEL = [7, 14, 15, 30]
 const SERVICIOS_NIVEL = [
   ['estacionamiento'],
@@ -55,7 +58,7 @@ const NOMBRES = ['Luis', 'Andrea', 'Carla', 'Jorge', 'Paola', 'Ricardo', 'Sofía
 // [id, nombre, score, nivel, segmento, usados, total, deuda, días de atraso] (tabla del diseño 05)
 const FIJOS = [
   ['u_0142', 'María', 76, 2, 'Puntual', 1, 3, 4.79, 0],
-  ['u_0007', 'Pedro', 84, 3, 'Conductor diario', 2, 4, 24.6, 0],
+  ['u_0007', 'Pedro', 84, 3, 'Conductor diario', 2, 5, 24.6, 0],
   ['u_0219', 'Ana', 63, 2, 'Conductor diario', 3, 3, 17.2, 0],
   ['u_0415', 'Valentina', 58, 1, 'Puntual', 1, 2, 3.9, 0],
   ['u_0388', 'Daniel', 52, 1, 'Nuevo', 1, 2, 4.1, 0],
@@ -71,6 +74,7 @@ function filaUsuario(id, nombre, score, nivel, segmento, usados, total, deuda, a
   return {
     user_id: id, nombre, trust_score: score, nivel, nivel_nombre: hab ? NOMBRES_NIVEL[nivel] : null,
     segmento, habilitado: hab, tickets_usados: hab ? usados : 0, tickets_total: hab ? total : 0,
+    servicios_usados: 0, servicios_total: hab ? SERVICIOS_CUPO_NIVEL[nivel] : 0,
     monto_max: hab ? MAX_NIVEL[nivel] : 0, deuda, dias_atraso: atraso, modo_recuperacion: atraso >= 8,
   }
 }
@@ -121,7 +125,7 @@ const MARIA = {
   user_id: 'u_0142', nombre: 'María', alias: '@maria.r',
   habilitado: true, habilitado_desde: '2026-06-02', cohorte: '2026-06',
   nivel: 2, nivel_nombre: 'Confiable', segmento: 'Puntual', quincena: [15, 30],
-  club: 'Caminante · Ruta Colonial', saldo_wallet: 0.0036, modo_recuperacion: false, estado_mora: 'al_dia',
+  club: 'Viajero · Ruta del Café', saldo_wallet: 0.0036, modo_recuperacion: false, estado_mora: 'al_dia',
   trust_score: 76,
   razones: [
     { senal: 'puntualidad', nombre: 'Puntualidad', aporte: 38.0, max: 40 },
@@ -138,7 +142,15 @@ const MARIA = {
     { requisito: 'dias', nombre: '30 días en PagoDirecto', ok: true, detalle: null },
   ],
   tickets: { total: 3, usados: 1, disponibles: 2, monto_max: 10.0, servicios: SERVICIOS_NIVEL[2] },
-  progreso: { siguiente_nivel: 3, siguiente_nombre: 'Premium', faltan_puntos: 4, repagos_hechos: 5, repagos_requeridos: 10, faltan_repagos: 5 },
+  servicios_cupo: { total: 1, usados: 0, disponibles: 1, cubre: ['luz', 'internet', 'telefono'] },
+  club_puntos: { nombre: 'Club PagoDirecto', ruta: 'Viajero · Ruta del Café', puntos_credirecto: 650, puntos_por_pago: 100, multiplicador: 1.5 },
+  beneficios: { ruta: 'Viajero · Ruta del Café', factor: 1.15, pausa: false,
+    razones: [{ senal: 'puntualidad', efecto: 0.15, texto: 'Paga a tiempo el 100% de sus pagos' }],
+    beneficios: [{ tipo: 'walletback', nombre: 'Walletback', unidad: '%', base: 2, personal: 2.3, estimado_mes: 0.62 },
+      { tipo: 'tickets_gratis', nombre: 'Tickets gratis de estacionamiento al mes', unidad: '', base: 1, personal: 1 }],
+    a_tu_medida: { tipo: 'cuota_sin_gasto', nombre: '1 cuota al mes sin gasto administrativo', detalle: 'Porque pagas antes o el día de cobro.' } },
+  progreso: { siguiente_nivel: 3, siguiente_nombre: 'Premium', faltan_puntos: 4, repagos_hechos: 5, repagos_requeridos: 10, faltan_repagos: 5,
+    ruta_requerida: 'Conocedor · Ruta de Paria', faltan_pts_club: 6200 },
   racha: { pagos: 2, meta: 3, quedan_dias: 4, multiplicador: false },
   deuda_total: 4.79,
   tickets_abiertos: [{
@@ -148,23 +160,23 @@ const MARIA = {
     descuento_si_anticipa: 0.11, gracia_hasta: '2026-11-17', comision_si_atrasa: 0.25, oferta_quincena: null,
   }],
   decisiones: {
-    prestar: { tickets: 2, plazo_dias: 15, monto_max: 10.0, servicios: SERVICIOS_NIVEL[2], motivo: null },
+    prestar: { tickets: 2, servicios_cupo: 1, plazo_dias: 15, monto_max: 10.0, servicios: SERVICIOS_NIVEL[2], motivo: null },
     comunicar: {
       tipo: 'recordatorio', nombre: 'Recordatorio',
       mensaje: 'Tu cuota de Credirecto vence en 2 días. Paga tu cuota y tu ticket vuelve a estar disponible.',
       canal: 'push', fecha: '2026-11-13', oferta_quincena: '2026-11-15',
     },
     premiar: [
-      { tipo: 'racha', detalle: 'Racha +1' },
-      { tipo: 'multiplicador', detalle: 'puntos ×1,5' },
+      { tipo: 'racha', detalle: '+1 racha en el Club' },
+      { tipo: 'multiplicador', detalle: 'pts del Club ×1,5' },
       { tipo: 'descuento_nivel', detalle: '−25 % gasto administrativo', monto: 0.11 },
     ],
   },
-  notificaciones: [{ fecha: '2026-10-20', tipo: 'subida_nivel', titulo: 'Nuevo nivel', mensaje: '¡Subiste a Credirecto Confiable! Ahora tienes 3 tickets y puedes pagar luz e internet.', canal: 'push' }],
+  notificaciones: [{ fecha: '2026-10-20', tipo: 'subida_nivel', titulo: 'Nuevo nivel', mensaje: '¡Subiste a Credirecto Confiable! Ahora tienes 3 tickets y 1 pago de servicios para luz, internet y teléfono.', canal: 'push' }],
   linea_de_tiempo: [
     { fecha: '2026-10-26', tipo: 'Ticket', texto: 'Ticket 1 · Estacionamiento C.C. El Tolón · cuota 15 nov', monto: 4.79 },
-    { fecha: '2026-10-20', tipo: 'Mensaje', texto: 'Push: «¡Subiste a Credirecto Confiable! Ahora tienes 3 tickets y puedes pagar luz e internet.»', monto: null },
-    { fecha: '2026-10-20', tipo: 'Nivel', texto: 'Básico → Confiable (score 61) · de 2 a 3 tickets', monto: null },
+    { fecha: '2026-10-20', tipo: 'Mensaje', texto: 'Push: «¡Subiste a Credirecto Confiable! Ahora tienes 3 tickets y 1 pago de servicios para luz, internet y teléfono.»', monto: null },
+    { fecha: '2026-10-20', tipo: 'Nivel', texto: 'Básico → Confiable (score 61) · de 2 tickets a 3 tickets y 1 pago de servicios', monto: null },
     { fecha: '2026-10-12', tipo: 'Pago', texto: 'Cuota pagada 3 días antes · ticket renovado · racha +1', monto: 4.5 },
     { fecha: '2026-10-10', tipo: 'Mensaje', texto: 'Push: «Paga tu cuota y tu ticket vuelve a estar disponible.»', monto: null },
     { fecha: '2026-10-03', tipo: 'Ticket', texto: 'Ticket 2 · Peaje Tazón', monto: 4.5 },
@@ -236,14 +248,15 @@ function fichaGenerica(u) {
     user_id: u.user_id, nombre: u.nombre, alias: '@' + u.nombre.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '') + u.user_id.slice(-2),
     habilitado: hab, habilitado_desde: hab ? '2026-07-14' : null, cohorte: hab ? '2026-07' : null,
     nivel, nivel_nombre: u.nivel_nombre, segmento: u.segmento, quincena: azar() > 0.6 ? [15, 30] : [],
-    club: 'Turista · Ruta Centro', saldo_wallet: 0, modo_recuperacion: u.modo_recuperacion,
+    club: hab ? RUTA_NIVEL[nivel] : RUTA_NIVEL[0], saldo_wallet: 0, modo_recuperacion: u.modo_recuperacion,
     estado_mora: u.modo_recuperacion ? 'mora' : u.dias_atraso >= 3 ? 'atrasado' : u.dias_atraso > 0 ? 'gracia' : 'al_dia',
     trust_score: u.trust_score, razones, checklist,
     tickets: { total: u.tickets_total, usados: u.tickets_usados, disponibles, monto_max: u.monto_max, servicios: hab ? SERVICIOS_NIVEL[nivel] : [] },
+    servicios_cupo: { total: u.servicios_total, usados: 0, disponibles: u.servicios_total, cubre: hab ? SERVICIOS_NIVEL[nivel].filter((s) => ['luz', 'internet', 'telefono', 'seguro'].includes(s)) : [] },
     progreso, racha: { pagos: hab ? Math.floor(azar() * 3) : 0, meta: 3, quedan_dias: 5, multiplicador: false },
     deuda_total: u.deuda, tickets_abiertos: abiertos,
     decisiones: {
-      prestar: { tickets: motivo ? 0 : disponibles, plazo_dias: hab ? PLAZO_NIVEL[nivel] : 0, monto_max: hab ? u.monto_max : 0,
+      prestar: { tickets: motivo ? 0 : disponibles, servicios_cupo: motivo ? 0 : u.servicios_total, plazo_dias: hab ? PLAZO_NIVEL[nivel] : 0, monto_max: hab ? u.monto_max : 0,
         servicios: hab && !motivo ? SERVICIOS_NIVEL[nivel] : [], motivo },
       comunicar, premiar,
     },
@@ -344,7 +357,7 @@ function segmentos() {
   return {
     hoy: estado.hoy, habilitados: 312, total: 500, margen_bajada: 5,
     niveles: L.map(([nivel, rango, usuarios, texto]) => ({
-      nivel, nombre: 'Credirecto ' + NOMBRES_NIVEL[nivel], rango, usuarios, tickets: TICKETS_NIVEL[nivel],
+      nivel, nombre: 'Credirecto ' + NOMBRES_NIVEL[nivel], rango, usuarios, tickets: TICKETS_NIVEL[nivel], servicios_cupo: SERVICIOS_CUPO_NIVEL[nivel], ruta_club: RUTA_NIVEL[nivel],
       monto_max: MAX_NIVEL[nivel], servicios: SERVICIOS_NIVEL[nivel], servicios_texto: texto,
     })),
     segmentos: [
@@ -419,7 +432,15 @@ function configInicial() {
       { titulo: 'Umbrales de nivel', campos: [n('umbral_basico', 'Básico desde', 40, 'pts'), n('umbral_confiable', 'Confiable desde', 60, 'pts'),
         n('umbral_premium', 'Premium desde', 80, 'pts'), n('margen_bajada', 'Margen para bajar', 5, 'pts')] },
       { titulo: 'Tickets por nivel', campos: [n('tickets_inicial', 'Inicial', 1, ''), n('tickets_basico', 'Básico', 2, ''),
-        n('tickets_confiable', 'Confiable', 3, ''), n('tickets_premium', 'Premium', 4, '')] },
+        n('tickets_confiable', 'Confiable', 3, ''), n('tickets_premium', 'Premium', 5, '')] },
+      { titulo: 'Ruta del Club para cada nivel', campos: [n('ruta_basico', 'Básico desde', 2, 'nivel'),
+        n('ruta_confiable', 'Confiable desde', 3, 'nivel'), n('ruta_premium', 'Premium desde', 4, 'nivel')] },
+      { titulo: 'Motor de beneficios del Club', campos: [n('beneficio_min_pct', 'Beneficio mínimo de la ruta', 50, '%'),
+        n('beneficio_max_pct', 'Beneficio máximo de la ruta', 150, '%'), n('bono_puntualidad_pct', 'Puntualidad (± si paga a tiempo o no)', 15, '%'),
+        n('bono_anticipados_pct', 'Paga antes del vencimiento', 15, '%'), n('bono_racha_pct', 'Racha de la semana completa', 10, '%'),
+        n('bono_score_pct', 'Trust Score alto (± si es bajo)', 10, '%'), n('castigo_riesgo_pct', 'Segmento En riesgo', 30, '%')] },
+      { titulo: 'Pagos de servicios por nivel', campos: [n('servicios_inicial', 'Inicial', 0, ''), n('servicios_basico', 'Básico', 0, ''),
+        n('servicios_confiable', 'Confiable', 1, ''), n('servicios_premium', 'Premium', 3, '')] },
       { titulo: 'Máximo por ticket', campos: [n('max_inicial', 'Inicial', 5, 'USD'), n('max_basico', 'Básico', 5, 'USD'),
         n('max_confiable', 'Confiable', 10, 'USD'), n('max_premium', 'Premium', 20, 'USD')] },
       { titulo: 'Plazos máximos', campos: [n('plazo_inicial', 'Inicial', 7, 'días'), n('plazo_basico', 'Básico', 14, 'días'),

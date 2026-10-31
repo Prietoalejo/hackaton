@@ -36,7 +36,6 @@ PROP_VEHICULO = 0.87
 PROP_VEHICULO_SIN_CREDITO = 0.70
 PROP_PUSH = 0.70
 SALDO_MAX, SALDO_MAX_MOROSO = 20.0, 3.0
-CLUBES = ["Turista", "Caminante · Ruta Colonial", "Explorador · Ruta Andina", "Viajero · Ruta del Sol"]
 DIAS_FOTOS = 14   # fotos diarias hacia atrás: movimientos de la semana y "score cayendo"
 LOTE = 1000
 SCHEMA = Path(__file__).with_name("schema.sql")
@@ -211,7 +210,7 @@ def _usuarios_generados(lote, rng):
             rng.random() < PROP_CEDULA,
             rng.random() < (PROP_VEHICULO_SIN_CREDITO if perfil == "sin_credito" else PROP_VEHICULO),
             rng.uniform(0, SALDO_MAX_MOROSO if perfil == "moroso" else SALDO_MAX), perfil,
-            rng.random() < C.QUINCENEROS, "push" if rng.random() < PROP_PUSH else "wisi", rng.choice(CLUBES))
+            rng.random() < C.QUINCENEROS, "push" if rng.random() < PROP_PUSH else "wisi", None)
         u["_habilitado_desde"] = _historia(lote, u)
 
 
@@ -220,7 +219,7 @@ def _usuarios_generados(lote, rng):
 def _maria(lote, rng):
     """Confiable, Puntual, cobra el 15 y el 30, racha 2 de 3. Hoy usa un ticket en C.C. El Tolón."""
     u = lote.usuario("u_0142", "María", "@maria.r", date(2026, 3, 10), True, True, 1.38 / C.TASA_BS,
-                     "puntual", True, "push", "Caminante · Ruta Colonial")
+                     "puntual", True, "push", None)
     for d in _dias(INICIO_HISTORIAL, FECHA_RELOJ):
         if d.day == 15:
             lote.eventos.append(_ev(u, d, "recarga", None, rng.uniform(25, 45)))
@@ -246,7 +245,7 @@ def _maria(lote, rng):
 def _carmen(lote, rng):
     """Aún sin Credirecto: cédula verificada, falta el vehículo y 1 de 2 pagos a tiempo."""
     u = lote.usuario("u_0333", "Carmen", "@carmen.s", date(2026, 8, 20), True, False, 1.38 / C.TASA_BS,
-                     "ocasional", False, "push", "Turista")
+                     "ocasional", False, "push", None)
     lote.eventos += [_ev(u, date(2026, 9, 1), "recarga", None, 20.0),
                      _ev(u, date(2026, 9, 15), "pago_servicio", "luz", 11.4, True),
                      _ev(u, date(2026, 10, 1), "recarga", None, 15.0),
@@ -257,7 +256,7 @@ def _carmen(lote, rng):
 def _pedro(lote, rng):
     """Pagaba bien, pero el 24 oct usó 2 tickets que vencen hoy y no los pagará."""
     u = lote.usuario("u_0007", "Pedro", "@pedro.g", date(2026, 6, 1), True, True, 4.0, "conductor", False,
-                     "wisi", "Explorador · Ruta Andina")
+                     "wisi", None)
     for d in _dias(u["fecha_registro"], date(2026, 10, 24)):
         if d.day == 1:
             lote.eventos.append(_ev(u, d, "recarga", None, rng.uniform(20, 40)))
@@ -367,6 +366,7 @@ def calcular_perfiles(lote):
             scores[uid][d] = perfil["trust_score"]
             resultados.append((perfil, decision))
             if d == FECHA_RELOJ:
+                ud["club"] = perfil["club"]["texto"]   # nivel y ruta del Club, por sus puntos
                 usuarios_finales.append(ud)
                 tickets_finales += tk
         por_dia.append((d, resultados))

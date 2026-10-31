@@ -5,7 +5,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { bs, fechaCorta } from '../../formato.js'
 import { useApp } from '../contexto.js'
 import { datos, mensajeError } from '../datos.js'
-import { bsAUsd, esDiaDeCobro, NOMBRE_SERVICIO, parseBs, sumarDias, SERVICIOS_NIVEL } from '../util.js'
+import { bsAUsd, cupoServicios, esDiaDeCobro, esFactura, NOMBRE_SERVICIO, parseBs, sumarDias, SERVICIOS_NIVEL } from '../util.js'
 import { BotonPildora, Encabezado, MensajeError, Pantalla, Tarjeta } from '../componentes/Base.jsx'
 import { IcoInfo, IcoServicio, LogoCD } from '../componentes/Iconos.jsx'
 
@@ -37,7 +37,12 @@ export default function PagoTicket() {
   const [cargando, setCargando] = useState(false)
   const [error, setError] = useState(null)
 
-  const { total, usados, disponibles, monto_max: maxUsd, servicios } = ficha.tickets
+  // Movilidad gasta un ticket; luz, internet, teléfono y seguros gastan un pago de servicios
+  const { monto_max: maxUsd, servicios } = ficha.tickets
+  const factura = esFactura(servicio)
+  const { total, usados, disponibles } = factura ? cupoServicios(ficha) : ficha.tickets
+  const unidad = factura ? 'pago de servicios' : 'ticket'
+  const unidades = factura ? 'pagos de servicios' : 'tickets'
   const montoBs = parseBs(texto)
   const montoUsd = bsAUsd(montoBs)
   const excede = montoUsd > maxUsd + 1e-9
@@ -59,7 +64,7 @@ export default function PagoTicket() {
       if (r.ticket?.oferta_quincena) {
         navegar(`/app/quincena/${r.ticket.id}`, { state: { ticket: r.ticket } })
       } else {
-        avisar(`Listo: pagaste ${bs(r.cubierto_por_credito + r.pagado_con_saldo)} con tu ticket. Tu cuota vence el ${fechaCorta(r.ticket.vence)}.`)
+        avisar(`Listo: pagaste ${bs(r.cubierto_por_credito + r.pagado_con_saldo)} con tu ${unidad}. Tu cuota vence el ${fechaCorta(r.ticket.vence)}.`)
         navegar('/app/detalle')
       }
     } catch (e) {
@@ -76,7 +81,7 @@ export default function PagoTicket() {
   return (
     <Pantalla padding="22px 0 0" pie={
       <>
-        <BotonPildora cargando={cargando} onClick={pagar}>Pagar con ticket</BotonPildora>
+        <BotonPildora cargando={cargando} onClick={pagar}>{factura ? 'Pagar con Credirecto' : 'Pagar con ticket'}</BotonPildora>
         <BotonPildora variante="secundario" onClick={() => avisar('El pago con saldo es el flujo normal de PagoDirecto; en esta demo solo probamos Credirecto.')}>Pagar con mi saldo</BotonPildora>
       </>
     }>
@@ -124,20 +129,22 @@ export default function PagoTicket() {
 
       <div style={{ padding: '12px 16px 0' }}>
         <Tarjeta style={{ padding: '18px 20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><LogoCD w={26} h={18} color="#8CC20B" /><span style={{ fontSize: 20, fontWeight: 700 }}>Usar 1 ticket</span></div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><LogoCD w={26} h={18} color="#8CC20B" /><span style={{ fontSize: 20, fontWeight: 700 }}>Usar 1 {unidad}</span></div>
           <div style={{ fontSize: 15, marginTop: 4 }}>
             {disponibles > 0
-              ? `Este pago usa 1 de tus ${disponibles} ${disponibles === 1 ? 'ticket disponible' : 'tickets disponibles'}.`
-              : 'Tus tickets están en uso. Paga una cuota y vuelven a estar disponibles.'}
+              ? disponibles === 1 ? `Este pago usa tu ${unidad} disponible.` : `Este pago usa 1 de tus ${disponibles} ${unidades} disponibles.`
+              : total > 0
+                ? `Tus ${unidades} están en uso. Paga una cuota y vuelven a estar disponibles.`
+                : `Tu nivel ${ficha.nivel_nombre} todavía no incluye pagos de servicios. Llegan en Credirecto Confiable.`}
           </div>
 
           {total > 0 && (
             <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(total, 4)}, minmax(0, 1fr))`, gap: 8, marginTop: 14 }}>
-              {fichas.map((e, i) => <FichaTicket key={i} n={i + 1} estado={e} />)}
+              {fichas.map((e, i) => <FichaTicket key={i} n={i + 1} estado={e} rotulo={factura ? 'SERVICIO' : 'TICKET'} />)}
             </div>
           )}
 
-          {!cubierto && total > 0 && !error && (
+          {!cubierto && (total > 0 || !factura) && !error && (
             <div style={{ fontSize: 13, marginTop: 12, color: '#8A4B00', background: '#FFF1D6', borderRadius: 12, padding: '8px 10px' }}>
               Tu nivel {ficha.nivel_nombre} todavía no cubre {nombre}.
             </div>
@@ -145,18 +152,18 @@ export default function PagoTicket() {
 
           {!excede ? (
             <>
-              <div className="cd-row" style={{ marginTop: 16 }}><span>Lo cubre tu ticket</span><b style={{ fontSize: 17 }}>{bs(cubre)}</b></div>
+              <div className="cd-row" style={{ marginTop: 16 }}><span>Lo cubre tu {unidad}</span><b style={{ fontSize: 17 }}>{bs(cubre)}</b></div>
               <div className="cd-mut" style={{ fontSize: 13, marginTop: 8, lineHeight: 1.4 }}>
-                Tu ticket cubre hasta {bs(maxUsd)}.{vence && ` Su cuota vence el ${fechaCorta(vence)}${esDiaDeCobro(ficha, vence) ? ', tu día de cobro' : ''}.`}
+                Tu {unidad} cubre hasta {bs(maxUsd)}.{vence && ` Su cuota vence el ${fechaCorta(vence)}${esDiaDeCobro(ficha, vence) ? ', tu día de cobro' : ''}.`}
               </div>
             </>
           ) : (
             <>
               <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', background: '#F6FCE3', borderRadius: 16, padding: '10px 12px', marginTop: 14 }}>
                 <IcoInfo color="#3B6B00" style={{ flex: 'none', marginTop: 1 }} />
-                <span style={{ fontSize: 14, lineHeight: 1.35, color: '#2C4F00' }}>Tu ticket cubre hasta {bs(maxUsd)}; el resto lo pagas con tu saldo.</span>
+                <span style={{ fontSize: 14, lineHeight: 1.35, color: '#2C4F00' }}>Tu {unidad} cubre hasta {bs(maxUsd)}; el resto lo pagas con tu saldo.</span>
               </div>
-              <div className="cd-row" style={{ marginTop: 12, fontSize: 15 }}><span>Cubre tu ticket</span><b>{bs(cubre)}</b></div>
+              <div className="cd-row" style={{ marginTop: 12, fontSize: 15 }}><span>Cubre tu {unidad}</span><b>{bs(cubre)}</b></div>
               <div className="cd-row" style={{ marginTop: 6, fontSize: 15 }}><span>Pagas con tu saldo</span><b>{bs(conSaldo)}</b></div>
               <div className="cd-row" style={{ borderTop: '1px dashed #D5D8E1', marginTop: 10, paddingTop: 10 }}><span style={{ fontWeight: 600 }}>Total</span><b style={{ fontSize: 18 }}>{bs(montoUsd)}</b></div>
             </>
@@ -174,7 +181,7 @@ const tiempo = (usdMonto) => {
   return min >= 60 ? `${Math.floor(min / 60)} h ${min % 60} min` : `${min} min`
 }
 
-function FichaTicket({ n, estado }) {
+function FichaTicket({ n, estado, rotulo }) {
   const estilos = {
     usado: { caja: { background: '#E6E8EE', color: '#4A4A5E' }, linea: '#C2C5D0', txt: 'Usado' },
     ahora: { caja: { background: '#121412', color: '#C6F432', boxShadow: '0 0 0 3px #FF1F5A' }, linea: 'rgba(198,244,50,.4)', txt: 'Se usa ahora' },
@@ -182,7 +189,7 @@ function FichaTicket({ n, estado }) {
   }[estado]
   return (
     <div className="cd-tk" style={estilos.caja}>
-      <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '.06em' }}>TICKET {n}</div>
+      <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '.06em' }}>{rotulo} {n}</div>
       <div className="cd-ntc" style={{ borderTop: `2px dashed ${estilos.linea}` }} aria-hidden="true"><span style={{ left: -6 }} /><span style={{ right: -6 }} /></div>
       <b>{estilos.txt}</b>
     </div>

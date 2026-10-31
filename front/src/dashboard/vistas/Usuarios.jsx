@@ -75,7 +75,7 @@ export default function Usuarios() {
     {
       titulo: 'Tickets usados / total',
       render: (u) => (u.habilitado
-        ? <>{u.tickets_usados} / {u.tickets_total} tickets<div className="rt-lbl">hasta {usd(u.monto_max, Number.isInteger(u.monto_max) ? 0 : 2)} c/u</div></>
+        ? <>{u.tickets_usados} / {u.tickets_total} tickets{u.servicios_total > 0 && <div className="rt-lbl">{u.servicios_usados ?? 0} / {u.servicios_total} servicios</div>}<div className="rt-lbl">hasta {usd(u.monto_max, Number.isInteger(u.monto_max) ? 0 : 2)} c/u</div></>
         : <>—<div className="rt-lbl">No habilitado</div></>),
     },
     { titulo: 'Deuda', render: (u) => <>{usd(u.deuda)}<div className="rt-lbl">{bs(u.deuda)}</div></> },

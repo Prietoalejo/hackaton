@@ -4,11 +4,61 @@ import { useNavigate } from 'react-router-dom'
 import { aFecha, bs, fechaCorta } from '../../formato.js'
 import { useApp } from '../contexto.js'
 import { datos, mensajeError } from '../datos.js'
-import { fondoCD, horaAhora, numeroTicket, proximoTicket, sumarDias } from '../util.js'
+import { fondoCD, horaAhora, nombreCuota, proximoTicket, sumarDias } from '../util.js'
 import { Encabezado, MensajeError, Pantalla, Tarjeta } from '../componentes/Base.jsx'
 import { IcoCheck, IcoReloj, LogoCD } from '../componentes/Iconos.jsx'
 
 const LETRAS = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
+const num = (n) => Number(n).toLocaleString('es-VE', { maximumFractionDigits: 2 })
+
+// Razones del motor dichas al usuario (el dashboard las muestra en tercera persona)
+const SUBE = { puntualidad: 'pagas a tiempo', anticipados: 'pagas antes del vencimiento', racha: 'completaste tu racha', score: 'tienes un buen historial' }
+const BAJA = { puntualidad: 'algunos pagos llegaron tarde', score: 'tu historial aún es corto o tiene atrasos', riesgo: 'tuviste un atraso reciente' }
+const lista = (xs) => (xs.length > 1 ? `${xs.slice(0, -1).join(', ')} y ${xs[xs.length - 1]}` : xs[0])
+const porque = (b) => {
+  if (b.pausa) return 'Tus beneficios vuelven en cuanto saldes tu cuota.'
+  const sube = b.razones.filter((r) => r.efecto > 0 && SUBE[r.senal]).map((r) => SUBE[r.senal])
+  const baja = b.razones.filter((r) => r.efecto < 0 && BAJA[r.senal]).map((r) => BAJA[r.senal])
+  if (!sube.length && !baja.length) return 'Recibes el beneficio base de tu ruta. Paga a tiempo o antes y sube.'
+  return [sube.length && `Sube porque ${lista(sube)}.`, baja.length && `Baja porque ${lista(baja)}; paga a tiempo y lo recuperas.`]
+    .filter(Boolean).join(' ')
+}
+
+/** Beneficios de la ruta del Club, personalizados por el motor (base × factor + uno a tu medida) */
+function BeneficiosRuta({ b }) {
+  const pct = Math.round(b.factor * 100)
+  const tono = b.pausa ? '#D6104D' : pct > 100 ? '#3B6B00' : pct < 100 ? '#8A4B00' : '#5D5D70'
+  const fondo = b.pausa ? '#FFE3EA' : pct > 100 ? '#F1FBD2' : pct < 100 ? '#FFF1D6' : '#EEF0F5'
+  return (
+    <div style={{ padding: '12px 16px 0' }}>
+      <Tarjeta style={{ padding: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontWeight: 700, fontSize: 17 }}>Tus beneficios</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: tono, background: fondo, padding: '4px 10px', borderRadius: 999 }}>
+            {b.pausa ? 'En pausa' : `${pct} % de tu ruta`}
+          </span>
+        </div>
+        <div className="cd-mut" style={{ fontSize: 13, marginTop: 2 }}>{b.ruta}</div>
+        {b.beneficios.map((x) => (
+          <div key={x.tipo} className="cd-row" style={{ marginTop: 10, fontSize: 15, alignItems: 'baseline' }}>
+            <span>{x.nombre}</span>
+            <span style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+              {x.personal !== x.base && <span className="cd-mut" style={{ fontSize: 12, textDecoration: 'line-through', marginRight: 6 }}>{num(x.base)}{x.unidad && ` ${x.unidad}`}</span>}
+              <b>{num(x.personal)}{x.unidad && ` ${x.unidad}`}</b>
+            </span>
+          </div>
+        ))}
+        {b.a_tu_medida && (
+          <div style={{ marginTop: 12, background: '#FFE8EF', borderRadius: 14, padding: '10px 12px' }}>
+            <div style={{ fontWeight: 700, color: '#A3165E', fontSize: 15 }}>{b.a_tu_medida.nombre}</div>
+            <div style={{ fontSize: 13, color: '#6B2A4A', marginTop: 2 }}>{b.a_tu_medida.detalle}</div>
+          </div>
+        )}
+        <div className="cd-mut" style={{ fontSize: 12, marginTop: 10, lineHeight: 1.4 }}>{porque(b)}</div>
+      </Tarjeta>
+    </div>
+  )
+}
 
 export default function Racha() {
   const { ficha, hoy, recargarFicha, avisar } = useApp()
@@ -17,6 +67,7 @@ export default function Racha() {
   const [error, setError] = useState(null)
   const r = ficha.racha || { pagos: 0, meta: 3, quedan_dias: 0, multiplicador: false }
   const faltan = Math.max(0, r.meta - r.pagos)
+  const club = ficha.club_puntos || { puntos_por_pago: 100, multiplicador: 1.5, puntos_credirecto: 0 }
   const ticket = proximoTicket(ficha)
 
   // Semana actual (lunes a domingo): días con pago marcados, días pasados sin pago tachados
@@ -34,9 +85,9 @@ export default function Racha() {
     setCargando(true); setError(null)
     try {
       const res = await datos.pagar({ user_id: ficha.user_id, ticket_id: ticket.id, monto: ticket.deuda, origen: 'usuario' })
-      const numero = numeroTicket(ficha, ticket.id)
+      const nombre = nombreCuota(ficha, ticket.id)
       // Primero navegamos (la cuota desaparece de la ficha al refrescarla)
-      navegar('/app/comprobante', { state: { ...res, numero, nivel: ficha.nivel_nombre, hora: horaAhora() } })
+      navegar('/app/comprobante', { state: { ...res, nombre, nivel: ficha.nivel_nombre, hora: horaAhora() } })
       recargarFicha()
     } catch (e) {
       setError(mensajeError(e))
@@ -89,6 +140,26 @@ export default function Racha() {
         </Tarjeta>
       </div>
 
+      {/* Los puntos son los del Club PagoDirecto: Credirecto solo los suma */}
+      <div style={{ padding: '12px 16px 0' }}>
+        <Tarjeta style={{ padding: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
+            <span style={{ fontWeight: 700, fontSize: 17 }}>Club PagoDirecto</span>
+            <span className="cd-mut" style={{ fontSize: 13 }}>{ficha.club || 'Nivel Turista'}</span>
+          </div>
+          <div style={{ fontSize: 14, marginTop: 6, lineHeight: 1.4 }}>
+            Cada cuota pagada a tiempo suma <b>{club.puntos_por_pago} pts</b> a tu ruta del Club; si pagas antes o completas la racha, <b>{Math.round(club.puntos_por_pago * club.multiplicador)} pts</b>.
+          </div>
+          {club.puntos_credirecto > 0 && (
+            <div style={{ display: 'inline-block', marginTop: 10, fontSize: 13, fontWeight: 600, color: '#A3165E', background: '#FFE8EF', padding: '5px 12px', borderRadius: 999 }}>
+              {club.puntos_credirecto.toLocaleString('es-VE')} pts ganados con Credirecto
+            </div>
+          )}
+        </Tarjeta>
+      </div>
+
+      {ficha.beneficios && <BeneficiosRuta b={ficha.beneficios} />}
+
       <div style={{ padding: '24px 20px 0' }}>
         <div style={{ fontSize: 22, fontWeight: 700 }}>Paga y entra en racha</div>
         <div className="cd-mut" style={{ fontSize: 14 }}>Cualquiera de estos pagos suma</div>
@@ -101,7 +172,7 @@ export default function Racha() {
           {ticket ? (
             <>
               <span style={{ fontSize: 18, fontWeight: 700, color: '#D7F86E' }}>{bs(ticket.deuda)}</span>
-              <span style={{ fontSize: 12, color: '#D5D8CF' }}>Ticket {numeroTicket(ficha, ticket.id)} · vence {fechaCorta(ticket.vence)}</span>
+              <span style={{ fontSize: 12, color: '#D5D8CF' }}>{nombreCuota(ficha, ticket.id)} · vence {fechaCorta(ticket.vence)}</span>
               <button className="cd-rb" disabled={cargando} onClick={pagar} style={{ background: '#FF1F5A', color: '#fff', fontWeight: 700, opacity: cargando ? 0.6 : 1 }}>
                 {cargando ? 'Pagando…' : 'Pagar'}
               </button>

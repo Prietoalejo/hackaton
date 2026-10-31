@@ -2,14 +2,15 @@
 from datetime import timedelta
 
 from app import config as C
+from app.motor.club import puntos_de_cuota
 from app.motor.cobros import cubrir_monto, oferta_quincena
 from app.motor.niveles import evaluar_nivel
 from app.motor.score import ESTADOS_PROTEGIDOS, ESTADOS_VENCIDOS, dias_atraso, es_anticipado
 
 
-def en_uso(tickets) -> list:
-    """Tickets que ocupan cupo: todo lo que no está pagado."""
-    return [t for t in tickets if t["estado"] != "pagado"]
+def en_uso(tickets, cupo=None) -> list:
+    """Lo que ocupa cupo: todo lo que no está pagado. `cupo` = "tickets" o "servicios" filtra por tipo."""
+    return [t for t in tickets if t["estado"] != "pagado" and (cupo is None or C.cupo_de(t["servicio"]) == cupo)]
 
 
 def racha(eventos, hoy) -> dict:
@@ -29,14 +30,17 @@ def racha(eventos, hoy) -> dict:
 def prestar_para(habilitado, nivel, tickets, modo_recuperacion, condiciones=None) -> dict:
     """Cupo de hoy. `condiciones` reemplaza las del nivel (la regla actual usa C.REGLA_ACTUAL)."""
     if not habilitado:
-        return {"tickets": 0, "plazo_dias": None, "monto_max": 0.0, "servicios": [], "motivo": "no_habilitado"}
+        return {"tickets": 0, "servicios_cupo": 0, "plazo_dias": None, "monto_max": 0.0, "servicios": [],
+                "motivo": "no_habilitado"}
     cond = condiciones or C.NIVELES[nivel]
-    prestar = {"tickets": max(0, cond["tickets"] - len(en_uso(tickets))), "plazo_dias": cond["plazo_dias"],
-               "monto_max": cond["monto_max"], "servicios": list(cond["servicios"]), "motivo": None}
+    prestar = {"tickets": max(0, cond["tickets"] - len(en_uso(tickets, "tickets"))),
+               "servicios_cupo": max(0, cond.get("servicios_cupo", 0) - len(en_uso(tickets, "servicios"))),
+               "plazo_dias": cond["plazo_dias"], "monto_max": cond["monto_max"],
+               "servicios": list(cond["servicios"]), "motivo": None}
     if modo_recuperacion:
-        prestar.update(tickets=0, motivo="modo_recuperacion")
+        prestar.update(tickets=0, servicios_cupo=0, motivo="modo_recuperacion")
     elif any(t["estado"] in ESTADOS_VENCIDOS for t in tickets):
-        prestar.update(tickets=0, motivo="deuda_vencida")
+        prestar.update(tickets=0, servicios_cupo=0, motivo="deuda_vencida")
     return prestar
 
 
@@ -45,8 +49,17 @@ def _prestar(perfil, tickets) -> dict:
                         perfil["usuario"].get("modo_recuperacion"))
 
 
+def descontar_cupo(prestar, servicio) -> None:
+    """Resta 1 del cupo que usa ese servicio (tickets o pagos de servicios)."""
+    clave = "servicios_cupo" if C.cupo_de(servicio) == "servicios" else "tickets"
+    prestar[clave] -= 1
+
+
 def validar_solicitud(prestar, servicio, monto, saldo_wallet) -> dict:
-    """¿Se aprueba un pago con Credirecto? → {"resultado", "motivo", "credito", "saldo"}."""
+    """¿Se aprueba un pago con Credirecto? → {"resultado", "motivo", "credito", "saldo"}.
+
+    Movilidad gasta un ticket; luz, internet, teléfono y seguros gastan un pago de servicios.
+    """
     def rechazo(motivo):
         return {"resultado": "rechazada", "motivo": motivo, "credito": 0.0, "saldo": 0.0}
 
@@ -54,7 +67,10 @@ def validar_solicitud(prestar, servicio, monto, saldo_wallet) -> dict:
         return rechazo(prestar["motivo"])
     if servicio not in prestar["servicios"]:
         return rechazo("servicio_no_cubierto")
-    if prestar["tickets"] <= 0:
+    if C.cupo_de(servicio) == "servicios":
+        if prestar.get("servicios_cupo", 0) <= 0:
+            return rechazo("servicios_en_uso")
+    elif prestar["tickets"] <= 0:
         return rechazo("maximo_en_uso")
     cubre = cubrir_monto(monto, prestar["monto_max"])
     if cubre["saldo"] > saldo_wallet + 1e-9:
@@ -117,16 +133,17 @@ def _comunicar(perfil, tickets, eventos, hoy):
 # --- Premiar ---------------------------------------------------------------------------
 
 def premios_por_pago(ticket, nivel, racha_despues) -> list:
-    """Premios de saldar una cuota. Solo se premia lo que reduce el riesgo, nunca el uso."""
+    """Premios de saldar una cuota. Solo se premia lo que reduce el riesgo, nunca el uso.
+    Racha y puntos son los del Club PagoDirecto: Credirecto no crea un sistema de puntos propio."""
     premios = []
     if ticket["fecha_pago"] <= ticket["fecha_vencimiento"]:
-        premios.append({"tipo": "racha", "detalle": "+1 racha"})
+        premios.append({"tipo": "racha", "detalle": "+1 racha en el Club"})
     anticipado = es_anticipado(ticket)
     if anticipado:
-        premios.append({"tipo": "multiplicador", "detalle": "puntos ×1,5"})
-    if ticket["fecha_pago"] <= ticket["fecha_vencimiento"]:
-        factor = C.MULTIPLICADOR_PUNTOS if anticipado or racha_despues["multiplicador"] else 1
-        premios.append({"tipo": "puntos", "puntos": int(C.PUNTOS_POR_PAGO * factor)})
+        premios.append({"tipo": "multiplicador", "detalle": "pts del Club ×1,5"})
+    puntos = puntos_de_cuota(ticket, bool(racha_despues and racha_despues["multiplicador"]))
+    if puntos:
+        premios.append({"tipo": "puntos", "puntos": puntos, "detalle": f"+{puntos} pts en el {C.CLUB_NOMBRE}"})
     if ticket["descuento"] > 0:
         premios.append({"tipo": "descuento_nivel", "monto": ticket["descuento"],
                         "detalle": f"−{int(C.DESCUENTO_NIVEL[nivel] * 100)} % gasto administrativo"})

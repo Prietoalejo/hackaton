@@ -4,7 +4,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { aFecha, bs, fechaCorta, fechaLarga } from '../../formato.js'
 import { useApp } from '../contexto.js'
 import { datos, mensajeError } from '../datos.js'
-import { diasEntre, esDiaDeCobro, mesAnio, numeroTicket, plural } from '../util.js'
+import { diasEntre, esDiaDeCobro, mesAnio, nombreCuota, plural } from '../util.js'
 import { BotonPildora, Encabezado, MensajeError, Pantalla, Tarjeta, TarjetaCredirecto } from '../componentes/Base.jsx'
 import { IcoCheck, IcoTicket } from '../componentes/Iconos.jsx'
 
@@ -39,7 +39,7 @@ export default function Quincena() {
     )
   }
 
-  const numero = numeroTicket(ficha, ticket.id)
+  const nombre = nombreCuota(ficha, ticket.id)
   const dias = diasEntre(ticket.vence, oferta)
 
   const mover = async () => {
@@ -69,7 +69,7 @@ export default function Quincena() {
         <h1 style={{ margin: 0, fontSize: 28, fontWeight: 700, lineHeight: 1.15, letterSpacing: '-.01em' }}>Mueve tu cuota a tu quincena</h1>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 12, padding: '7px 14px 7px 10px', borderRadius: 999, background: '#fff', fontSize: 14, fontWeight: 600, boxShadow: '0 4px 16px rgba(21,21,43,.05)' }}>
           <IcoTicket w={20} h={17} color="#FF1F5A" sw={2} />
-          <span>Ticket {numero} · {ticket.comercio} · {bs(ticket.cuota)}</span>
+          <span>{nombre} · {ticket.comercio} · {bs(ticket.cuota)}</span>
         </div>
       </div>
 

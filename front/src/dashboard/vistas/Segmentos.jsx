@@ -2,7 +2,7 @@
 import { entero, fechaCorta, usd } from '../../formato.js'
 import { Barra, Encabezado, ErrorCaja, Esqueleto, FilaBarra } from '../componentes.jsx'
 import { useDatos } from '../datos.jsx'
-import { tickets } from '../util.js'
+import { cupo } from '../util.js'
 
 // Colores de las barras por segmento (diseño 03)
 const COLOR_SEGMENTO = {
@@ -36,8 +36,9 @@ function Niveles({ d }) {
             </div>
             <div style={{ fontSize: 34, fontWeight: 700, marginTop: 8 }}>{entero(l.usuarios)}</div>
             <Barra pct={d.habilitados ? (l.usuarios / d.habilitados) * 100 : 0} fondo="#E2E4EA" style={{ marginTop: 8 }} />
-            <div style={{ fontSize: 13, marginTop: 10, opacity: 0.85 }}>{tickets(l.tickets)} · hasta {usd(l.monto_max, Number.isInteger(l.monto_max) ? 0 : 2)} c/u</div>
+            <div style={{ fontSize: 13, marginTop: 10, opacity: 0.85 }}>{cupo(l.tickets, l.servicios_cupo ?? 0)} · hasta {usd(l.monto_max, Number.isInteger(l.monto_max) ? 0 : 2)} c/u</div>
             <div style={{ fontSize: 12, opacity: 0.7 }}>{l.servicios_texto}</div>
+            {l.ruta_club && <div style={{ fontSize: 12, marginTop: 6, fontWeight: 600 }}>Club: desde {l.ruta_club}</div>}
           </div>
         ))}
       </div>

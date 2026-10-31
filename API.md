@@ -97,7 +97,8 @@ Recarga los datos sintéticos y vuelve el reloj al 2026-10-31. Tarda ~1 min.
 ```json
 {"hoy": "2026-10-31", "habilitados": 312, "total": 500, "margen_bajada": 5,
  "niveles": [{"nivel": 0, "nombre": "Credirecto Inicial", "rango": "score < 40", "usuarios": 96,
-              "tickets": 1, "monto_max": 5.0, "servicios": ["estacionamiento"], "servicios_texto": "Estacionamiento"}],
+              "tickets": 1, "servicios_cupo": 0, "monto_max": 5.0, "servicios": ["estacionamiento"],
+              "servicios_texto": "Estacionamiento"}],
  "segmentos": [{"segmento": "Conductor diario", "descripcion": "paga estacionamiento 4+ días por semana", "usuarios": 60}],
  "semana": {"desde": "2026-10-25", "hasta": "2026-10-31", "subieron": 41, "bajaron": 12,
             "movimientos": [{"de": "Inicial", "a": "Básico", "usuarios": 19, "sube": true}]}}
@@ -131,7 +132,7 @@ Recarga los datos sintéticos y vuelve el reloj al 2026-10-31. Tarda ~1 min.
 {"user_id": "u_0142", "nombre": "María", "alias": "@maria.r",
  "habilitado": true, "habilitado_desde": "2026-06-02", "cohorte": "2026-06",
  "nivel": 2, "nivel_nombre": "Confiable", "segmento": "Puntual", "quincena": [15, 30],
- "club": "Caminante · Ruta Colonial", "saldo_wallet": 0.0036, "modo_recuperacion": false, "estado_mora": "al_dia",
+ "club": "Viajero · Ruta del Café", "saldo_wallet": 0.0036, "modo_recuperacion": false, "estado_mora": "al_dia",
  "trust_score": 76,
  "razones": [{"senal": "puntualidad", "nombre": "Puntualidad", "aporte": 38.0, "max": 40},
              {"senal": "friccion", "nombre": "Fricción", "aporte": -3.0, "max": -10}],
@@ -141,6 +142,11 @@ Recarga los datos sintéticos y vuelve el reloj al 2026-10-31. Tarda ~1 min.
                {"requisito": "dias", "nombre": "30 días en PagoDirecto", "ok": true, "detalle": null}],
  "tickets": {"total": 3, "usados": 1, "disponibles": 2, "monto_max": 10.0,
              "servicios": ["estacionamiento", "parquimetro", "peaje", "luz", "internet", "telefono"]},
+ "servicios_cupo": {"total": 1, "usados": 0, "disponibles": 1, "cubre": ["luz", "internet", "telefono"]},
+ "club_puntos": {"nombre": "Club PagoDirecto", "nivel_club": 2, "nivel_nombre": "Viajero", "ruta": "Ruta del Café",
+                 "texto": "Viajero · Ruta del Café", "puntos": 4800, "puntos_credirecto": 650,
+                 "siguiente": {"nivel_club": 3, "nivel_nombre": "Conocedor", "ruta": "Ruta de Paria", "desde": 11000, "faltan": 6200},
+                 "puntos_por_pago": 100, "multiplicador": 1.5},
  "progreso": {"siguiente_nivel": 3, "siguiente_nombre": "Premium", "faltan_puntos": 4,
               "repagos_hechos": 5, "repagos_requeridos": 10, "faltan_repagos": 5},
  "racha": {"pagos": 2, "meta": 3, "quedan_dias": 4, "multiplicador": false},
@@ -152,18 +158,26 @@ Recarga los datos sintéticos y vuelve el reloj al 2026-10-31. Tarda ~1 min.
    "descuento_si_anticipa": 0.11, "gracia_hasta": "2026-11-09",
    "comision_si_atrasa": 0.25, "oferta_quincena": "2026-11-15"}],
  "decisiones": {
-   "prestar": {"tickets": 2, "plazo_dias": 15, "monto_max": 10.0, "servicios": ["estacionamiento", "..."], "motivo": null},
+   "prestar": {"tickets": 2, "servicios_cupo": 1, "plazo_dias": 15, "monto_max": 10.0, "servicios": ["estacionamiento", "..."], "motivo": null},
    "comunicar": {"tipo": "recordatorio", "nombre": "Recordatorio", "mensaje": "Tu cuota de Credirecto vence en 2 días. Paga tu cuota y tu ticket vuelve a estar disponible.",
                  "canal": "push", "fecha": "2026-11-05", "oferta_quincena": "2026-11-15"},
    "premiar": [{"tipo": "racha", "detalle": "+1 racha"}]},
  "notificaciones": [{"fecha": "2026-10-20", "tipo": "subida_nivel", "titulo": "Nuevo nivel",
-                     "mensaje": "¡Subiste a Credirecto Confiable! Ahora tienes 3 tickets y puedes pagar luz e internet.", "canal": "push"}],
+                     "mensaje": "¡Subiste a Credirecto Confiable! Ahora tienes 3 tickets y 1 pago de servicios para luz, internet y teléfono.", "canal": "push"}],
  "linea_de_tiempo": [{"fecha": "2026-10-31", "tipo": "Ticket", "texto": "Ticket · Estacionamiento C.C. El Tolón · cuota 7 nov", "monto": 4.79}]}
 ```
 - `prestar.motivo` ∈ `null | "no_habilitado" | "modo_recuperacion" | "deuda_vencida"`. `comunicar` puede ser `null`.
 - `oferta_quincena`: fecha a la que se puede mover la cuota (o `null`). `progreso` es `null` en Premium o no habilitado.
 - `linea_de_tiempo[].tipo` ∈ `Ticket, Pago, Mensaje, Nivel, Comisión, Mora, Recarga` (más reciente primero, máx. 40).
 - `premiar[].tipo` ∈ `racha, multiplicador, puntos (trae "puntos"), descuento_nivel (trae "monto"), subida_nivel (trae "nuevo_nivel")`.
+- `tickets` es el cupo de movilidad (estacionamiento, parquímetro, peaje); `servicios_cupo` el de facturas (luz, internet, teléfono, seguro).
+  `tickets.servicios` sigue listando todo lo que cubre el nivel.
+- `club` es el texto del nivel y la ruta del Club ("Viajero · Ruta del Café"); `club_puntos` trae el detalle.
+  `club_puntos.puntos_credirecto`: la parte de esos puntos que vino de cuotas de Credirecto.
+- `progreso` trae además `ruta_requerida` y `faltan_pts_club`: la ruta del Club que exige el siguiente nivel.
+- `beneficios` (motor de beneficios del Club): `{"ruta", "factor" (0–1,5), "pausa", "razones": [{"senal", "efecto", "texto"}],
+  "beneficios": [{"tipo": "walletback" | "tickets_gratis", "nombre", "unidad", "base", "personal", "estimado_mes"?}],
+  "a_tu_medida": {"tipo", "nombre", "detalle"} | null}`.
 
 ### `GET /config` / `PUT /config`  (vista 06)
 ```json
@@ -207,7 +221,8 @@ Body `{"user_id": "u_0142", "ticket_id": 4433, "monto": 4.79, "origen": "usuario
 {"aplicado": 4.68, "deuda_restante": 0.0,
  "comprobante": {"referencia": "CD-000418207", "fecha": "2026-11-04", "dias_antes": 3, "anticipado": true,
                  "cuota": 4.36, "gasto_admin": 0.44, "descuento": 0.11, "descuento_pct": 25, "comision": 0.0,
-                 "total": 4.68, "ahorro": 0.11, "racha_antes": 2, "racha_despues": 3, "ticket_disponible": true},
+                 "total": 4.68, "ahorro": 0.11, "racha_antes": 2, "racha_despues": 3, "ticket_disponible": true,
+                 "puntos_club": 150, "club": "Viajero · Ruta del Café"},
  "ticket": {...}, "usuario": {...}}
 ```
 `fallo_tecnico`: ticket a `pausa_tecnica`, vencimiento +2 días, sin cobro (`comprobante: null`).

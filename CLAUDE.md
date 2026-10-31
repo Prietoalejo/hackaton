@@ -39,21 +39,48 @@ Son HTML exportados de una herramienta de diseño. No se ejecutan tal cual:
 
 ## Reglas de negocio
 
-### Tickets (cómo ve el usuario su crédito)
-- **1 ticket = 1 pago a crédito** (un estacionamiento, un peaje, una recarga o una factura).
+### Tickets y pagos de servicios (cómo ve el usuario su crédito)
+- El crédito se da en **cupos, no en dinero**. Hay dos cupos por nivel:
+  - **Ticket** = 1 pago de movilidad a crédito (estacionamiento, parquímetro o peaje).
+  - **Pago de servicios** = 1 factura a crédito (luz, internet, teléfono o seguro).
 - El crédito **nunca** se muestra como cupo en bolívares. Los Bs solo aparecen en cuotas y comprobantes.
-- Un ticket se renueva cuando el usuario paga su cuota.
+- Un ticket o pago de servicios se renueva cuando el usuario paga su cuota.
 
-| Nivel | Score | Tickets | Máx. por ticket | Servicios |
-|---|---|---|---|---|
-| Credirecto Inicial | < 40 | 1 | $5 | Estacionamiento |
-| Credirecto Básico | 40–59 | 2 | $5 | + parquímetros y peajes |
-| Credirecto Confiable | 60–79 | 3 | $10 | + luz, internet y teléfono |
-| Credirecto Premium | ≥ 80 | 4 | $20 | + seguros |
+| Nivel | Score | Tickets | Pagos de servicios | Máx. por pago | Cubre |
+|---|---|---|---|---|---|
+| Credirecto Inicial | < 40 | 1 | — | $5 | Estacionamiento |
+| Credirecto Básico | 40–59 | 2 | — | $5 | + parquímetros y peajes |
+| Credirecto Confiable | 60–79 | 3 | 1 | $10 | + luz, internet y teléfono |
+| Credirecto Premium | ≥ 80 | 5 | 3 | $20 | + seguros |
 
 - Para **bajar** de nivel, el score debe quedar 5 puntos bajo el umbral (margen).
 - Si un pago supera el máximo por ticket: el ticket cubre hasta el máximo y el resto se paga con saldo.
-- Los nombres de nivel del Club ("Nivel Turista", rutas, racha) son otra cosa; no mezclarlos.
+- **Cada nivel de Credirecto está amarrado a una ruta del Club PagoDirecto**: para tenerlo hay que haber
+  desbloqueado esa ruta con puntos del Club (además del score y los repagos). El nivel final es el menor de los tres.
+
+| Club PagoDirecto (nivel · ruta) | Pts para desbloquear | Nivel de Credirecto que permite |
+|---|---|---|
+| Turista · Ruta Colonial | 0 | Inicial |
+| Caminante · Ruta Falcón | 1.000 | Básico |
+| Viajero · Ruta del Café | 4.000 | Confiable |
+| Conocedor · Ruta de Paria | 11.000 | Premium |
+| Explorador · Ruta de Los Llanos | 24.000 | Premium |
+| Trotamundo · Ruta Andina | 45.000 | Premium |
+| Baqueano · Ruta del Zulia | 76.000 | Premium |
+
+  El Club anuncia 10 niveles (de Turista a Leyenda); la app muestra hoy estos 7. Puntos del Club: 100 por pago
+  (servicio o cuota a tiempo, ×1,5 si se paga antes) y +500 al completar una ruta.
+
+### Motor de beneficios del Club
+El beneficio de cada ruta **no es fijo**: la ruta da una base (walletback % y tickets gratis de estacionamiento
+al mes; valores supuestos, de 1 % / 0 en Turista a 4 % / 4 en Baqueano) y el motor la multiplica por un
+factor personal, acotado entre 50 % y 150 %:
+- \+ paga a tiempo ≥ 95 % (−15 % si < 80 %), + paga antes ≥ 50 % de sus cuotas (15 %), + racha completa (10 %),
+  \+ Trust Score ≥ 80 (−10 % si < 40), − segmento En riesgo (30 %). Modo recuperación: beneficios en pausa (0 %).
+- Además, un beneficio **a su medida** por segmento: Conductor diario +1 ticket gratis, Puntual 1 cuota al mes
+  sin gasto administrativo, Nuevo walletback doble el primer mes, En enfriamiento walletback doble en el
+  próximo pago de servicio, En riesgo "recupera tu beneficio completo", quincenero cuotas en su quincena.
+- Premia lo que reduce el riesgo, nunca usar más crédito. Pesos y topes editables en Configuración.
 
 ### Trust Score (0–100)
 Puntualidad 40 + Constancia 20 + Antigüedad 15 + Anticipados 15 + Verificación 10 − Fricción (hasta 10). Todos los pesos son configurables.
@@ -69,12 +96,14 @@ Puntualidad 40 + Constancia 20 + Antigüedad 15 + Anticipados 15 + Verificación
 Cédula verificada + vehículo verificado + 2 pagos de servicios a tiempo + 30 días en PagoDirecto (todo configurable).
 
 ### Premios
-Pagar antes del vencimiento: +1 en la racha y puntos ×1,5 en el Club.
+Credirecto **no tiene puntos propios**: suma a los puntos y la racha que ya existen en el **Club PagoDirecto**
+(Hitos / Beneficios / Puntos, progreso de la ruta). Cuota pagada a tiempo: +100 pts del Club y +1 en la racha.
+Pagar antes del vencimiento (o con la racha completa): pts ×1,5.
 
 ## Datos de ejemplo (coherentes en todas las pantallas)
 - Tasa: **1 USD = Bs 380**.
 - 500 usuarios: 312 habilitados (Inicial 96, Básico 104, Confiable 78, Premium 34) y 188 en espera.
-- Usuaria de ejemplo **u_0142 · María**: score 76, Confiable, segmento Puntual, quincena 15 y 30, 2 de 3 tickets disponibles, racha 2 de 3, Club "Caminante · Ruta Colonial".
+- Usuaria de ejemplo **u_0142 · María**: score 76, Confiable, segmento Puntual, quincena 15 y 30, 2 de 3 tickets disponibles, racha 2 de 3, Club "Viajero · Ruta del Café".
 - Su cuota: Ticket 1 · Estacionamiento C.C. El Tolón · vence 15 nov · Bs 1.821,02 (Bs 1.655,47 + gasto adm. Bs 165,55).
 
 ## Índice de pantallas
@@ -135,8 +164,11 @@ Las funciones de `motor/` son puras: reciben datos y la fecha `hoy`, no tocan la
 - **Mensajes** (uno por día, por prioridad): aviso de mora, comisión, gracia, recordatorio (2 días antes),
   mover a quincena (el día del uso), falta poco para subir (el día que paga y queda a un repago).
   Van por el canal preferido del usuario; el aviso de mora va por push y Wisi.
+- **Cupos**: `tickets` (movilidad) y `servicios_cupo` (facturas) se cuentan por separado (`config.cupo_de`).
+  Sin cupo de servicios libre el rechazo es `servicios_en_uso`.
 - **Premios**: racha (pagos a tiempo en la semana, meta 3 → ×1,5), ×1,5 por pagar antes, puntos del
-  Club (100 por pago), descuento por nivel, subida de nivel. Usar el crédito no se premia.
+  Club PagoDirecto (100 por pago; son los mismos puntos del Club, no un sistema nuevo), descuento por nivel,
+  subida de nivel. Usar el crédito no se premia.
 - **Regla actual vs. Credirecto**: el generador simula los mismos usuarios con la regla actual (2 tickets,
   7 días, solo estacionamiento, para todos) y guarda sus métricas en `metricas_regla_actual`.
   Credirecto empieza a decidir el 7 sep 2026.
