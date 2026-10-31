@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Modo recuperación</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+.s{width:390px;background:#F3F4F8;font-family:'Outfit',system-ui,sans-serif;color:#15152B;position:relative;overflow:hidden}
+.cb{width:50px;height:50px;border-radius:50%;background:#fff;border:0;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(21,21,43,.07);color:#15152B;padding:0}
+.card{background:#fff;border-radius:28px;box-shadow:0 8px 28px rgba(21,21,43,.06)}
+.mut{color:#6B6B80}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.nav{position:absolute;left:0;right:0;bottom:0;height:92px;background:#fff;border-radius:28px 28px 0 0;display:grid;grid-template-columns:1fr 1fr 96px 1fr 1fr;align-items:center;box-shadow:0 -6px 24px rgba(21,21,43,.06);padding:0 6px 10px}
+.ni{display:flex;flex-direction:column;align-items:center;gap:4px;font:500 13px 'Outfit',sans-serif;color:#6B6B80;text-decoration:none}
+.masc{position:absolute;left:50%;bottom:40px;transform:translateX(-50%);width:84px;height:84px;border-radius:50%;border:2px dashed #B9BCCB;background:#F3F4F8;display:flex;align-items:center;justify-content:center;font:500 11px 'Outfit',sans-serif;color:#6B6B80}
+</style>
+</helmet>
+<div class="s" style="height: 1080px; padding: 22px 0 120px">
+  <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 20px">
+    <div style="display: flex; align-items: center; gap: 10px">
+      <div style="width: 54px; height: 54px; border-radius: 50%; background: #E3E5EC; border: 3px solid #fff; box-shadow: 0 0 0 2px #D5D8E1; display: flex; align-items: center; justify-content: center; color: #8A8DA0"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-4 4-6 8-6s7 2 8 6"></path></svg></div>
+      <div><div style="font-weight: 700; font-size: 19px">@maria.r</div><div style="font-size: 13px; font-weight: 600; color: #8A4B00; background: #FFF1D6; padding: 3px 10px; border-radius: 999px; display: inline-block; margin-top: 2px">Modo recuperación</div></div>
+    </div>
+    <button class="cb" aria-label="Soporte"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 14v-2a8 8 0 0116 0v2"></path><rect x="3" y="14" width="4" height="6" rx="2"></rect><rect x="17" y="14" width="4" height="6" rx="2"></rect></svg></button>
+  </div>
+
+  <div style="padding: 20px 16px 0">
+    <div class="card" style="padding: 22px 20px">
+      <div class="mut" style="font-size: 15px">Deuda pendiente de Credirecto</div>
+      <div style="font-size: 38px; font-weight: 700">Bs 1.916,02</div>
+      <div class="mut" style="font-size: 13px">Cuota del Ticket 1 Bs 1.821,02 + comisión por desfase Bs 95,00</div>
+      <div style="display: flex; gap: 12px; align-items: center; background: #F3F4F8; border-radius: 20px; padding: 14px; margin-top: 16px">
+        <span style="width: 40px; height: 40px; border-radius: 14px; background: #fff; color: #E0124F; display: flex; align-items: center; justify-content: center; flex: none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="6" width="18" height="14" rx="3"></rect><path d="M16 13h2"></path><path d="M7 3h10"></path></svg></span>
+        <span style="font-size: 15px; line-height: 1.35">Cada recarga paga primero tu deuda; lo que sobre queda en tu wallet.</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding: 14px 16px 0">
+    <div class="card" style="padding: 20px">
+      <div style="font-weight: 700; font-size: 17px">Para seguir tu día</div>
+      <div class="row" style="margin-top: 12px; font-size: 15px"><span>Deuda Credirecto</span><span>Bs 1.916,02</span></div>
+      <div class="row" style="margin-top: 8px; font-size: 15px"><span>Estacionamiento en curso · Sambil</span><span>Bs 1.520,00</span></div>
+      <div class="row mut" style="margin-top: 8px; font-size: 15px"><span>Tu saldo actual</span><span>− Bs 1,38</span></div>
+      <div style="border-top: 1px dashed #D5D8E1; margin-top: 14px; padding-top: 14px; font-size: 16px; line-height: 1.35">Recarga al menos <b style="font-size: 19px">Bs 3.434,64</b> para saldar tu deuda y pagar tu estacionamiento.</div>
+      <button style="width: 100%; margin-top: 16px; height: 56px; border: 0; border-radius: 999px; background: #FF1F5A; color: #fff; font: 700 19px 'Outfit',sans-serif; box-shadow: 0 10px 24px rgba(255,31,90,.28)">Recargar Bs 3.434,64</button>
+      <button style="width: 100%; margin-top: 10px; height: 50px; border: 0; border-radius: 999px; background: #E8EAF0; color: #15152B; font: 600 16px 'Outfit',sans-serif">Recargar otro monto</button>
+    </div>
+  </div>
+
+  <div style="padding: 14px 16px 0">
+    <div style="display: flex; gap: 12px; align-items: center; background: #EAF0FD; border-radius: 24px; padding: 16px">
+      <span style="width: 44px; height: 44px; border-radius: 50%; background: #fff; color: #2F55C8; display: flex; align-items: center; justify-content: center; flex: none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 16V11l2-5h10l2 5v5"></path><path d="M3 16h18v3H3z"></path></svg></span>
+      <span style="font-size: 15px; line-height: 1.35; color: #1B2F6E"><b>Tranquila:</b> la salida de estacionamientos y los peajes siguen disponibles.</span>
+    </div>
+  </div>
+
+  <div style="padding: 14px 16px 0">
+    <div style="border-radius: 28px; padding: 20px; color: #fff; display: flex; gap: 14px; align-items: center; background: radial-gradient(110% 100% at 100% 120%,#C6F432 0%,rgba(150,200,20,.5) 28%,rgba(22,24,22,0) 64%),linear-gradient(160deg,#232623 0%,#121412 70%)">
+      <svg width="40" height="26" viewBox="0 0 30 20" fill="none" stroke="#C6F432" stroke-width="3.2" style="flex: none" aria-hidden="true"><rect x="2" y="5" width="15" height="11" rx="5.5"></rect><rect x="13" y="4" width="15" height="11" rx="5.5"></rect></svg>
+      <span><span style="display: block; font-size: 19px; font-weight: 700">Al pagar, recuperas tu crédito</span><span style="font-size: 14px; color: #D5D8CF">Tus 3 tickets vuelven en minutos.</span></span>
+    </div>
+  </div>
+
+  <nav class="nav" aria-label="Navegación principal">
+    <a href="#" class="ni" style="color: #E0124F"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 11l8-7 8 7v9H4z"></path></svg>Home</a>
+    <a href="#" class="ni"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"></rect><path d="M9 9h6M9 13h6M9 17h4"></path></svg>Movimientos</a>
+    <span></span>
+    <a href="#" class="ni"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"></path><path d="M9 8h6M9 12h6"></path></svg>Mis pagos</a>
+    <a href="#" class="ni"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>Menú</a>
+  </nav>
+  <div class="masc">Mascota</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1080}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

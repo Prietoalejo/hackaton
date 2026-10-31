@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Pago de estacionamiento · usar 1 ticket</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+.s{width:390px;background:#F3F4F8;font-family:'Outfit',system-ui,sans-serif;color:#15152B;position:relative;overflow:hidden}
+.cb{width:50px;height:50px;border-radius:50%;background:#fff;border:0;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(21,21,43,.07);color:#15152B;padding:0}
+.card{background:#fff;border-radius:28px;box-shadow:0 8px 28px rgba(21,21,43,.06)}
+.mut{color:#6B6B80}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.tk{border-radius:16px;padding:10px 6px 8px;text-align:center;font-size:13px}
+.ntc{position:relative;margin:8px -6px 6px}
+.ntc span{position:absolute;top:-7px;width:12px;height:12px;border-radius:50%;background:#fff}
+</style>
+</helmet>
+<div class="s" style="height: 844px; padding: 22px 0 0">
+  <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 20px">
+    <button class="cb" aria-label="Volver"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
+    <span style="font-size: 19px; font-weight: 600; color: #5D5D70">Pago de estacionamiento</span>
+    <button class="cb" aria-label="Soporte"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 14v-2a8 8 0 0116 0v2"></path><rect x="3" y="14" width="4" height="6" rx="2"></rect><rect x="17" y="14" width="4" height="6" rx="2"></rect></svg></button>
+  </div>
+
+  <div style="padding: 18px 16px 0">
+    <div class="card" style="padding: 18px 20px">
+      <div style="display: flex; gap: 14px; align-items: center">
+        <span style="width: 50px; height: 50px; border-radius: 16px; background: #FFE8EF; color: #E0124F; display: flex; align-items: center; justify-content: center; flex: none"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 16V11l2-5h10l2 5v5"></path><path d="M3 16h18v3H3z"></path></svg></span>
+        <div><div style="font-weight: 700; font-size: 17px">C.C. Sambil Chacao</div><div class="mut" style="font-size: 13px">Ticket ID: 0DFF7B1 · {{tiempo}}</div></div>
+      </div>
+      <div style="text-align: center; margin-top: 12px"><div class="mut" style="font-size: 14px">Monto del estacionamiento</div><div style="font-size: 38px; font-weight: 700">{{monto}}</div></div>
+    </div>
+  </div>
+
+  <div style="padding: 12px 16px 0">
+    <div class="card" style="padding: 18px 20px">
+      <div style="display: flex; align-items: center; gap: 8px"><svg width="26" height="18" viewBox="0 0 30 20" fill="none" stroke="#8CC20B" stroke-width="3.2" aria-hidden="true"><rect x="2" y="5" width="15" height="11" rx="5.5"></rect><rect x="13" y="4" width="15" height="11" rx="5.5"></rect></svg><span style="font-size: 20px; font-weight: 700">Usar 1 ticket</span></div>
+      <div style="font-size: 15px; margin-top: 4px">Este pago usa 1 de tus 2 tickets disponibles.</div>
+
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 14px">
+        <div class="tk" style="background: #E6E8EE; color: #4A4A5E"><div style="font-size: 11px; font-weight: 600; letter-spacing: .06em">TICKET 1</div><div class="ntc" style="border-top: 2px dashed #C2C5D0" aria-hidden="true"><span style="left: -6px"></span><span style="right: -6px"></span></div><b>Usado</b></div>
+        <div class="tk" style="background: #121412; color: #C6F432; box-shadow: 0 0 0 3px #FF1F5A"><div style="font-size: 11px; font-weight: 600; letter-spacing: .06em">TICKET 2</div><div class="ntc" style="border-top: 2px dashed rgba(198,244,50,.4)" aria-hidden="true"><span style="left: -6px"></span><span style="right: -6px"></span></div><b>Se usa ahora</b></div>
+        <div class="tk" style="background: linear-gradient(160deg,#D4F95A 0%,#B5E61D 100%); color: #121412"><div style="font-size: 11px; font-weight: 600; letter-spacing: .06em">TICKET 3</div><div class="ntc" style="border-top: 2px dashed rgba(18,20,18,.3)" aria-hidden="true"><span style="left: -6px"></span><span style="right: -6px"></span></div><b>Disponible</b></div>
+      </div>
+
+      <sc-if value="{{dentro}}" hint-placeholder-val="{{true}}">
+        <div class="row" style="margin-top: 16px"><span>Lo cubre tu ticket</span><b style="font-size: 17px">Bs 1.520,00</b></div>
+        <div class="mut" style="font-size: 13px; margin-top: 8px; line-height: 1.4">Tu ticket cubre hasta Bs 3.800,00. Su cuota vence el 15 nov, tu día de cobro.</div>
+      </sc-if>
+      <sc-if value="{{excede}}" hint-placeholder-val="{{false}}">
+        <div style="display: flex; gap: 10px; align-items: flex-start; background: #F6FCE3; border-radius: 16px; padding: 10px 12px; margin-top: 14px">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3B6B00" stroke-width="2" style="flex: none; margin-top: 1px" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16v.5"></path></svg>
+          <span style="font-size: 14px; line-height: 1.35; color: #2C4F00">Tu ticket cubre hasta Bs 3.800,00; el resto lo pagas con tu saldo.</span>
+        </div>
+        <div class="row" style="margin-top: 12px; font-size: 15px"><span>Cubre tu ticket</span><b>Bs 3.800,00</b></div>
+        <div class="row" style="margin-top: 6px; font-size: 15px"><span>Pagas con tu saldo</span><b>Bs 1.140,00</b></div>
+        <div class="row" style="border-top: 1px dashed #D5D8E1; margin-top: 10px; padding-top: 10px"><span style="font-weight: 600">Total</span><b style="font-size: 18px">Bs 4.940,00</b></div>
+      </sc-if>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 16px; right: 16px; bottom: 30px; display: flex; flex-direction: column; gap: 10px">
+    <button style="height: 58px; border: 0; border-radius: 999px; background: #FF1F5A; color: #fff; font: 700 19px 'Outfit',sans-serif; box-shadow: 0 10px 24px rgba(255,31,90,.3)">Pagar con ticket</button>
+    <button style="height: 52px; border: 0; border-radius: 999px; background: #E8EAF0; color: #15152B; font: 600 16px 'Outfit',sans-serif">Pagar con mi saldo</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"supera_maximo":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const x = !!(this.props.supera_maximo ?? false);
+    return {
+      excede: x, dentro: !x,
+      monto: x ? 'Bs 4.940,00' : 'Bs 1.520,00',
+      tiempo: x ? '9 h 40 min' : '3 h 20 min'
+    };
+  }
+}
+</script>
+</body>
+</html>

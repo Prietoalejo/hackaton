@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Notificaciones push</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+.n{display:flex;gap:12px;padding:14px;border-radius:24px;background:rgba(245,246,240,.82);backdrop-filter:blur(18px);color:#15152B;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.ic{width:40px;height:40px;border-radius:11px;background:#FF1F5A;color:#fff;display:flex;align-items:center;justify-content:center;font:800 22px 'Outfit',sans-serif;flex:none}
+.hd{display:flex;justify-content:space-between;font-size:13px;color:#4A4A5E}
+.tt{font-weight:700;font-size:15px;margin-top:2px}
+.bd{font-size:15px;line-height:1.3;margin-top:2px}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; font-family: 'Outfit',system-ui,sans-serif; color: #fff; background: radial-gradient(70% 45% at 100% 30%, rgba(198,244,50,.55) 0%, rgba(198,244,50,0) 70%), radial-gradient(80% 50% at 0% 95%, rgba(255,31,90,.5) 0%, rgba(255,31,90,0) 70%), linear-gradient(180deg,#141614 0%,#1E2A12 60%,#121412 100%)">
+  <div style="text-align: center; padding-top: 74px">
+    <div style="font-size: 19px; font-weight: 500; opacity: .9">Jueves, 12 de noviembre</div>
+    <div style="font-size: 92px; font-weight: 300; line-height: 1; margin-top: 4px; letter-spacing: -.02em">9:41</div>
+  </div>
+  <div style="position: absolute; left: 12px; right: 12px; bottom: 120px; display: flex; flex-direction: column; gap: 10px">
+    <div class="n">
+      <span class="ic">p</span>
+      <div style="flex: 1"><div class="hd"><span>PagoDirecto</span><span>ahora</span></div><div class="tt">Credirecto</div><div class="bd">Tu cuota de Credirecto vence en 2 días. Paga tu cuota y tu ticket vuelve a estar disponible.</div></div>
+    </div>
+    <div class="n">
+      <span class="ic">p</span>
+      <div style="flex: 1"><div class="hd"><span>PagoDirecto</span><span>hace 2 h</span></div><div class="tt">Nuevo nivel</div><div class="bd">¡Subiste a Credirecto Confiable! Ahora tienes 3 tickets y puedes pagar luz e internet.</div></div>
+    </div>
+    <div class="n">
+      <span class="ic">p</span>
+      <div style="flex: 1"><div class="hd"><span>PagoDirecto</span><span>ayer</span></div><div class="tt">Credirecto</div><div class="bd">Te falta 1 pago a tiempo para ganar un ticket más.</div></div>
+    </div>
+  </div>
+  <div style="position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); width: 134px; height: 5px; border-radius: 3px; background: rgba(255,255,255,.85)" aria-hidden="true"></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

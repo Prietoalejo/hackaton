@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Racha de pagos</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+.s{width:390px;background:#F3F4F8;font-family:'Outfit',system-ui,sans-serif;color:#15152B;position:relative;overflow:hidden}
+.cb{width:50px;height:50px;border-radius:50%;background:#fff;border:0;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(21,21,43,.07);color:#15152B;padding:0}
+.card{background:#fff;border-radius:28px;box-shadow:0 8px 28px rgba(21,21,43,.06)}
+.mut{color:#6B6B80}
+.dy{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600}
+.pc{width:136px;flex:none;border-radius:28px;padding:16px 12px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px}
+.rb{margin-top:8px;height:36px;padding:0 16px;border-radius:999px;border:0;font:600 14px 'Outfit',sans-serif}
+</style>
+</helmet>
+<div class="s" style="height: 900px; padding: 22px 0 0">
+  <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 20px">
+    <button class="cb" aria-label="Volver"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
+    <span style="font-size: 19px; font-weight: 600; color: #5D5D70">Racha de pagos</span>
+    <button class="cb" aria-label="Soporte"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 14v-2a8 8 0 0116 0v2"></path><rect x="3" y="14" width="4" height="6" rx="2"></rect><rect x="17" y="14" width="4" height="6" rx="2"></rect></svg></button>
+  </div>
+
+  <div style="padding: 20px 16px 0">
+    <div style="border-radius: 30px; padding: 24px 20px 22px; color: #fff; position: relative; background: linear-gradient(135deg,#0E0F2A 0%,#3A1440 45%,#A3165E 80%,#FF1F5A 100%); box-shadow: 0 14px 34px rgba(58,20,64,.3)">
+      <div style="display: flex; align-items: center; gap: 10px">
+        <span style="font-size: 84px; font-weight: 700; line-height: 1">2</span>
+        <span style="font-size: 24px; font-weight: 600; line-height: 1.1">de 3<br>pagos</span>
+      </div>
+      <div style="position: absolute; right: 18px; top: 18px; width: 92px; height: 92px; border-radius: 50%; border: 2px dashed rgba(255,255,255,.45); display: flex; align-items: center; justify-content: center; font-size: 11px; color: #F2E6EE">Mascota</div>
+      <div style="display: flex; justify-content: space-between; margin-top: 22px">
+        <span class="dy" style="background: #FF1F5A"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></span>
+        <span class="dy" style="background: rgba(255,255,255,.14); color: rgba(255,255,255,.6); text-decoration: line-through">M</span>
+        <span class="dy" style="background: #FF1F5A"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></span>
+        <span class="dy" style="background: #fff; color: #15152B">J</span>
+        <span class="dy" style="background: rgba(255,255,255,.14); color: rgba(255,255,255,.75)">V</span>
+        <span class="dy" style="background: rgba(255,255,255,.14); color: rgba(255,255,255,.75)">S</span>
+        <span class="dy" style="background: rgba(255,255,255,.14); color: rgba(255,255,255,.75)">D</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-top: 16px; font-size: 15px"><span>Racha de 7 días</span><span style="font-weight: 700">2 / 3 pagos</span></div>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 10px" aria-hidden="true">
+        <span style="height: 8px; border-radius: 4px; background: #fff"></span><span style="height: 8px; border-radius: 4px; background: #fff"></span><span style="height: 8px; border-radius: 4px; background: rgba(255,255,255,.3)"></span>
+      </div>
+      <div style="font-size: 15px; font-weight: 600; margin-top: 14px">Completa 3 pagos y activa el ×1,5</div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 16px 16px 0">
+    <div class="card" style="padding: 14px; display: flex; gap: 10px; align-items: center"><span style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid #FFB3C7; color: #E0124F; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; flex: none">×1,5</span><span><span class="mut" style="display: block; font-size: 13px">Multiplicador</span><span style="font-weight: 700">Te falta 1 pago</span></span></div>
+    <div class="card" style="padding: 14px; display: flex; gap: 10px; align-items: center"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#E0124F" stroke-width="1.8" style="flex: none" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg><span><span class="mut" style="display: block; font-size: 13px">El reloj corre</span><span style="font-weight: 700">Quedan 4 días</span></span></div>
+  </div>
+
+  <div style="padding: 24px 20px 0"><div style="font-size: 22px; font-weight: 700">Paga y entra en racha</div><div class="mut" style="font-size: 14px">Cualquiera de estos pagos suma</div></div>
+  <div style="display: flex; gap: 12px; padding: 14px 0 0 16px">
+    <div class="pc" style="color: #fff; background: radial-gradient(120% 70% at 90% 115%,#C6F432 0%,rgba(150,200,20,.5) 30%,rgba(22,24,22,0) 64%),linear-gradient(160deg,#232623 0%,#121412 70%); box-shadow: 0 8px 22px rgba(18,20,18,.22)">
+      <svg width="40" height="26" viewBox="0 0 30 20" fill="none" stroke="#C6F432" stroke-width="3.2" aria-hidden="true"><rect x="2" y="5" width="15" height="11" rx="5.5"></rect><rect x="13" y="4" width="15" height="11" rx="5.5"></rect></svg>
+      <span style="font-weight: 700; font-size: 16px; margin-top: 4px">Cuota Credirecto</span>
+      <span style="font-size: 18px; font-weight: 700; color: #D7F86E">Bs 1.821,02</span>
+      <span style="font-size: 12px; color: #D5D8CF">Ticket 1 · vence 15 nov</span>
+      <button class="rb" style="background: #FF1F5A; color: #fff; font-weight: 700">Pagar</button>
+    </div>
+    <div class="pc card">
+      <span style="font-size: 22px; font-weight: 800; color: #1A9BDB; font-style: italic; height: 34px">movistar</span>
+      <span style="font-weight: 700; font-size: 16px">04149205479</span>
+      <span class="mut" style="font-size: 13px">Movistar</span>
+      <button class="rb" style="background: #EEF0F5; color: #1C2C6B; margin-top: 22px">Recargar</button>
+    </div>
+    <div class="pc card">
+      <span style="font-size: 20px; font-weight: 800; color: #B0105E; letter-spacing: .04em; height: 34px">DIGITEL</span>
+      <span style="font-weight: 700; font-size: 16px">Digitel</span>
+      <span class="mut" style="font-size: 13px">Prepago</span>
+      <button class="rb" style="background: #EEF0F5; color: #1C2C6B; margin-top: 22px">Recargar</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

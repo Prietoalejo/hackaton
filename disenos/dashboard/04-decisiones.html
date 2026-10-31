@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Ritmo · Decisiones</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#1F4FB8}a:hover{color:#163B8C}
+.wrap{display:flex;flex-wrap:wrap;gap:24px;padding:24px;background:#F3F4F8;font-family:'Outfit',system-ui,sans-serif;color:#15152B;min-height:1420px}
+.side{flex:0 0 248px;background:#fff;border:1px solid #E3E5EA;border-radius:12px;padding:22px 14px;display:flex;flex-direction:column;gap:6px;align-self:flex-start}
+.side a{display:flex;gap:12px;align-items:center;height:48px;padding:0 16px;border-radius:6px;color:#4A4A5E;text-decoration:none;font-weight:500;font-size:15px}
+.side a.on{background:#EEF0F3;color:#15152B;font-weight:600}
+.main{flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:20px}
+.card{background:#fff;border:1px solid #E3E5EA;border-radius:12px;padding:22px 24px}
+.lbl{font-size:13px;color:#6B6B80;font-weight:500}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:20px}
+.tb{width:100%;border-collapse:collapse;font-size:15px;min-width:560px}
+.tb th{text-align:left;font-size:13px;color:#6B6B80;font-weight:500;padding:8px 10px;border-bottom:1px solid #E6E8EE}
+.tb td{padding:12px 10px;border-bottom:1px solid #F0F1F5}
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:3px 10px;border-radius:6px}
+@media (max-width:760px){.side{flex:1 1 100%}.two{grid-template-columns:1fr}}
+</style>
+</helmet>
+<div class="wrap">
+  <nav class="side" aria-label="Vistas de Ritmo">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 4px 10px 18px">
+      <span style="width: 42px; height: 42px; border-radius: 8px; background: #15152B; display: flex; align-items: center; justify-content: center"><svg width="26" height="18" viewBox="0 0 30 20" fill="none" stroke="#C6F432" stroke-width="3.2" aria-hidden="true"><rect x="2" y="5" width="15" height="11" rx="5.5"></rect><rect x="13" y="4" width="15" height="11" rx="5.5"></rect></svg></span>
+      <span><span style="display: block; font-weight: 800; font-size: 19px">Ritmo</span><span class="lbl">· Credirecto</span></span>
+    </div>
+    <a href="R1-Resumen.dc.html">Resumen</a>
+    <a href="R2-Cohortes.dc.html">Cohortes</a>
+    <a href="R3-Segmentos.dc.html">Segmentos y niveles</a>
+    <a href="R4-Decisiones.dc.html" class="on">Decisiones</a>
+    <a href="R5-Usuarios.dc.html">Usuarios</a>
+    <a href="R6-Configuracion.dc.html">Configuración</a>
+    <div style="margin-top: 20px; background: #F3F4F8; border-radius: 10px; padding: 14px"><div class="lbl">Reloj de demo</div><div style="font-weight: 700; margin-top: 2px">Sáb 31 oct 2026</div><div class="lbl" style="margin-top: 6px">1 USD = Bs 380,00</div></div>
+  </nav>
+
+  <main class="main">
+    <div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center">
+      <div><h1 style="margin: 0; font-size: 30px; font-weight: 700">Decisiones</h1><div class="lbl" style="font-size: 15px">Prestar, habilitar, comunicar y premiar · semana del 25 al 31 oct</div></div>
+    </div>
+
+    <div class="two">
+      <section class="card">
+        <div style="display: flex; justify-content: space-between"><h2 style="margin: 0; font-size: 20px">Solicitudes de crédito</h2><b>1.284</b></div>
+        <div style="display: flex; height: 18px; border-radius: 9px; overflow: hidden; gap: 3px; margin-top: 16px" aria-hidden="true">
+          <span style="width: 81.5%; background: #4D7C0F"></span><span style="width: 11.1%; background: #3F6212"></span><span style="flex: 1; background: #B42318"></span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 14px">
+          <div><div class="lbl">Aprobadas</div><div style="font-size: 24px; font-weight: 700">1.046</div><div class="lbl">81,5 %</div></div>
+          <div><div class="lbl">Parciales (ticket + saldo)</div><div style="font-size: 24px; font-weight: 700">142</div><div class="lbl">11,1 %</div></div>
+          <div><div class="lbl">Rechazadas</div><div style="font-size: 24px; font-weight: 700">96</div><div class="lbl">7,5 %</div></div>
+        </div>
+        <div style="font-weight: 600; margin-top: 20px">Motivos de rechazo</div>
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px">
+          <sc-for list="{{reasons}}" as="r" hint-placeholder-count="4">
+            <div><div style="display: flex; justify-content: space-between; font-size: 14px"><span>{{r.name}}</span><b>{{r.n}}</b></div><div style="height: 8px; border-radius: 4px; background: #F3F4F8; margin-top: 4px"><div style="height: 100%; border-radius: 4px; background: #B42318; width: {{r.pct}}"></div></div></div>
+          </sc-for>
+        </div>
+      </section>
+
+      <section class="card">
+        <div style="display: flex; justify-content: space-between"><h2 style="margin: 0; font-size: 20px">Habilitaciones</h2><span class="pill" style="background: #EEF4E4; color: #3F6212">+23 esta semana</span></div>
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 14px">
+          <sc-for list="{{enabled}}" as="e" hint-placeholder-count="4">
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #F3F4F8; border-radius: 8px; padding: 10px 14px; font-size: 14px"><span><b>{{e.id}}</b> · {{e.name}}</span><span class="lbl">{{e.when}} · {{e.level}}</span></div>
+          </sc-for>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-top: 18px"><span style="font-weight: 600">Qué les falta a los 188 en espera</span></div>
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px">
+          <sc-for list="{{waiting}}" as="w" hint-placeholder-count="4">
+            <div><div style="display: flex; justify-content: space-between; font-size: 14px"><span>{{w.name}}</span><b>{{w.n}}</b></div><div style="height: 8px; border-radius: 4px; background: #F3F4F8; margin-top: 4px"><div style="height: 100%; border-radius: 4px; background: #9AA0B4; width: {{w.pct}}"></div></div></div>
+          </sc-for>
+        </div>
+      </section>
+    </div>
+
+    <section class="card">
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px"><h2 style="margin: 0; font-size: 20px">Mensajes por momento y canal</h2><span class="lbl">674 enviados · 81 % abiertos</span></div>
+      <div style="overflow-x: auto; margin-top: 12px">
+        <table class="tb">
+          <thead><tr><th>Momento</th><th>Push</th><th>Wisi</th><th>Total</th><th>Pagan en 48 h</th></tr></thead>
+          <tbody>
+            <sc-for list="{{msgs}}" as="m" hint-placeholder-count="6">
+              <tr><td><b>{{m.name}}</b><div class="lbl">{{m.desc}}</div></td><td>{{m.push}}</td><td>{{m.wisi}}</td><td><b>{{m.total}}</b></td><td><span style="display: flex; align-items: center; gap: 8px"><span style="width: 90px; height: 8px; border-radius: 4px; background: #F3F4F8"><span style="display: block; height: 100%; border-radius: 4px; background: #4D7C0F; width: {{m.conv}}"></span></span>{{m.conv}}</span></td></tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section style="border-radius: 12px; padding: 22px 24px; color: #15152B; background: #FFFFFF; border: 1px solid #E3E5EA">
+      <h2 style="margin: 0; font-size: 20px">Premios</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; margin-top: 16px">
+        <div style="background: #F5F6F8; border-radius: 10px; padding: 16px"><div style="font-size: 13px; color: #6B6B80">Rachas activadas por pagos de Credirecto</div><div style="font-size: 32px; font-weight: 700; color: #3F6212">167</div></div>
+        <div style="background: #F5F6F8; border-radius: 10px; padding: 16px"><div style="font-size: 13px; color: #6B6B80">Multiplicadores ×1,5 activados</div><div style="font-size: 32px; font-weight: 700; color: #3F6212">94</div></div>
+        <div style="background: #F5F6F8; border-radius: 10px; padding: 16px"><div style="font-size: 13px; color: #6B6B80">Puntos del Club otorgados</div><div style="font-size: 32px; font-weight: 700; color: #3F6212">48.300</div></div>
+        <div style="background: #F5F6F8; border-radius: 10px; padding: 16px"><div style="font-size: 13px; color: #6B6B80">Descuentos por nivel</div><div style="font-size: 32px; font-weight: 700; color: #3F6212">212</div><div style="font-size: 13px; color: #6B6B80">$96,40 · Bs 36.632,00</div></div>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1420}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const pct = (n, max) => (n / max * 100).toFixed(0) + '%';
+    const R = [['Sin tickets disponibles', 38], ['Servicio no cubierto por su nivel', 27], ['Máximo de tickets en uso', 19], ['Deuda vencida', 12]];
+    const W = [['Verificar su vehículo', 81], ['Hacer 2 pagos de servicios a tiempo', 64], ['Verificar su cédula', 27], ['Menos de 30 días en PagoDirecto', 16]];
+    const M = [
+      ['Recordatorio', '2 días antes, a su hora habitual', 298, 114, '78%'],
+      ['Mover a quincena', 'cuota cae lejos de su recarga', 61, 25, '64%'],
+      ['Gracia', 'día 1 después del vencimiento', 30, 24, '71%'],
+      ['Comisión', 'al aplicar el 5 % por desfase', 12, 19, '58%'],
+      ['Aviso de mora', 'día 8, entra en modo recuperación', 6, 12, '39%'],
+      ['Falta poco para subir', 'a 1 repago de ganar un ticket más', 60, 13, '83%']
+    ];
+    return {
+      reasons: R.map(([name, n]) => ({ name, n, pct: pct(n, 38) })),
+      waiting: W.map(([name, n]) => ({ name, n, pct: pct(n, 81) })),
+      enabled: [
+        { id: 'u_0488', name: 'José', when: '31 oct', level: 'Inicial' },
+        { id: 'u_0311', name: 'Andrea', when: '30 oct', level: 'Inicial' },
+        { id: 'u_0457', name: 'Luis', when: '29 oct', level: 'Básico' },
+        { id: 'u_0102', name: 'Carla', when: '27 oct', level: 'Inicial' }
+      ],
+      msgs: M.map(([name, desc, push, wisi, conv]) => ({ name, desc, push, wisi, total: push + wisi, conv }))
+    };
+  }
+}
+</script>
+</body>
+</html>

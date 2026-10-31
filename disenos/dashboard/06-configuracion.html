@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Ritmo · Configuración</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#1F4FB8}a:hover{color:#163B8C}
+.wrap{display:flex;flex-wrap:wrap;gap:24px;padding:24px;background:#F3F4F8;font-family:'Outfit',system-ui,sans-serif;color:#15152B;min-height:1700px}
+.side{flex:0 0 248px;background:#fff;border:1px solid #E3E5EA;border-radius:12px;padding:22px 14px;display:flex;flex-direction:column;gap:6px;align-self:flex-start}
+.side a{display:flex;gap:12px;align-items:center;height:48px;padding:0 16px;border-radius:6px;color:#4A4A5E;text-decoration:none;font-weight:500;font-size:15px}
+.side a.on{background:#EEF0F3;color:#15152B;font-weight:600}
+.main{flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:20px}
+.card{background:#fff;border:1px solid #E3E5EA;border-radius:12px;padding:20px 22px}
+.lbl{font-size:13px;color:#6B6B80;font-weight:500}
+.groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.f{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 0;font-size:14px}
+.f input[type=number]{width:84px;height:38px;border:0;border-radius:12px;background:#F3F4F8;text-align:right;padding:0 10px;font:600 15px 'Outfit',sans-serif;color:#15152B}
+.f input[type=checkbox]{width:22px;height:22px;accent-color:#4D7C0F}
+.pp{background:#15152B;color:#fff;border:0;border-radius:6px;font:700 16px 'Outfit',sans-serif;height:48px;padding:0 24px;cursor:pointer}
+.dkb{background:#fff;color:#15152B;border:1px solid #D0D3DA;border-radius:6px;font:700 16px 'Outfit',sans-serif;height:48px;padding:0 24px;cursor:pointer}
+.ps{background:#EEF0F5;color:#15152B;border:0;border-radius:6px;font:600 14px 'Outfit',sans-serif;height:42px;padding:0 18px;cursor:pointer}
+.bot{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:20px}
+@media (max-width:760px){.side{flex:1 1 100%}.bot{grid-template-columns:1fr}}
+</style>
+</helmet>
+<div class="wrap">
+  <nav class="side" aria-label="Vistas de Ritmo">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 4px 10px 18px">
+      <span style="width: 42px; height: 42px; border-radius: 8px; background: #15152B; display: flex; align-items: center; justify-content: center"><svg width="26" height="18" viewBox="0 0 30 20" fill="none" stroke="#C6F432" stroke-width="3.2" aria-hidden="true"><rect x="2" y="5" width="15" height="11" rx="5.5"></rect><rect x="13" y="4" width="15" height="11" rx="5.5"></rect></svg></span>
+      <span><span style="display: block; font-weight: 800; font-size: 19px">Ritmo</span><span class="lbl">· Credirecto</span></span>
+    </div>
+    <a href="R1-Resumen.dc.html">Resumen</a>
+    <a href="R2-Cohortes.dc.html">Cohortes</a>
+    <a href="R3-Segmentos.dc.html">Segmentos y niveles</a>
+    <a href="R4-Decisiones.dc.html">Decisiones</a>
+    <a href="R5-Usuarios.dc.html">Usuarios</a>
+    <a href="R6-Configuracion.dc.html" class="on">Configuración</a>
+    <div style="margin-top: 20px; background: #F3F4F8; border-radius: 10px; padding: 14px"><div class="lbl">Reloj de demo</div><div style="font-weight: 700; margin-top: 2px">{{dateShort}}</div><div class="lbl" style="margin-top: 6px">1 USD = Bs 380,00</div></div>
+  </nav>
+
+  <main class="main">
+    <div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center">
+      <div><h1 style="margin: 0; font-size: 30px; font-weight: 700">Configuración</h1><div class="lbl" style="font-size: 15px">{{dirtyText}}</div></div>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap">
+        <button class="dkb" onClick="{{simulate}}">Simular</button>
+        <button class="pp" onClick="{{save}}">{{saveLabel}}</button>
+      </div>
+    </div>
+
+    <div class="groups">
+      <sc-for list="{{groups}}" as="g" hint-placeholder-count="8">
+        <section class="card">
+          <h2 style="margin: 0 0 6px; font-size: 17px">{{g.title}}</h2>
+          <sc-for list="{{g.fields}}" as="f" hint-placeholder-count="4">
+            <sc-if value="{{f.isNum}}" hint-placeholder-val="{{true}}">
+              <label class="f"><span>{{f.label}}</span><span style="display: flex; align-items: center; gap: 6px"><input type="number" value="{{f.val}}" step="{{f.step}}" onChange="{{f.set}}"><span class="lbl" style="width: 34px">{{f.unit}}</span></span></label>
+            </sc-if>
+            <sc-if value="{{f.isBool}}" hint-placeholder-val="{{false}}">
+              <label class="f"><span>{{f.label}}</span><input type="checkbox" checked="{{f.on}}" onChange="{{f.toggle}}"></label>
+            </sc-if>
+          </sc-for>
+        </section>
+      </sc-for>
+    </div>
+
+    <div class="bot">
+      <section style="border-radius: 12px; padding: 22px 24px; color: #15152B; background: #FFFFFF; border: 1px solid #E3E5EA">
+        <div style="display: flex; justify-content: space-between; align-items: center"><h2 style="margin: 0; font-size: 20px">Simulación · antes y después</h2><span style="font-size: 12px; color: #6B6B80">No se guarda</span></div>
+        <sc-if value="{{simIdle}}" hint-placeholder-val="{{false}}">
+          <div style="padding: 40px 10px; text-align: center; color: #6B6B80">Cambia parámetros y pulsa <b style="color: #3F6212">Simular</b> para ver el impacto en los mismos 500 usuarios.</div>
+        </sc-if>
+        <sc-if value="{{simLoading}}" hint-placeholder-val="{{false}}">
+          <div style="padding: 40px 10px; display: flex; flex-direction: column; align-items: center; gap: 10px; color: #6B6B80"><span style="width: 36px; height: 36px; border-radius: 50%; border: 4px solid #E3E5EA; border-top-color: #6B6B80"></span>Recalculando 500 scores…</div>
+        </sc-if>
+        <sc-if value="{{simReady}}" hint-placeholder-val="{{true}}">
+          <div style="display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; margin-top: 14px; font-size: 15px">
+            <span style="font-size: 12px; color: #6B6B80; padding: 8px 0">Métrica</span><span style="font-size: 12px; color: #6B6B80; padding: 8px 0">Antes</span><span style="font-size: 12px; color: #6B6B80; padding: 8px 0">Después</span><span style="font-size: 12px; color: #6B6B80; padding: 8px 0">Cambio</span>
+            <sc-for list="{{sim}}" as="r" hint-placeholder-count="4">
+              <span style="padding: 10px 0; border-top: 1px solid #E8EAEE">{{r.name}}</span><span style="padding: 10px 0; border-top: 1px solid #E8EAEE">{{r.a}}</span><span style="padding: 10px 0; border-top: 1px solid #E8EAEE; font-weight: 700">{{r.b}}</span><span style="padding: 10px 0; border-top: 1px solid #E8EAEE; font-weight: 700; color: {{r.c}}">{{r.d}}</span>
+            </sc-for>
+          </div>
+        </sc-if>
+      </section>
+
+      <section class="card">
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center">
+          <div><h2 style="margin: 0; font-size: 20px">Reloj de demo</h2><div style="font-size: 22px; font-weight: 700; margin-top: 4px">{{dateLong}}</div></div>
+          <div style="display: flex; gap: 8px"><button class="ps" onClick="{{plus1}}">+1 día</button><button class="ps" onClick="{{plus7}}">+7 días</button></div>
+        </div>
+        <div style="margin-top: 14px; background: #F5F6F8; border: 1px solid #E3E5EA; border-radius: 10px; padding: 14px 16px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; color: #15152B; height: 260px; overflow-y: auto" aria-live="polite">
+          <sc-for list="{{log}}" as="l" hint-placeholder-count="5">
+            <div style="padding: 4px 0; border-bottom: 1px solid #E8EAEE"><span style="color: #3F6212">{{l.t}}</span> {{l.m}}</div>
+          </sc-for>
+        </div>
+        <div class="lbl" style="margin-top: 8px">Worker de mora: comisiones aplicadas, créditos congelados, scores recalculados y usuarios habilitados.</div>
+      </section>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1700}}'>
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    this.defs = [
+      ['Pesos del score', [['wPun','Puntualidad',40,'pts'],['wCon','Constancia',20,'pts'],['wAnt','Antigüedad',15,'pts'],['wAnc','Anticipados',15,'pts'],['wVer','Verificación',10,'pts'],['wFri','Fricción máxima',-10,'pts']]],
+      ['Umbrales de nivel', [['uBas','Básico desde',40,'pts'],['uCon','Confiable desde',60,'pts'],['uPre','Premium desde',80,'pts'],['margen','Margen para bajar',5,'pts']]],
+      ['Tickets por nivel', [['tIni','Inicial',1,''],['tBas','Básico',2,''],['tCon','Confiable',3,''],['tPre','Premium',4,'']]],
+      ['Máximo por ticket', [['mIni','Inicial',5,'USD'],['mBas','Básico',5,'USD'],['mCon','Confiable',10,'USD'],['mPre','Premium',20,'USD']]],
+      ['Plazos máximos', [['pIni','Inicial',7,'días'],['pBas','Básico',14,'días'],['pCon','Confiable',15,'días'],['pPre','Premium',30,'días']]],
+      ['Cobros y mora', [['gracia','Gracia sin comisión',2,'días'],['gasto','Gasto administrativo',10,'%'],['dCon','Descuento Confiable',25,'%'],['dPre','Descuento Premium',50,'%'],['com','Comisión por desfase',5,'%'],['comMin','Comisión mínima',0.25,'USD'],['mora','Inicio de mora, día',8,'']]],
+      ['Requisitos para habilitar', [['rCed','Cédula verificada',true],['rVeh','Vehículo verificado',true],['rPag','Pagos de servicios a tiempo',2,''],['rDias','Días en PagoDirecto',30,'días']]],
+      ['Datos de la prueba', [['quince','Usuarios «quinceneros»',35,'%']]]
+    ];
+    const v = {};
+    this.defs.forEach(([, fs]) => fs.forEach(([k, , d]) => { v[k] = d; }));
+    this.base = Object.assign({}, v);
+    this.state = { v, sim: 'idle', simV: null, saved: false, day: 0, log: [{ t: '31 oct 00:00', m: 'Worker listo · 500 scores al día · 0 créditos congelados' }] };
+  }
+  componentWillUnmount() { clearTimeout(this._t); }
+  setVal(k, raw) { const n = raw === '' ? 0 : Number(raw); this.setState({ v: Object.assign({}, this.state.v, { [k]: n }), saved: false }); }
+  toggle(k) { this.setState({ v: Object.assign({}, this.state.v, { [k]: !this.state.v[k] }), saved: false }); }
+  calc(v) {
+    const dm = (v.gracia - 2) * -0.3 + (v.mora - 8) * 0.15 + (v.tCon * v.mCon - 30) * 0.04 + (v.tPre * v.mPre - 80) * 0.01 + (v.uPre - 80) * -0.05 + (v.rPag - 2) * -0.6 + (v.rVeh ? 0 : 1.2) + (v.com - 5) * -0.1;
+    const mora = Math.max(0.5, 4.1 + dm);
+    const rep = Math.min(99, 87.4 - dm * 1.4 + (v.quince - 35) * 0.05);
+    const hab = Math.max(0, Math.min(500, Math.round(312 + (2 - v.rPag) * 40 + (v.rVeh ? 0 : 81) + (v.rCed ? 0 : 27) + (30 - v.rDias) * 0.5)));
+    const prest = 9840 * (1 + (v.tCon * v.mCon - 30) * 0.012 + (v.tPre * v.mPre - 80) * 0.003 + (v.tBas * v.mBas - 10) * 0.01) * (hab / 312);
+    return { mora, rep, hab, prest };
+  }
+  dateOf(d) { const x = new Date(2026, 9, 31 + d); return x; }
+  advance(n) {
+    const log = this.state.log.slice();
+    for (let i = 1; i <= n; i++) {
+      const d = this.state.day + i, x = this.dateOf(d);
+      const t = x.getDate().toString().padStart(2, '0') + ' ' + ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][x.getMonth()] + ' 00:00';
+      const com = (d * 3) % 5 + 1, cong = d % 3 === 0 ? 1 : 0, hab = (d * 2) % 4, up = (d * 5) % 7;
+      log.unshift({ t, m: 'Comisiones aplicadas: ' + com + ' · tickets congelados: ' + cong + ' · 500 scores recalculados (' + up + ' suben de nivel) · usuarios habilitados: ' + hab });
+    }
+    this.setState({ day: this.state.day + n, log: log.slice(0, 30) });
+  }
+  renderVals() {
+    const s = this.state, v = s.v;
+    const fmt = (n, d) => n.toLocaleString('es-VE', { minimumFractionDigits: d, maximumFractionDigits: d });
+    const groups = this.defs.map(([title, fs]) => ({ title, fields: fs.map(([k, label, d, unit]) => {
+      const isBool = typeof d === 'boolean';
+      return { label, unit: unit || '', isBool, isNum: !isBool, val: v[k], on: !!v[k], step: k === 'comMin' ? '0.05' : '1',
+        set: (e) => this.setVal(k, e.target.value), toggle: () => this.toggle(k) };
+    }) }));
+    const dirty = Object.keys(v).some((k) => v[k] !== this.base[k]);
+    const a = this.calc(this.base), b = s.simV ? this.calc(s.simV) : a;
+    const G = '#3F6212', R = '#B42318', N = '#6B6B80';
+    const row = (name, x, y, f, goodUp) => {
+      const dd = y - x, c = Math.abs(dd) < 1e-6 ? N : ((dd > 0) === goodUp ? G : R);
+      return { name, a: f(x), b: f(y), d: (dd > 0 ? '▲ +' : (dd < 0 ? '▼ ' : '')) + f(dd).replace('$', '$'), c };
+    };
+    const pct = (n) => fmt(n, 1) + ' %';
+    const usd = (n) => '$' + fmt(n, 0);
+    const sim = [
+      row('Mora', a.mora, b.mora, pct, false),
+      row('Repago a tiempo', a.rep, b.rep, pct, true),
+      row('Monto prestado', a.prest, b.prest, usd, true),
+      row('Usuarios habilitados', a.hab, b.hab, (n) => fmt(n, 0), true)
+    ];
+    const x = this.dateOf(s.day);
+    const days = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+    const mon = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    return {
+      groups, sim,
+      simIdle: s.sim === 'idle', simLoading: s.sim === 'loading', simReady: s.sim === 'ready',
+      simulate: () => { this.setState({ sim: 'loading' }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ sim: 'ready', simV: Object.assign({}, this.state.v) }), 900); },
+      save: () => { this.base = Object.assign({}, this.state.v); this.setState({ saved: true }); },
+      saveLabel: s.saved ? 'Guardado ✓' : 'Guardar configuración',
+      dirtyText: dirty ? 'Tienes cambios sin guardar' : 'Configuración activa · guardada el 28 oct por Equipo Riesgo',
+      dateLong: days[x.getDay()].replace(/^./, (c) => c.toUpperCase()) + ' ' + x.getDate() + ' de ' + mon[x.getMonth()] + ' de ' + x.getFullYear(),
+      dateShort: days[x.getDay()].slice(0, 3).replace(/^./, (c) => c.toUpperCase()) + ' ' + x.getDate() + ' ' + mon[x.getMonth()].slice(0, 3) + ' ' + x.getFullYear(),
+      plus1: () => this.advance(1), plus7: () => this.advance(7),
+      log: s.log
+    };
+  }
+}
+</script>
+</body>
+</html>

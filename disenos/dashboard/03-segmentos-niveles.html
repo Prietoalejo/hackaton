@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Ritmo · Segmentos y niveles</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#1F4FB8}a:hover{color:#163B8C}
+.wrap{display:flex;flex-wrap:wrap;gap:24px;padding:24px;background:#F3F4F8;font-family:'Outfit',system-ui,sans-serif;color:#15152B;min-height:1080px}
+.side{flex:0 0 248px;background:#fff;border:1px solid #E3E5EA;border-radius:12px;padding:22px 14px;display:flex;flex-direction:column;gap:6px;align-self:flex-start}
+.side a{display:flex;gap:12px;align-items:center;height:48px;padding:0 16px;border-radius:6px;color:#4A4A5E;text-decoration:none;font-weight:500;font-size:15px}
+.side a.on{background:#EEF0F3;color:#15152B;font-weight:600}
+.main{flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:20px}
+.card{background:#fff;border:1px solid #E3E5EA;border-radius:12px;padding:22px 24px}
+.lbl{font-size:13px;color:#6B6B80;font-weight:500}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:20px}
+.lv{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
+@media (max-width:760px){.side{flex:1 1 100%}.two{grid-template-columns:1fr}}
+</style>
+</helmet>
+<div class="wrap">
+  <nav class="side" aria-label="Vistas de Ritmo">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 4px 10px 18px">
+      <span style="width: 42px; height: 42px; border-radius: 8px; background: #15152B; display: flex; align-items: center; justify-content: center"><svg width="26" height="18" viewBox="0 0 30 20" fill="none" stroke="#C6F432" stroke-width="3.2" aria-hidden="true"><rect x="2" y="5" width="15" height="11" rx="5.5"></rect><rect x="13" y="4" width="15" height="11" rx="5.5"></rect></svg></span>
+      <span><span style="display: block; font-weight: 800; font-size: 19px">Ritmo</span><span class="lbl">· Credirecto</span></span>
+    </div>
+    <a href="R1-Resumen.dc.html">Resumen</a>
+    <a href="R2-Cohortes.dc.html">Cohortes</a>
+    <a href="R3-Segmentos.dc.html" class="on">Segmentos y niveles</a>
+    <a href="R4-Decisiones.dc.html">Decisiones</a>
+    <a href="R5-Usuarios.dc.html">Usuarios</a>
+    <a href="R6-Configuracion.dc.html">Configuración</a>
+    <div style="margin-top: 20px; background: #F3F4F8; border-radius: 10px; padding: 14px"><div class="lbl">Reloj de demo</div><div style="font-weight: 700; margin-top: 2px">Sáb 31 oct 2026</div><div class="lbl" style="margin-top: 6px">1 USD = Bs 380,00</div></div>
+  </nav>
+
+  <main class="main">
+    <div><h1 style="margin: 0; font-size: 30px; font-weight: 700">Segmentos y niveles</h1><div class="lbl" style="font-size: 15px">El nivel define cupo y servicios; el segmento define qué le comunicamos.</div></div>
+
+    <section class="card">
+      <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px"><h2 style="margin: 0; font-size: 20px">Usuarios por nivel</h2><span class="lbl">312 habilitados · umbrales 40 / 60 / 80 · 1 ticket = 1 pago a crédito</span></div>
+      <div class="lv" style="margin-top: 16px">
+        <sc-for list="{{levels}}" as="l" hint-placeholder-count="4">
+          <div style="{{l.box}}">
+            <div style="display: flex; justify-content: space-between; align-items: center"><span style="font-weight: 600">{{l.name}}</span><span style="font-size: 12px; opacity: .8">{{l.range}}</span></div>
+            <div style="font-size: 34px; font-weight: 700; margin-top: 8px">{{l.n}}</div>
+            <div style="height: 8px; border-radius: 4px; margin-top: 8px; {{l.track}}"><div style="height: 100%; border-radius: 4px; width: {{l.pct}}; {{l.fill}}"></div></div>
+            <div style="font-size: 13px; margin-top: 10px; opacity: .85">{{l.tk}} · hasta {{l.max}} c/u</div>
+            <div style="font-size: 12px; opacity: .7">{{l.svc}}</div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <div class="two">
+      <section class="card">
+        <div style="display: flex; justify-content: space-between"><h2 style="margin: 0; font-size: 20px">Usuarios por segmento</h2><span class="lbl">500 usuarios</span></div>
+        <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 18px">
+          <sc-for list="{{segs}}" as="s" hint-placeholder-count="6">
+            <div>
+              <div style="display: flex; justify-content: space-between; gap: 10px"><span><b>{{s.name}}</b> <span class="lbl">· {{s.desc}}</span></span><b>{{s.n}}</b></div>
+              <div style="height: 12px; border-radius: 6px; background: #EEF0F5; margin-top: 6px"><div style="height: 100%; border-radius: 6px; width: {{s.pct}}; background: {{s.color}}"></div></div>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+
+      <section style="border-radius: 12px; padding: 22px 24px; color: #15152B; background: #FFFFFF; border: 1px solid #E3E5EA">
+        <div style="display: flex; justify-content: space-between"><h2 style="margin: 0; font-size: 20px">Movimientos de la semana</h2><span style="font-size: 13px; color: #6B6B80">25 – 31 oct</span></div>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 16px">
+          <div style="background: #EEF4E4; border-radius: 10px; padding: 16px"><div style="color: #3F6212; font-size: 14px">▲ Subieron</div><div style="font-size: 40px; font-weight: 700">41</div></div>
+          <div style="background: #FDECEC; border-radius: 10px; padding: 16px"><div style="color: #B42318; font-size: 14px">▼ Bajaron</div><div style="font-size: 40px; font-weight: 700">12</div></div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 16px; font-size: 15px">
+          <sc-for list="{{moves}}" as="mv" hint-placeholder-count="6">
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #E8EAEE; padding-bottom: 8px"><span>{{mv.from}} <span style="color: {{mv.c}}">{{mv.arrow}}</span> {{mv.to}}</span><b style="color: {{mv.c}}">{{mv.n}}</b></div>
+          </sc-for>
+        </div>
+        <div style="font-size: 13px; color: #6B6B80; margin-top: 12px">Para bajar de nivel el score debe caer 5 puntos bajo el umbral, así nadie rebota por un mal día.</div>
+      </section>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1080}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const L = [
+      { name: 'Credirecto Inicial', range: 'score < 40', n: 96, t: 1, max: 5, svc: 'Estacionamiento' },
+      { name: 'Credirecto Básico', range: '40 – 59', n: 104, t: 2, max: 5, svc: '+ parquímetros y peajes' },
+      { name: 'Credirecto Confiable', range: '60 – 79', n: 78, t: 3, max: 10, svc: '+ luz, internet y teléfono' },
+      { name: 'Credirecto Premium', range: '≥ 80', n: 34, t: 4, max: 20, svc: '+ seguros' }
+    ];
+    const levels = L.map((l, i) => {
+      const dark = false;
+      return {
+        ...l, tk: l.t + (l.t === 1 ? ' ticket' : ' tickets'), max: '$' + l.max,
+        pct: (l.n / 312 * 100).toFixed(1) + '%',
+        box: dark ? 'border-radius: 10px; padding: 16px; background: #F5F6F8; color: #15152B' : 'border-radius: 10px; padding: 16px; background: #F3F4F8',
+        track: dark ? 'background: #EEF0F3' : 'background: #E2E4EA',
+        fill: dark ? 'background: #3F6212' : 'background: #4D7C0F'
+      };
+    });
+    const S = [
+      { name: 'Conductor diario', desc: 'paga estacionamiento 4+ días por semana', n: 60, color: '#4D7C0F' },
+      { name: 'Puntual', desc: 'paga antes o el día de cobro', n: 101, color: '#7FA05A' },
+      { name: 'Nuevo', desc: 'menos de 30 días con crédito', n: 72, color: '#A9C08A' },
+      { name: 'En enfriamiento', desc: 'sin usar el crédito en 21+ días', n: 41, color: '#9AA0B4' },
+      { name: 'En riesgo', desc: 'atraso o score cayendo', n: 38, color: '#B42318' },
+      { name: 'Sin crédito', desc: 'aún no habilitados', n: 188, color: '#C9CBD6' }
+    ];
+    const segs = S.map((s) => ({ ...s, pct: (s.n / 188 * 100).toFixed(1) + '%' }));
+    const up = '#3F6212', dn = '#B42318';
+    const moves = [
+      { from: 'Inicial', to: 'Básico', n: 19, arrow: '→', c: up },
+      { from: 'Básico', to: 'Confiable', n: 15, arrow: '→', c: up },
+      { from: 'Confiable', to: 'Premium', n: 7, arrow: '→', c: up },
+      { from: 'Premium', to: 'Confiable', n: 2, arrow: '←', c: dn },
+      { from: 'Confiable', to: 'Básico', n: 4, arrow: '←', c: dn },
+      { from: 'Básico', to: 'Inicial', n: 6, arrow: '←', c: dn }
+    ];
+    return { levels, segs, moves };
+  }
+}
+</script>
+</body>
+</html>

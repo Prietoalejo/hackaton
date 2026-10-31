@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Ritmo · Resumen</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#1F4FB8}a:hover{color:#163B8C}
+.wrap{display:flex;flex-wrap:wrap;gap:24px;padding:24px;background:#F3F4F8;font-family:'Outfit',system-ui,sans-serif;color:#15152B;min-height:1560px}
+.side{flex:0 0 248px;background:#fff;border:1px solid #E3E5EA;border-radius:12px;padding:22px 14px;display:flex;flex-direction:column;gap:6px;align-self:flex-start}
+.side a{display:flex;gap:12px;align-items:center;height:48px;padding:0 16px;border-radius:6px;color:#4A4A5E;text-decoration:none;font-weight:500;font-size:15px}
+.side a.on{background:#EEF0F3;color:#15152B;font-weight:600}
+.main{flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:20px}
+.card{background:#fff;border:1px solid #E3E5EA;border-radius:12px;padding:22px 24px}
+.dk{border-radius:12px;color:#15152B;padding:24px 26px;background:#FFFFFF;border:1px solid #E3E5EA}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px}
+.lbl{font-size:13px;color:#6B6B80;font-weight:500}
+.big{font-size:30px;font-weight:700;line-height:1.15;margin-top:6px}
+.bs{font-size:13px;color:#6B6B80}
+.up{display:inline-block;font-size:12px;font-weight:700;padding:3px 9px;border-radius:6px;background:#EEF4E4;color:#3F6212}
+.dn{display:inline-block;font-size:12px;font-weight:700;padding:3px 9px;border-radius:6px;background:#FDECEC;color:#B42318}
+.pp{background:#15152B;color:#fff;border:0;border-radius:6px;font:700 15px 'Outfit',sans-serif;height:44px;padding:0 20px;cursor:pointer}
+.ps{background:#fff;color:#15152B;border:1px solid #D0D3DA;border-radius:6px;font:600 14px 'Outfit',sans-serif;height:44px;padding:0 16px;}
+.cmp{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:0;align-items:center}
+.cmp>div{padding:13px 10px;border-bottom:1px solid #E8EAEE}
+.g{color:#3F6212;font-weight:700}
+.r{color:#B42318;font-weight:700}
+.sk{background:#EEF0F3;border-radius:8px}
+@media (max-width:760px){.side{flex:1 1 100%}.cmp{grid-template-columns:1.3fr 1fr 1fr 1fr;font-size:13px}}
+</style>
+</helmet>
+<div class="wrap">
+  <nav class="side" aria-label="Vistas de Ritmo">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 4px 10px 18px">
+      <span style="width: 42px; height: 42px; border-radius: 8px; background: #15152B; display: flex; align-items: center; justify-content: center"><svg width="26" height="18" viewBox="0 0 30 20" fill="none" stroke="#C6F432" stroke-width="3.2" aria-hidden="true"><rect x="2" y="5" width="15" height="11" rx="5.5"></rect><rect x="13" y="4" width="15" height="11" rx="5.5"></rect></svg></span>
+      <span><span style="display: block; font-weight: 800; font-size: 19px">Ritmo</span><span class="lbl">· Credirecto</span></span>
+    </div>
+    <a href="R1-Resumen.dc.html" class="on">Resumen</a>
+    <a href="R2-Cohortes.dc.html">Cohortes</a>
+    <a href="R3-Segmentos.dc.html">Segmentos y niveles</a>
+    <a href="R4-Decisiones.dc.html">Decisiones</a>
+    <a href="R5-Usuarios.dc.html">Usuarios</a>
+    <a href="R6-Configuracion.dc.html">Configuración</a>
+    <div style="margin-top: 20px; background: #F3F4F8; border-radius: 10px; padding: 14px">
+      <div class="lbl">Reloj de demo</div>
+      <div style="font-weight: 700; margin-top: 2px">Sáb 31 oct 2026</div>
+      <div class="lbl" style="margin-top: 6px">1 USD = Bs 380,00</div>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between">
+      <div><h1 style="margin: 0; font-size: 30px; font-weight: 700">Resumen</h1><div class="lbl" style="font-size: 15px">500 usuarios · 1 may – 31 oct 2026</div></div>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap"><button class="ps">Últimas 12 semanas</button><button class="pp">Exportar</button></div>
+    </div>
+
+    <sc-if value="{{isLoading}}" hint-placeholder-val="{{false}}">
+      <div class="grid">
+        <div class="card"><div class="sk" style="height: 14px; width: 60%"></div><div class="sk" style="height: 34px; width: 80%; margin-top: 12px"></div><div class="sk" style="height: 12px; width: 40%; margin-top: 10px"></div></div>
+        <div class="card"><div class="sk" style="height: 14px; width: 60%"></div><div class="sk" style="height: 34px; width: 80%; margin-top: 12px"></div><div class="sk" style="height: 12px; width: 40%; margin-top: 10px"></div></div>
+        <div class="card"><div class="sk" style="height: 14px; width: 60%"></div><div class="sk" style="height: 34px; width: 80%; margin-top: 12px"></div><div class="sk" style="height: 12px; width: 40%; margin-top: 10px"></div></div>
+        <div class="card"><div class="sk" style="height: 14px; width: 60%"></div><div class="sk" style="height: 34px; width: 80%; margin-top: 12px"></div><div class="sk" style="height: 12px; width: 40%; margin-top: 10px"></div></div>
+      </div>
+      <div class="dk" style="height: 380px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 10px"><span style="width: 40px; height: 40px; border-radius: 50%; border: 4px solid #E3E5EA; border-top-color: #6B6B80"></span><span style="color: #6B6B80">Recalculando Ritmo vs. regla actual…</span></div>
+      <div class="card"><div class="sk" style="height: 260px"></div></div>
+    </sc-if>
+
+    <sc-if value="{{isEmpty}}" hint-placeholder-val="{{false}}">
+      <div class="card" style="padding: 56px 24px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px">
+        <span style="width: 72px; height: 72px; border-radius: 10px; background: #EEF4E4; color: #3F6212; display: flex; align-items: center; justify-content: center"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 17l5-5 4 4 8-9"></path><path d="M3 21h18"></path></svg></span>
+        <div style="font-size: 22px; font-weight: 700">Todavía no hay pagos en este período</div>
+        <div class="lbl" style="font-size: 15px; max-width: 460px">Ritmo necesita al menos 7 días de pagos para calcular scores y comparar con la regla actual. Avanza el reloj de demo o carga los datos de ejemplo.</div>
+        <div style="display: flex; gap: 10px; margin-top: 8px"><a href="R6-Configuracion.dc.html" class="pp" style="display: inline-flex; align-items: center; text-decoration: none; color: #fff">Ir al reloj de demo</a></div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{isData}}" hint-placeholder-val="{{true}}">
+      <div class="grid">
+        <div class="card"><div class="lbl">Usuarios totales</div><div class="big">500</div><div class="bs">Base de la prueba</div></div>
+        <div class="card"><div class="lbl">Habilitados vs. en espera</div><div class="big">312 <span style="font-size: 18px; color: #6B6B80; font-weight: 500">/ 188</span></div><div style="display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 10px; gap: 2px" aria-hidden="true"><span style="width: 62.4%; background: #4D7C0F"></span><span style="flex: 1; background: #DADCE4"></span></div><div class="bs" style="margin-top: 6px">62,4 % habilitados</div></div>
+        <div class="card"><div class="lbl">Monto prestado</div><div class="big">$9.840</div><div class="bs">Bs 3.739.200,00</div></div>
+        <div class="card"><div class="lbl">Repago a tiempo</div><div class="big">87,4 %</div><span class="up">▲ 1,2 pp vs. sem. pasada</span></div>
+        <div class="card"><div class="lbl">Mora</div><div class="big">4,1 %</div><span class="dn">▲ 0,1 pp vs. sem. pasada</span></div>
+        <div class="card"><div class="lbl">Comisiones cobradas</div><div class="big">$412</div><div class="bs">Bs 156.560,00</div></div>
+        <div class="card"><div class="lbl">Reuso</div><div class="big">71 %</div><div class="bs">Vuelven a usar Credirecto en 30 días</div></div>
+        <div class="card"><div class="lbl">Pérdida esperada</div><div class="big">$403</div><div class="bs">Bs 153.140,00</div></div>
+      </div>
+
+      <section class="dk" aria-labelledby="vs">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; align-items: flex-end">
+          <div>
+            <span style="font-size: 13px; font-weight: 700; background: #EEF4E4; color: #3F6212; padding: 5px 12px; border-radius: 6px">Mismos 500 usuarios</span>
+            <h2 id="vs" style="margin: 12px 0 0; font-size: 30px; font-weight: 700">Ritmo vs. regla actual</h2>
+            <div style="color: #6B6B80; font-size: 15px; margin-top: 4px">Regla actual: 2 tickets y 7 días para todos. Ritmo: cupo, servicios y plazo según cómo y cuándo paga cada uno.</div>
+          </div>
+        </div>
+        <div style="overflow-x: auto; margin-top: 18px">
+          <div class="cmp" style="min-width: 560px; font-size: 15px">
+            <div style="color: #6B6B80; font-size: 13px">Métrica</div><div style="color: #6B6B80; font-size: 13px">Regla actual</div><div style="color: #6B6B80; font-size: 13px">Ritmo</div><div style="color: #6B6B80; font-size: 13px">Diferencia</div>
+            <div>Repago a tiempo</div><div>74,2 %</div><div style="font-weight: 700">87,4 %</div><div class="g">▲ +13,2 pp</div>
+            <div>Mora</div><div>11,8 %</div><div style="font-weight: 700">4,1 %</div><div class="g">▼ −7,7 pp</div>
+            <div>Monto prestado</div><div>$7.120<br><span style="font-size: 12px; color: #6B6B80">Bs 2.705.600</span></div><div style="font-weight: 700">$9.840<br><span style="font-size: 12px; color: #6B6B80; font-weight: 400">Bs 3.739.200</span></div><div class="g">▲ +38 %</div>
+            <div>Reuso</div><div>52 %</div><div style="font-weight: 700">71 %</div><div class="g">▲ +19 pp</div>
+            <div>Pérdida esperada</div><div>$840<br><span style="font-size: 12px; color: #6B6B80">Bs 319.200</span></div><div style="font-weight: 700">$403<br><span style="font-size: 12px; color: #6B6B80; font-weight: 400">Bs 153.140</span></div><div class="g">▼ −52 %</div>
+            <div>Comisiones cobradas</div><div>$604<br><span style="font-size: 12px; color: #6B6B80">Bs 229.520</span></div><div style="font-weight: 700">$412<br><span style="font-size: 12px; color: #6B6B80; font-weight: 400">Bs 156.560</span></div><div class="r">▼ −32 %</div>
+            <div style="border: 0">Usuarios habilitados</div><div style="border: 0">500</div><div style="border: 0; font-weight: 700">312</div><div style="border: 0; color: #6B6B80">−188 en espera, con checklist</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="ch">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: center">
+          <h2 id="ch" style="margin: 0; font-size: 20px">Repago a tiempo y mora por semana</h2>
+          <div style="display: flex; gap: 16px; font-size: 14px">
+            <span style="display: flex; align-items: center; gap: 6px"><span style="width: 18px; height: 4px; border-radius: 2px; background: #4D7C0F"></span>Repago a tiempo</span>
+            <span style="display: flex; align-items: center; gap: 6px"><span style="width: 18px; height: 4px; border-radius: 2px; background: #B42318"></span>Mora</span>
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 16px">
+          <div style="display: flex; flex-direction: column; justify-content: space-between; height: 240px; font-size: 12px; color: #6B6B80; text-align: right; width: 36px"><span>100 %</span><span>75 %</span><span>50 %</span><span>25 %</span><span>0 %</span></div>
+          <div style="flex: 1; min-width: 0; position: relative">
+            <svg width="100%" height="240" viewBox="0 0 1100 240" preserveAspectRatio="none" role="img" aria-label="Repago a tiempo sube de 76 % a 87,4 % y la mora baja de 10,2 % a 4,1 % en 12 semanas">
+              <path d="M0 1H1100M0 60H1100M0 120H1100M0 180H1100M0 239H1100" stroke="#ECEEF3" stroke-width="1" vector-effect="non-scaling-stroke"></path>
+              <polyline points="{{repPts}}" fill="none" stroke="#4D7C0F" stroke-width="3.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"></polyline>
+              <polyline points="{{moraPts}}" fill="none" stroke="#B42318" stroke-width="3.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"></polyline>
+            </svg>
+            <div style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); font-size: 11px; color: #6B6B80; margin-top: 6px">
+              <sc-for list="{{weeks}}" as="w" hint-placeholder-count="12"><span>{{w}}</span></sc-for>
+            </div>
+          </div>
+        </div>
+        <div class="lbl" style="margin-top: 12px">Ritmo se activó el 7 sep. Última semana: repago 87,4 %, mora 4,1 %.</div>
+      </section>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"estado":{"editor":"enum","options":["datos","cargando","vacío"],"default":"datos"},"$preview":{"width":1440,"height":1560}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const e = this.props.estado ?? 'datos';
+    const rep = [76, 77.5, 78.6, 79.2, 81, 82.4, 84.1, 85, 85.9, 86.8, 86.2, 87.4];
+    const mora = [10.2, 9.8, 9.3, 8.6, 7.4, 6.6, 5.9, 5.2, 4.8, 4.4, 4.0, 4.1];
+    const pts = (a) => a.map((v, i) => (i * 100) + ',' + (240 - v * 2.4).toFixed(1)).join(' ');
+    return {
+      isData: e === 'datos', isLoading: e === 'cargando', isEmpty: e === 'vacío',
+      repPts: pts(rep), moraPts: pts(mora),
+      weeks: ['10 ago','17 ago','24 ago','31 ago','7 sep','14 sep','21 sep','28 sep','5 oct','12 oct','19 oct','26 oct']
+    };
+  }
+}
+</script>
+</body>
+</html>

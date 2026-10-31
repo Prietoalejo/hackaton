@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Ritmo · Cohortes</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#1F4FB8}a:hover{color:#163B8C}
+.wrap{display:flex;flex-wrap:wrap;gap:24px;padding:24px;background:#F3F4F8;font-family:'Outfit',system-ui,sans-serif;color:#15152B;min-height:1080px}
+.side{flex:0 0 248px;background:#fff;border:1px solid #E3E5EA;border-radius:12px;padding:22px 14px;display:flex;flex-direction:column;gap:6px;align-self:flex-start}
+.side a{display:flex;gap:12px;align-items:center;height:48px;padding:0 16px;border-radius:6px;color:#4A4A5E;text-decoration:none;font-weight:500;font-size:15px}
+.side a.on{background:#EEF0F3;color:#15152B;font-weight:600}
+.main{flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:20px}
+.card{background:#fff;border:1px solid #E3E5EA;border-radius:12px;padding:22px 24px}
+.lbl{font-size:13px;color:#6B6B80;font-weight:500}
+.hm{display:grid;grid-template-columns:96px repeat(12,minmax(44px,1fr));gap:6px;min-width:760px}
+.cell{height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600}
+.seg{display:inline-flex;background:#fff;border:1px solid #E3E5EA;border-radius:6px;padding:5px;}
+.seg button{height:40px;border:0;border-radius:6px;padding:0 18px;font:600 14px 'Outfit',sans-serif;cursor:pointer}
+@media (max-width:760px){.side{flex:1 1 100%}}
+</style>
+</helmet>
+<div class="wrap">
+  <nav class="side" aria-label="Vistas de Ritmo">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 4px 10px 18px">
+      <span style="width: 42px; height: 42px; border-radius: 8px; background: #15152B; display: flex; align-items: center; justify-content: center"><svg width="26" height="18" viewBox="0 0 30 20" fill="none" stroke="#C6F432" stroke-width="3.2" aria-hidden="true"><rect x="2" y="5" width="15" height="11" rx="5.5"></rect><rect x="13" y="4" width="15" height="11" rx="5.5"></rect></svg></span>
+      <span><span style="display: block; font-weight: 800; font-size: 19px">Ritmo</span><span class="lbl">· Credirecto</span></span>
+    </div>
+    <a href="R1-Resumen.dc.html">Resumen</a>
+    <a href="R2-Cohortes.dc.html" class="on">Cohortes</a>
+    <a href="R3-Segmentos.dc.html">Segmentos y niveles</a>
+    <a href="R4-Decisiones.dc.html">Decisiones</a>
+    <a href="R5-Usuarios.dc.html">Usuarios</a>
+    <a href="R6-Configuracion.dc.html">Configuración</a>
+    <div style="margin-top: 20px; background: #F3F4F8; border-radius: 10px; padding: 14px"><div class="lbl">Reloj de demo</div><div style="font-weight: 700; margin-top: 2px">Sáb 31 oct 2026</div><div class="lbl" style="margin-top: 6px">1 USD = Bs 380,00</div></div>
+  </nav>
+
+  <main class="main">
+    <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between">
+      <div><h1 style="margin: 0; font-size: 30px; font-weight: 700">Cohortes</h1><div class="lbl" style="font-size: 15px">Por mes del primer uso de Credirecto · 312 usuarios habilitados</div></div>
+      <div class="seg" role="group" aria-label="Métrica">
+        <button onClick="{{pickRep}}" style="background: {{repBg}}; color: {{repFg}}">Repago a tiempo</button>
+        <button onClick="{{pickReu}}" style="background: {{reuBg}}; color: {{reuFg}}">Reuso</button>
+      </div>
+    </div>
+
+    <section class="card">
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: center">
+        <h2 style="margin: 0; font-size: 20px">{{title}}</h2>
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #6B6B80">{{lo}}<span style="width: 160px; height: 12px; border-radius: 6px; background: linear-gradient(90deg,#E2E4EA,#9BC26B)"></span>{{hi}}</div>
+      </div>
+      <div style="overflow-x: auto; margin-top: 18px">
+        <sc-if value="{{loading}}" hint-placeholder-val="{{false}}">
+          <div class="hm">
+            <sc-for list="{{skel}}" as="k" hint-placeholder-count="78"><span class="cell" style="background: #ECEEF3"></span></sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ready}}" hint-placeholder-val="{{true}}">
+          <div class="hm">
+            <span class="lbl" style="align-self: end">Cohorte</span>
+            <sc-for list="{{cols}}" as="c" hint-placeholder-count="12"><span class="lbl" style="text-align: center">{{c}}</span></sc-for>
+            <sc-for list="{{rows}}" as="r" hint-placeholder-count="6">
+              <span style="display: flex; flex-direction: column; justify-content: center"><b style="font-size: 15px">{{r.name}}</b><span class="lbl">{{r.n}} usuarios</span></span>
+              <sc-for list="{{r.cells}}" as="v" hint-placeholder-count="12"><span class="cell" style="{{v.style}}" title="{{v.tip}}">{{v.txt}}</span></sc-for>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 18px; margin-top: 16px; font-size: 13px; color: #6B6B80">
+        <span style="display: flex; align-items: center; gap: 6px"><span style="width: 18px; height: 18px; border-radius: 6px; border: 1.5px dashed #C9CBD6"></span>Aún no llega a esa semana</span>
+        <span>Ritmo empezó a decidir el 7 sep: mira el salto desde la cohorte de septiembre.</span>
+      </div>
+    </section>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px">
+      <div class="card"><div class="lbl">Mejor cohorte, semana 4</div><div style="font-size: 26px; font-weight: 700; margin-top: 4px">{{best}}</div></div>
+      <div class="card"><div class="lbl">Peor cohorte, semana 4</div><div style="font-size: 26px; font-weight: 700; margin-top: 4px">{{worst}}</div></div>
+      <div style="border-radius: 12px; padding: 22px 24px; color: #15152B; background: #FFFFFF; border: 1px solid #E3E5EA; display: flex; gap: 12px; align-items: center">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#C6F432" stroke-width="2" style="flex: none" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16v.5"></path></svg>
+        <span style="font-size: 15px; line-height: 1.4">Una cohorte nunca cambia; los usuarios se mueven entre segmentos y niveles.</span>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1080}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { m: 'rep', loading: false }; }
+  pick(m) {
+    if (m === this.state.m) return;
+    this.setState({ m, loading: true });
+    clearTimeout(this._t);
+    this._t = setTimeout(() => this.setState({ loading: false }), 600);
+  }
+  componentWillUnmount() { clearTimeout(this._t); }
+  renderVals() {
+    const m = this.state.m;
+    const coh = [
+      { name: 'May 2026', n: 58, weeks: 12, rb: 71, ub: 61 },
+      { name: 'Jun 2026', n: 54, weeks: 12, rb: 73, ub: 63 },
+      { name: 'Jul 2026', n: 49, weeks: 12, rb: 75, ub: 64 },
+      { name: 'Ago 2026', n: 52, weeks: 12, rb: 78, ub: 67 },
+      { name: 'Sep 2026', n: 57, weeks: 8, rb: 85, ub: 76 },
+      { name: 'Oct 2026', n: 42, weeks: 4, rb: 88, ub: 80 }
+    ];
+    const lo = m === 'rep' ? 65 : 30, hi = m === 'rep' ? 95 : 85;
+    const mix = (t) => {
+      const a = [226, 228, 234], b = [155, 194, 107];
+      return 'rgb(' + a.map((x, i) => Math.round(x + (b[i] - x) * t)).join(',') + ')';
+    };
+    const val = (c, w, ci) => {
+      const jit = ((ci * 7 + w * 3) % 5) * 0.4 - 0.8;
+      if (m === 'rep') return Math.min(96, c.rb + w * (ci >= 4 ? 0.6 : 0.9) + (w > 5 && ci < 4 ? 2.5 : 0) + jit);
+      return Math.max(28, c.ub - w * (ci >= 4 ? 1.6 : 2.6) + jit);
+    };
+    const rows = coh.map((c, ci) => ({
+      name: c.name, n: c.n,
+      cells: Array.from({ length: 12 }, (_, i) => {
+        const w = i + 1;
+        if (w > c.weeks) return { txt: '—', style: 'border: 1.5px dashed #C9CBD6; color: #8A8DA0; background: transparent', tip: 'Sin datos todavía' };
+        const v = val(c, w, ci);
+        const t = Math.max(0, Math.min(1, (v - lo) / (hi - lo)));
+        return { txt: v.toFixed(0) + '%', style: 'background: ' + mix(t) + '; color: #15152B', tip: c.name + ' · semana ' + w + ': ' + v.toFixed(1) + '%' };
+      })
+    }));
+    const w4 = coh.map((c, ci) => ({ name: c.name, v: val(c, 4, ci) }));
+    const sorted = w4.slice().sort((a, b) => b.v - a.v);
+    const on = m === 'rep';
+    return {
+      loading: this.state.loading, ready: !this.state.loading,
+      skel: Array.from({ length: 78 }, (_, i) => i),
+      cols: Array.from({ length: 12 }, (_, i) => 'S' + (i + 1)),
+      rows,
+      title: on ? '% que repaga a tiempo, por semana desde su primer uso' : '% que vuelve a usar Credirecto, por semana desde su primer uso',
+      lo: lo + '%', hi: hi + '%',
+      best: sorted[0].name + ' · ' + sorted[0].v.toFixed(0) + '%',
+      worst: sorted[sorted.length - 1].name + ' · ' + sorted[sorted.length - 1].v.toFixed(0) + '%',
+      repBg: on ? '#15152B' : 'transparent', repFg: on ? '#FFFFFF' : '#4A4A5E',
+      reuBg: on ? 'transparent' : '#15152B', reuFg: on ? '#4A4A5E' : '#FFFFFF',
+      pickRep: () => this.pick('rep'), pickReu: () => this.pick('reu')
+    };
+  }
+}
+</script>
+</body>
+</html>

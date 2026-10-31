@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Fecha de pago en tu quincena</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+.s{width:390px;background:#F3F4F8;font-family:'Outfit',system-ui,sans-serif;color:#15152B;position:relative;overflow:hidden}
+.cb{width:50px;height:50px;border-radius:50%;background:#fff;border:0;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(21,21,43,.07);color:#15152B;padding:0}
+.card{background:#fff;border-radius:28px;box-shadow:0 8px 28px rgba(21,21,43,.06)}
+.mut{color:#6B6B80}
+.d{height:38px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:14px;font-weight:500}
+</style>
+</helmet>
+<div class="s" style="height: 844px; padding: 22px 0 0">
+  <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 20px">
+    <button class="cb" aria-label="Volver"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
+    <span style="font-size: 19px; font-weight: 600; color: #5D5D70">Fecha de pago</span>
+    <button class="cb" aria-label="Soporte"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 14v-2a8 8 0 0116 0v2"></path><rect x="3" y="14" width="4" height="6" rx="2"></rect><rect x="17" y="14" width="4" height="6" rx="2"></rect></svg></button>
+  </div>
+
+  <div style="padding: 20px 16px 0">
+    <div class="card" style="padding: 20px 18px">
+      <div style="display: flex; justify-content: space-between; align-items: center"><span style="font-weight: 700; font-size: 18px">Noviembre 2026</span><span class="mut" style="font-size: 13px">Tus recargas</span></div>
+      <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; margin-top: 14px; text-align: center">
+        <span class="mut" style="font-size: 12px">L</span><span class="mut" style="font-size: 12px">M</span><span class="mut" style="font-size: 12px">M</span><span class="mut" style="font-size: 12px">J</span><span class="mut" style="font-size: 12px">V</span><span class="mut" style="font-size: 12px">S</span><span class="mut" style="font-size: 12px">D</span>
+        <span></span><span></span><span></span><span></span><span></span><span></span><span class="d">1</span>
+        <span class="d">2</span><span class="d">3</span><span class="d">4</span><span class="d">5</span><span class="d">6</span><span class="d">7</span><span class="d">8</span>
+        <span class="d">9</span><span class="d">10</span><span class="d">11</span><span class="d">12</span><span class="d" style="box-shadow: inset 0 0 0 2px #FF1F5A; color: #D6104D; font-weight: 700">13</span><span class="d">14</span><span class="d" style="background: #C6F432; font-weight: 700">15</span>
+        <span class="d">16</span><span class="d">17</span><span class="d">18</span><span class="d">19</span><span class="d">20</span><span class="d">21</span><span class="d">22</span>
+        <span class="d">23</span><span class="d">24</span><span class="d">25</span><span class="d">26</span><span class="d">27</span><span class="d">28</span><span class="d">29</span>
+        <span class="d" style="background: #C6F432; font-weight: 700">30</span>
+      </div>
+      <div style="display: flex; gap: 16px; margin-top: 10px; font-size: 13px">
+        <span style="display: flex; align-items: center; gap: 6px"><span style="width: 12px; height: 12px; border-radius: 50%; box-shadow: inset 0 0 0 2px #FF1F5A"></span>Vence tu cuota</span>
+        <span style="display: flex; align-items: center; gap: 6px"><span style="width: 12px; height: 12px; border-radius: 50%; background: #C6F432"></span>Sueles recargar</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding: 14px 16px 0">
+    <div style="border-radius: 28px; padding: 22px 20px; color: #fff; background: radial-gradient(110% 80% at 100% 115%,#C6F432 0%,rgba(150,200,20,.5) 26%,rgba(22,24,22,0) 60%),linear-gradient(160deg,#232623 0%,#121412 70%)">
+      <div style="display: flex; gap: 10px; align-items: center"><span style="width: 40px; height: 40px; border-radius: 14px; background: rgba(198,244,50,.16); color: #C6F432; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="2"></rect><path d="M4 10h16M9 3v4M15 3v4"></path></svg></span><span style="font-weight: 600; color: #D7F86E">Fecha en tu quincena</span></div>
+      <div style="font-size: 20px; font-weight: 600; line-height: 1.35; margin-top: 14px">Tu cuota vence el 13 de noviembre. Vemos que sueles recargar los días 15 y 30. ¿La movemos al 15?</div>
+      <div style="font-size: 14px; color: #D5D8CF; margin-top: 8px">Sin costo. La cuota de tu Ticket 1 (Bs 1.821,02) queda igual.</div>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 16px; right: 16px; bottom: 30px; display: flex; flex-direction: column; gap: 10px">
+    <button style="height: 58px; border: 0; border-radius: 999px; background: #FF1F5A; color: #fff; font: 700 19px 'Outfit',sans-serif; box-shadow: 0 10px 24px rgba(255,31,90,.3)">Mover al 15</button>
+    <button style="height: 52px; border: 0; border-radius: 999px; background: #E8EAF0; color: #15152B; font: 600 16px 'Outfit',sans-serif">Mantener fecha</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

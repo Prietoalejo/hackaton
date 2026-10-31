@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Período de gracia</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+.s{width:390px;background:#F3F4F8;font-family:'Outfit',system-ui,sans-serif;color:#15152B;position:relative;overflow:hidden}
+.cb{width:50px;height:50px;border-radius:50%;background:#fff;border:0;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(21,21,43,.07);color:#15152B;padding:0}
+.card{background:#fff;border-radius:28px;box-shadow:0 8px 28px rgba(21,21,43,.06)}
+.mut{color:#6B6B80}
+</style>
+</helmet>
+<div class="s" style="height: 844px; padding: 22px 0 0">
+  <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 20px">
+    <button class="cb" aria-label="Volver"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
+    <span style="font-size: 19px; font-weight: 600; color: #5D5D70">Tu cuota</span>
+    <button class="cb" aria-label="Soporte"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 14v-2a8 8 0 0116 0v2"></path><rect x="3" y="14" width="4" height="6" rx="2"></rect><rect x="17" y="14" width="4" height="6" rx="2"></rect></svg></button>
+  </div>
+
+  <div style="padding: 22px 16px 0">
+    <div class="card" style="padding: 24px 20px">
+      <span style="width: 56px; height: 56px; border-radius: 20px; background: #FFF4E0; color: #B86500; display: flex; align-items: center; justify-content: center"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></span>
+      <div style="font-size: 24px; font-weight: 700; line-height: 1.2; margin-top: 16px">Tu cuota venció ayer.<br>Tienes 2 días sin comisión.</div>
+      <div class="mut" style="font-size: 15px; margin-top: 8px; line-height: 1.4">A cualquiera le pasa. Págala cuando puedas en estos días y todo sigue igual.</div>
+
+      <div style="background: #F3F4F8; border-radius: 22px; padding: 16px; margin-top: 18px">
+        <div class="mut" style="font-size: 14px">Cuota del Ticket 1 · Estacionamiento C.C. El Tolón</div>
+        <div style="font-size: 34px; font-weight: 700">Bs 1.821,02</div>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 14px" aria-hidden="true">
+          <span style="height: 10px; border-radius: 5px; background: #F5A623"></span>
+          <span style="height: 10px; border-radius: 5px; background: #C6F432"></span>
+          <span style="height: 10px; border-radius: 5px; background: #C6F432"></span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 6px; font-size: 12px" class="mut">
+          <span>15 nov · venció</span><span>16 nov · hoy</span><span>17 nov</span>
+        </div>
+        <div style="font-weight: 600; margin-top: 10px; color: #2C4F00">Quedan 2 días de gracia · hasta el 17 nov, 11:59 p. m.</div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 16px; font-size: 14px; line-height: 1.35">
+        <div style="display: flex; gap: 10px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3B6B00" stroke-width="2.2" style="flex: none" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg><span>Al pagarla, tu ticket vuelve a estar disponible. Tu nivel Confiable y tu racha siguen intactos.</span></div>
+        <div style="display: flex; gap: 10px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6B6B80" stroke-width="2" style="flex: none" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16v.5"></path></svg><span class="mut">Desde el 18 nov se suma una comisión de Bs 95,00.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 16px; right: 16px; bottom: 30px; display: flex; flex-direction: column; gap: 10px">
+    <button style="height: 58px; border: 0; border-radius: 999px; background: #FF1F5A; color: #fff; font: 700 19px 'Outfit',sans-serif; box-shadow: 0 10px 24px rgba(255,31,90,.3)">Pagar ahora</button>
+    <button style="height: 52px; border: 0; border-radius: 999px; background: #E8EAF0; color: #15152B; font: 600 16px 'Outfit',sans-serif">Pagar una parte</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

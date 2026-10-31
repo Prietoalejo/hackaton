@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Comprobante · pago anticipado</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+.s{width:390px;background:#F3F4F8;font-family:'Outfit',system-ui,sans-serif;color:#15152B;position:relative;overflow:hidden}
+.cb{width:50px;height:50px;border-radius:50%;background:#fff;border:0;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(21,21,43,.07);color:#15152B;padding:0}
+.mut{color:#6B6B80}
+.row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+</style>
+</helmet>
+<div class="s" style="height: 1040px; padding: 22px 0 0">
+  <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 20px">
+    <button class="cb" aria-label="Volver"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
+    <span style="font-size: 19px; font-weight: 600; color: #5D5D70">Pago de cuota</span>
+    <button class="cb" aria-label="Soporte"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 14v-2a8 8 0 0116 0v2"></path><rect x="3" y="14" width="4" height="6" rx="2"></rect><rect x="17" y="14" width="4" height="6" rx="2"></rect></svg></button>
+  </div>
+
+  <div style="padding: 44px 26px 0; position: relative">
+    <span style="position: absolute; left: 50%; top: 14px; transform: translateX(-50%); width: 64px; height: 64px; border-radius: 50%; background: #1FA34A; border: 5px solid #fff; display: flex; align-items: center; justify-content: center; color: #fff; z-index: 1; box-shadow: 0 6px 16px rgba(31,163,74,.3)"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></span>
+    <div style="background: #fff; border-radius: 28px; box-shadow: 0 12px 34px rgba(21,21,43,.08); padding: 40px 0 0; position: relative">
+      <div style="text-align: center"><div style="font-size: 21px; font-weight: 700">Transacción exitosa</div><div class="mut" style="font-size: 13px">12-11-2026 · 7:48 p. m.</div></div>
+
+      <div style="margin: 16px 14px 0; border-radius: 22px; padding: 16px; color: #fff; background: radial-gradient(110% 90% at 100% 120%,#C6F432 0%,rgba(150,200,20,.5) 28%,rgba(22,24,22,0) 62%),linear-gradient(160deg,#232623 0%,#121412 70%)">
+        <div style="display: flex; align-items: center; gap: 8px"><svg width="20" height="20" viewBox="0 0 24 24" fill="#C6F432" stroke="#C6F432" stroke-width="1.4" aria-hidden="true"><path d="M12 3c1 4 5 5 5 10a5 5 0 01-10 0c0-3 2-4 2-6 1 1 2 2 2 3 1-2 1-5 1-7z"></path></svg><span style="font-weight: 700; color: #D7F86E">Pagaste 3 días antes</span></div>
+        <div style="font-size: 16px; font-weight: 500; margin-top: 6px; line-height: 1.35">+1 pago en tu racha y puntos ×1,5 en el Club</div>
+        <div style="display: flex; gap: 8px; margin-top: 12px; font-size: 13px; font-weight: 600">
+          <span style="background: #C6F432; color: #121412; padding: 6px 10px; border-radius: 999px">Racha 2 → 3</span>
+          <span style="background: rgba(255,255,255,.14); padding: 6px 10px; border-radius: 999px">Ticket 1 disponible otra vez</span>
+        </div>
+      </div>
+
+      <div style="padding: 18px 22px 0">
+        <div class="row mut" style="font-size: 12px; letter-spacing: .04em"><span>CONCEPTO</span><span>MONTO</span></div>
+        <div class="row" style="margin-top: 10px"><span>Cobro crédito cuota · Ticket 1</span><span style="font-weight: 600">Bs 1.655,47</span></div>
+        <div class="row" style="margin-top: 14px">
+          <span><span style="display: block">Gasto administrativo</span><span style="display: inline-block; margin-top: 6px; font-size: 12px; font-weight: 700; color: #2C4F00; background: #E9F9B4; padding: 4px 10px; border-radius: 999px">−25% por ser Confiable</span></span>
+          <span style="text-align: right"><span class="mut" style="display: block; font-size: 13px; text-decoration: line-through">Bs 165,55</span><span style="font-weight: 600">Bs 124,16</span></span>
+        </div>
+        <div class="row" style="border-top: 1px solid #E6E8EE; margin-top: 16px; padding-top: 14px"><span class="mut">Total pagado</span><span style="font-weight: 800; font-size: 19px">Bs 1.779,63</span></div>
+        <div class="mut" style="font-size: 12px; margin-top: 6px">Ahorraste Bs 41,39 en gasto administrativo.</div>
+      </div>
+
+      <div style="position: relative; margin-top: 20px; border-top: 2px dashed #E1E3EA" aria-hidden="true">
+        <span style="position: absolute; left: -16px; top: -16px; width: 30px; height: 30px; border-radius: 50%; background: #F3F4F8"></span>
+        <span style="position: absolute; right: -16px; top: -16px; width: 30px; height: 30px; border-radius: 50%; background: #F3F4F8"></span>
+      </div>
+      <div style="padding: 18px 16px 18px">
+        <div style="background: #EAF0FD; border-radius: 16px; padding: 12px; text-align: center"><div class="mut" style="font-size: 15px">Referencia</div><div style="font-size: 24px; font-weight: 700; letter-spacing: .02em">CD-000418207</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 30px; display: flex; justify-content: center">
+    <button style="width: 210px; height: 58px; border: 0; border-radius: 999px; background: #FF1F5A; color: #fff; font: 700 20px 'Outfit',sans-serif; box-shadow: 0 10px 24px rgba(255,31,90,.3)">Listo</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1040}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
