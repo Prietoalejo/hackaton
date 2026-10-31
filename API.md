@@ -180,6 +180,8 @@ Recarga los datos sintéticos y vuelve el reloj al 2026-10-31. Tarda ~1 min.
   `club_puntos.puntos_credirecto`: la parte de esos puntos que vino de cuotas de Credirecto.
 - `racha.pagos` cuenta **días** con pago a tiempo en la semana (no pagos). Cuotas por debajo de `monto_min_premio`
   no suman racha, puntos ni repagos. `comprobante.anticipado` y `dias_antes` se miden contra el vencimiento original.
+- `progreso.siguiente_tickets` / `siguiente_servicios`: el cupo del siguiente nivel según la configuración activa.
+- `club_puntos.monto_min_premio`, `beneficio_min_pct`, `beneficio_max_pct`: parámetros de Configuración que explica la pantalla Club.
 - `progreso` trae además `ruta_requerida` y `faltan_pts_club`: la ruta del Club que exige el siguiente nivel.
 - `tickets` y `servicios_cupo` traen `base` (del nivel) y `ajuste` (cupo variable ±1); `total` ya lo incluye.
 - `ritmo`: `{"senal_debil", "consejo"}` para mostrarle al usuario qué mejorar.
@@ -194,7 +196,7 @@ Recarga los datos sintéticos y vuelve el reloj al 2026-10-31. Tarda ~1 min.
 ```json
 {"tasa_bs": 380.0, "guardado": {"fecha": "2026-10-28", "por": "Equipo Riesgo"},
  "grupos": [{"titulo": "Pesos del score",
-             "campos": [{"clave": "peso_puntualidad", "etiqueta": "Puntualidad", "valor": 40, "unidad": "pts", "tipo": "numero", "paso": 1}]},
+             "campos": [{"clave": "peso_puntualidad", "etiqueta": "Puntualidad", "valor": 40, "defecto": 40, "unidad": "pts", "tipo": "numero", "paso": 1}]},
             {"titulo": "Requisitos para habilitar",
              "campos": [{"clave": "req_cedula", "etiqueta": "Cédula verificada", "valor": true, "unidad": "", "tipo": "booleano", "paso": null}]}]}
 ```

@@ -53,6 +53,9 @@ def calcular_club(eventos, tickets, hoy) -> dict:
                        "desde": siguiente["desde"], "faltan": siguiente["desde"] - puntos} if siguiente else None),
         "puntos_por_pago": C.PUNTOS_POR_PAGO, "multiplicador": C.MULTIPLICADOR_PUNTOS,
         "bono_ruta": C.BONO_RUTA_COMPLETADA,
+        # Parámetros editables en Configuración que la pantalla Club explica
+        "monto_min_premio": C.MONTO_MIN_PREMIO,
+        "beneficio_min_pct": C.VALORES["beneficio_min_pct"], "beneficio_max_pct": C.VALORES["beneficio_max_pct"],
         "desglose": {"servicios": pagos * C.PUNTOS_POR_PAGO, "credirecto": puntos_credirecto,
                      "rutas": completadas * C.BONO_RUTA_COMPLETADA},
         "rutas": rutas,

@@ -339,7 +339,11 @@ function CaminoA({ progreso: p }) {
               ? <>Ya tienes los pagos a tiempo. Sigue sumando puntos en el Club para llegar a <b>Credirecto {p.siguiente_nombre}</b>.</>
               : <>¡Ya casi! Sigue pagando a tiempo y pronto llegas a <b>Credirecto {p.siguiente_nombre}</b>.</>}
         </div>
-        <div className="cd-mut" style={{ fontSize: 13, marginTop: 4 }}>{BENEFICIO_NIVEL[p.siguiente_nivel]}</div>
+        <div className="cd-mut" style={{ fontSize: 13, marginTop: 4 }}>
+          {p.siguiente_tickets != null
+            ? `${p.siguiente_nombre}: ${plural(p.siguiente_tickets, 'ticket', 'tickets')}${p.siguiente_servicios ? ` + ${plural(p.siguiente_servicios, 'pago', 'pagos')} de servicios` : ''}.`
+            : BENEFICIO_NIVEL[p.siguiente_nivel]}
+        </div>
       </Tarjeta>
     </div>
   )

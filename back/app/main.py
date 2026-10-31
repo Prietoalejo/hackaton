@@ -262,7 +262,7 @@ def _config_json(conn) -> dict:
     for clave, grupo, etiqueta, unidad, defecto, paso in C.EDITABLES:
         booleano = isinstance(defecto, bool)
         grupos.setdefault(grupo, []).append({
-            "clave": clave, "etiqueta": etiqueta, "valor": C.VALORES[clave], "unidad": unidad,
+            "clave": clave, "etiqueta": etiqueta, "valor": C.VALORES[clave], "defecto": C.DEFAULTS[clave], "unidad": unidad,
             "tipo": "booleano" if booleano else "numero", "paso": None if booleano else paso})
     return {"tasa_bs": C.TASA_BS,
             "guardado": {"fecha": guardada["fecha"].isoformat(), "por": guardada["por"]} if guardada else None,

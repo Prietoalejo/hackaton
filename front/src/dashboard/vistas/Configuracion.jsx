@@ -135,6 +135,12 @@ export default function Configuracion() {
   })
   const cambiados = new Set(campos.filter((c) => !invalidos.has(c.clave) && valores[c.clave] !== original[c.clave]).map((c) => c.clave))
   const sucio = cambiados.size > 0 || invalidos.size > 0
+  // Campos cuyo valor (guardado o editado) no es el de fábrica: la config guardada puede venir de una versión anterior
+  const distintos = campos.filter((c) => c.defecto !== undefined && valores[c.clave] !== c.defecto)
+  const porDefecto = () => {
+    setCambios((c) => ({ ...c, ...Object.fromEntries(distintos.map((x) => [x.clave, x.defecto])) }))
+    setGuardado(false); setErrorGuardar(null)
+  }
 
   // Aviso del navegador si se intenta salir con cambios sin guardar
   useEffect(() => {
@@ -190,6 +196,12 @@ export default function Configuracion() {
         </div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
           {sucio && <Boton variante="borde" grande onClick={() => { setCambios({}); setErrorGuardar(null) }} disabled={guardando}>Descartar</Boton>}
+          {distintos.length > 0 && (
+            <Boton variante="borde" grande onClick={porDefecto} disabled={guardando}
+              title={`Distintos de fábrica: ${distintos.map((c) => `${c.etiqueta} (${c.valor} → ${c.defecto})`).join(', ')}`}>
+              Valores por defecto ({distintos.length})
+            </Boton>
+          )}
           <Boton variante="borde" grande onClick={simular} disabled={!cfg || invalidos.size > 0 || sim.fase === 'cargando'}>Simular</Boton>
           <Boton grande onClick={guardar} disabled={!cfg || !sucio || invalidos.size > 0 || guardando}
             style={guardado && !sucio ? { opacity: 1 } : undefined}>

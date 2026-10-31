@@ -3,7 +3,7 @@
 // misma ruta, la racha es la del Club y cada ruta permite un nivel de Credirecto (`club_puntos.rutas`).
 import { useLayoutEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { bs, entero, NIVELES } from '../../formato.js'
+import { bs, entero, NIVELES, usd } from '../../formato.js'
 import { useApp } from '../contexto.js'
 import { proximoTicket } from '../util.js'
 import { Avatar, Encabezado, Pantalla, Tarjeta } from '../componentes/Base.jsx'
@@ -102,7 +102,7 @@ export default function Club() {
 
       {pestana === 'hitos' && <Hitos />}
       {pestana === 'beneficios' && (ficha.beneficios
-        ? <><BeneficiosRuta b={ficha.beneficios} /><NotaBeneficios /></>
+        ? <><BeneficiosRuta b={ficha.beneficios} /><NotaBeneficios club={club} /></>
         : <Vacio texto="Tus beneficios aparecen cuando empiezas a pagar en PagoDirecto." />)}
       {pestana === 'puntos' && <Puntos club={club} />}
     </Pantalla>
@@ -333,9 +333,10 @@ function Mision({ icono, titulo, texto, derecha, boton, hecha, onClick, oscuro }
   )
 }
 
-const NotaBeneficios = () => (
+const NotaBeneficios = ({ club }) => (
   <div className="cd-mut" style={{ fontSize: 13, textAlign: 'center', margin: '12px 24px 0', lineHeight: 1.4 }}>
-    Tu beneficio cambia según cómo pagas: entre 50 % y 150 % del de tu ruta. Premia pagar a tiempo y antes, nunca usar más crédito.
+    Tu beneficio cambia según cómo pagas: entre {club.beneficio_min_pct ?? 50} % y {club.beneficio_max_pct ?? 150} % del de tu ruta.
+    Premia pagar a tiempo y antes, nunca usar más crédito.
   </div>
 )
 
@@ -375,7 +376,7 @@ function Puntos({ club }) {
         {fila('Cuota de Credirecto a tiempo', `+${club.puntos_por_pago ?? 100} pts`)}
         {fila('Antes del vencimiento o con la racha completa', `×${String(club.multiplicador ?? 1.5).replace('.', ',')}`)}
         {fila('Completar una ruta', `+${entero(club.bono_ruta ?? 500)} pts`)}
-        <div className="cd-mut" style={{ fontSize: 12, marginTop: 12, lineHeight: 1.4 }}>Las cuotas de menos de $0,50 no suman puntos ni racha.</div>
+        <div className="cd-mut" style={{ fontSize: 12, marginTop: 12, lineHeight: 1.4 }}>Las cuotas de menos de {usd(club.monto_min_premio ?? 0.5)} no suman puntos ni racha.</div>
       </Tarjeta>
     </div>
   )

@@ -66,6 +66,9 @@ def evaluar_nivel(score, historial, usuario, hoy, nivel_anterior=None, umbrales=
             "repagos_hechos": min(repagos, requeridos) if requeridos else repagos,
             "repagos_requeridos": requeridos,
             "faltan_repagos": max(0, requeridos - repagos),
+            # Lo que trae el siguiente nivel según la configuración activa (no un texto fijo)
+            "siguiente_tickets": C.NIVELES[siguiente]["tickets"],
+            "siguiente_servicios": C.NIVELES[siguiente]["servicios_cupo"],
         }
         ruta = C.RUTAS_CLUB[C.RUTA_MINIMA_POR_NIVEL[siguiente]]
         progreso.update(ruta_requerida=f"{ruta['nivel']} · {ruta['ruta']}",
