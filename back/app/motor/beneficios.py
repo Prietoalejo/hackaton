@@ -93,7 +93,7 @@ def _a_tu_medida(perfil, factor) -> dict | None:
     if segmento == C.SEG_EN_RIESGO:
         return {"tipo": "recupera_factor", "nombre": "Recupera tu beneficio completo",
                 "detalle": f"Paga a tiempo tus próximas {C.BENEFICIO_MIN_PAGOS} cuotas y vuelve al 100 %."}
-    if perfil.get("quincena"):
+    if perfil.get("quincena") and C.VALORES["ofrecer_quincena"]:
         return {"tipo": "quincena", "nombre": "Cuotas en tu quincena sin costo",
                 "detalle": "Movemos tus cuotas a tu día de cobro."}
     return None

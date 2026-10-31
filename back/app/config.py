@@ -70,6 +70,8 @@ EDITABLES = [
     ("comision_pct", "Cobros y mora", "Comisión por desfase", "%", 5, 1),
     ("comision_min", "Cobros y mora", "Comisión mínima", "USD", 0.25, 0.05),
     ("mora_dia", "Cobros y mora", "Inicio de mora, día", "", 8, 1),
+    # Apagado: la cuota vence en su fecha y no se ofrece moverla a la quincena del usuario
+    ("ofrecer_quincena", "Cobros y mora", "Ofrecer mover la cuota a la quincena", "", False, None),
 
     ("req_cedula", "Requisitos para habilitar", "Cédula verificada", "", True, None),
     ("req_vehiculo", "Requisitos para habilitar", "Vehículo verificado", "", True, None),

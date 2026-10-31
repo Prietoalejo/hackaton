@@ -96,7 +96,7 @@ Puntualidad 40 + Constancia 20 + Antigüedad 15 + Anticipados 15 + Verificación
 - Gracia: 2 días sin comisión tras el vencimiento.
 - Después: comisión por desfase 5 %, mínimo $0,25.
 - Mora desde el día 8 → **modo recuperación**: la app queda limitada a recargar y pagar; cada recarga paga primero la deuda y lo que sobra queda en la wallet; salida de estacionamientos y peajes siguen disponibles.
-- Quincena: si el usuario recarga habitualmente los días 15 y 30, se le ofrece mover la cuota a esa fecha.
+- Quincena: si el usuario recarga habitualmente los días 15 y 30, se le ofrece mover la cuota a esa fecha. **Hoy está apagado** (`ofrecer_quincena = false` en la configuración): la cuota vence en su fecha y no se ofrece moverla.
 
 ### Habilitación de Credirecto
 Cédula verificada + vehículo verificado + 2 pagos de servicios a tiempo + 30 días en PagoDirecto (todo configurable).

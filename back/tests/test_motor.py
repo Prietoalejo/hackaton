@@ -40,9 +40,11 @@ def test_quincena():
 
 def test_oferta_quincena_respeta_el_plazo_del_nivel():
     t = ticket(HOY)                                       # vence el 7 nov
-    assert oferta_quincena(t, 2, [15, 30]) == date(2026, 11, 15)   # Confiable: hasta 15 días
-    assert oferta_quincena(t, 0, [15, 30]) is None                 # Inicial: 7 días
-    assert oferta_quincena(t, 3, [1, 15]) == date(2026, 11, 15)
+    assert oferta_quincena(t, 2, [15, 30]) is None                 # apagada por defecto: la cuota no se mueve
+    with C.con_valores({"ofrecer_quincena": True}):
+        assert oferta_quincena(t, 2, [15, 30]) == date(2026, 11, 15)   # Confiable: hasta 15 días
+        assert oferta_quincena(t, 0, [15, 30]) is None                 # Inicial: 7 días
+        assert oferta_quincena(t, 3, [1, 15]) == date(2026, 11, 15)
 
 
 def test_descuento_por_nivel_si_paga_antes():
@@ -85,9 +87,11 @@ def test_comunicar_prioridades():
     wisi = usuario(canal_preferido="wisi")
     hoy_uso = ticket(HOY)
     ctx = _contexto(wisi, tickets + [hoy_uso], eventos, HOY)
-    if oferta_quincena(hoy_uso, ctx["nivel"], ctx["quincena"]):
-        d = decidir(ctx, tickets + [hoy_uso], eventos, HOY)
-        assert d["comunicar"]["tipo"] == "mover_quincena" and d["comunicar"]["canal"] == "wisi"
+    assert decidir(ctx, tickets + [hoy_uso], eventos, HOY)["comunicar"] is None   # sin oferta de quincena
+    with C.con_valores({"ofrecer_quincena": True}):
+        if oferta_quincena(hoy_uso, ctx["nivel"], ctx["quincena"]):
+            d = decidir(ctx, tickets + [hoy_uso], eventos, HOY)
+            assert d["comunicar"]["tipo"] == "mover_quincena" and d["comunicar"]["canal"] == "wisi"
 
 
 def test_premiar_pago_anticipado():

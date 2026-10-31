@@ -60,9 +60,12 @@ const NOMBRE_SERV = {
 const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
 const corta = (iso) => { const [, m, d] = iso.split('-').map(Number); return `${d} ${MESES[m - 1]}` }
 
+// Igual que config.ofrecer_quincena del back: apagado, la cuota vence en su fecha
+const OFRECER_QUINCENA = false
+
 /** Próxima fecha de quincena después del vencimiento (máx. 10 días) o null */
 function ofertaQuincena(quincena, vence) {
-  if (!quincena?.length) return null
+  if (!OFRECER_QUINCENA || !quincena?.length) return null
   for (let i = 0; i <= 10; i++) {
     const f = sumarDias(vence, i)
     const [a, m, d] = f.split('-').map(Number)
@@ -151,12 +154,9 @@ const maria = ficha({
   // Cuota de ejemplo de CLAUDE.md: Bs 1.655,47 + gasto adm. Bs 165,55 = Bs 1.821,02
   tickets_abiertos: [nuevoTicket({ id: 4433, codigo: '0DFF7B1', servicio: 'estacionamiento', comercio: 'C.C. El Tolón',
     fecha_uso: '2026-10-29', vence: '2026-11-05', monto: 1655.47 / TASA, nivel: 2, quincena: [15, 30] })],
-  comunicar: { tipo: 'mover_quincena', nombre: 'Mover a la quincena', canal: 'push', fecha: '2026-10-31', oferta_quincena: '2026-11-15',
-    mensaje: 'Tu cuota vence el 5 de noviembre. Vemos que sueles recargar los días 15 y 30. ¿La movemos al 15?' },
+  comunicar: null,
   premiar: [{ tipo: 'racha', detalle: '+1 racha' }, { tipo: 'descuento_nivel', detalle: '−25 % en gasto administrativo', monto: 0.11 }],
   notificaciones: [
-    { fecha: '2026-10-31', tipo: 'mover_quincena', titulo: 'Credirecto', canal: 'push',
-      mensaje: 'Tu cuota vence el 5 de noviembre. ¿La movemos al 15, tu día de recarga? Sin costo.' },
     { fecha: '2026-10-29', tipo: 'falta_poco', titulo: 'Credirecto', canal: 'push',
       mensaje: 'Te falta 1 pago a tiempo para activar el ×1,5 en el Club.' },
     { fecha: '2026-10-20', tipo: 'subida_nivel', titulo: 'Nuevo nivel', canal: 'push',

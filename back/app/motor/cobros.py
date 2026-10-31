@@ -60,7 +60,12 @@ def vencimiento_base(fecha_uso):
 
 
 def oferta_quincena(ticket, nivel, quincena):
-    """Fecha de quincena a la que se puede mover la cuota sin pasar el plazo máximo del nivel, o None."""
+    """Fecha de quincena a la que se puede mover la cuota sin pasar el plazo máximo del nivel, o None.
+
+    None siempre si la opción está apagada en la configuración (ofrecer_quincena).
+    """
+    if not C.VALORES["ofrecer_quincena"]:
+        return None
     if nivel is None or ticket["estado"] not in ("abierto", "pausa_tecnica"):
         return None
     limite = ticket["fecha_uso"] + timedelta(days=C.NIVELES[nivel]["plazo_dias"])
