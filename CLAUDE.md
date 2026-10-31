@@ -117,6 +117,9 @@ Pagar antes del vencimiento (o con la racha completa): pts ×1,5.
 ## Índice de pantallas
 
 App (`disenos/app/`): 01 home sin Credirecto (carrusel con checklist) · 02 home habilitado (carrusel con tickets) · 03 detalle (tickets, cuotas/movimientos, camino a Premium, servicios) · 04 pago con ticket · 05 mover cuota a la quincena · 06 comprobante de pago anticipado · 07 racha · 08 período de gracia · 09 modo recuperación · 10 notificaciones push.
+Además, **Club PagoDirecto** (`/app/club`, sin archivo de diseño; sigue las capturas de la app real): carrusel de rutas
+(deslizar a la izquierda) con mapa, paradas y progreso, y abajo las pestañas Hitos, Beneficios y Puntos. Se abre desde
+"Ver mi ruta" en el Home, la tarjeta del Club en Racha y la ruta que exige el siguiente nivel en Detalle.
 
 Dashboard (`disenos/dashboard/`): 01 Resumen (KPIs, Credirecto vs. regla actual, gráfico semanal) · 02 Cohortes (mapa de calor) · 03 Segmentos y niveles · 04 Decisiones · 05 Usuarios (tabla + ficha) · 06 Configuración (parámetros, simular, reloj de demo).
 

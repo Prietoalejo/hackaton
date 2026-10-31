@@ -25,7 +25,7 @@ const porque = (b) => {
 }
 
 /** Beneficios de la ruta del Club, personalizados por el motor (base × factor + uno a tu medida) */
-function BeneficiosRuta({ b }) {
+export function BeneficiosRuta({ b }) {
   const pct = Math.round(b.factor * 100)
   const tono = b.pausa ? '#D6104D' : pct > 100 ? '#3B6B00' : pct < 100 ? '#8A4B00' : '#5D5D70'
   const fondo = b.pausa ? '#FFE3EA' : pct > 100 ? '#F1FBD2' : pct < 100 ? '#FFF1D6' : '#EEF0F5'
@@ -142,9 +142,9 @@ export default function Racha() {
 
       {/* Los puntos son los del Club PagoDirecto: Credirecto solo los suma */}
       <div style={{ padding: '12px 16px 0' }}>
-        <Tarjeta style={{ padding: 16 }}>
+        <Tarjeta role="button" tabIndex={0} onClick={() => navegar('/app/club')} style={{ padding: 16, cursor: 'pointer' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
-            <span style={{ fontWeight: 700, fontSize: 17 }}>Club PagoDirecto</span>
+            <span style={{ fontWeight: 700, fontSize: 17 }}>Club PagoDirecto ›</span>
             <span className="cd-mut" style={{ fontSize: 13 }}>{ficha.club || 'Nivel Turista'}</span>
           </div>
           <div style={{ fontSize: 14, marginTop: 6, lineHeight: 1.4 }}>

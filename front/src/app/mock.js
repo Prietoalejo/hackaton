@@ -26,6 +26,32 @@ const NIVEL_CONF = [
 const FACTURAS = ['luz', 'internet', 'telefono', 'seguro']
 const esFactura = (s) => FACTURAS.includes(s)
 const PUNTOS_POR_PAGO = 100
+// Rutas del Club (igual que C.RUTAS_CLUB del back) y el nivel de Credirecto que permite cada una
+const RUTAS_CLUB = [
+  ['Turista', 'Ruta Colonial', 0, 1.0, 0, 0], ['Caminante', 'Ruta Falcón', 1000, 1.5, 1, 1],
+  ['Viajero', 'Ruta del Café', 4000, 2.0, 1, 2], ['Conocedor', 'Ruta de Paria', 11000, 2.5, 2, 3],
+  ['Explorador', 'Ruta de Los Llanos', 24000, 3.0, 2, 3], ['Trotamundo', 'Ruta Andina', 45000, 3.5, 3, 3],
+  ['Baqueano', 'Ruta del Zulia', 76000, 4.0, 4, 3],
+]
+/** club_puntos completo a partir del texto "Viajero · Ruta del Café" del perfil */
+function clubDe(p) {
+  const n = Math.max(0, RUTAS_CLUB.findIndex(([nivel]) => (p.club || '').startsWith(nivel)))
+  const [nivel, ruta, desde] = RUTAS_CLUB[n]
+  const sig = RUTAS_CLUB[n + 1]
+  const puntos = p.puntos_club ?? Math.min(desde + 800, sig ? sig[2] - 1 : desde + 800)
+  const credirecto = p.puntos_credirecto ?? 0
+  const bonos = n * 500
+  return {
+    nombre: 'Club PagoDirecto', nivel_club: n, nivel_nombre: nivel, ruta, texto: `${nivel} · ${ruta}`, puntos,
+    puntos_credirecto: credirecto, puntos_por_pago: PUNTOS_POR_PAGO, multiplicador: 1.5, bono_ruta: 500,
+    siguiente: sig ? { nivel_club: n + 1, nivel_nombre: sig[0], ruta: sig[1], desde: sig[2], faltan: sig[2] - puntos } : null,
+    desglose: { servicios: Math.max(0, puntos - credirecto - bonos), credirecto, rutas: bonos },
+    rutas: RUTAS_CLUB.map(([nv, rt, ds, wb, tg, cn], i) => ({
+      nivel_club: i, nivel_nombre: nv, ruta: rt, desde: ds, walletback_pct: wb, tickets_gratis: tg, credirecto_nivel: cn,
+      estado: i < n ? 'completada' : i === n ? 'actual' : 'bloqueada',
+    })),
+  }
+}
 const MONTO_MIN_PREMIO = 0.5 // USD: cuotas menores no suman puntos, racha ni repagos (igual que el back)
 const NOMBRE_SERV = {
   estacionamiento: 'Estacionamiento', parquimetro: 'Parquímetro', peaje: 'Peaje', luz: 'Luz',
@@ -76,8 +102,7 @@ function ficha(p) {
     servicios_cupo: conf
       ? { total: conf.servicios_cupo, usados: 0, disponibles: conf.servicios_cupo, cubre: conf.servicios.filter(esFactura) }
       : { total: 0, usados: 0, disponibles: 0, cubre: [] },
-    club_puntos: { nombre: 'Club PagoDirecto', ruta: p.club, puntos_credirecto: p.puntos_credirecto ?? 0,
-      puntos_por_pago: PUNTOS_POR_PAGO, multiplicador: 1.5 },
+    club_puntos: clubDe(p),
     beneficios: p.beneficios ?? null,
     progreso: p.progreso ?? null,
     racha: p.racha,
@@ -113,7 +138,7 @@ const checklistCompleto = [
 // ---------- Fichas de ejemplo ----------
 const maria = ficha({
   user_id: 'u_0142', nombre: 'María', alias: '@maria.r', habilitado_desde: '2026-06-02', cohorte: '2026-06',
-  nivel: 2, segmento: 'Puntual', quincena: [15, 30], club: 'Viajero · Ruta del Café', trust_score: 76, puntos_credirecto: 650,
+  nivel: 2, segmento: 'Puntual', quincena: [15, 30], club: 'Viajero · Ruta del Café', trust_score: 76, puntos_credirecto: 650, puntos_club: 4800,
   beneficios: { ruta: 'Viajero · Ruta del Café', factor: 1.15, pausa: false,
     razones: [{ senal: 'puntualidad', efecto: 0.15, texto: 'Paga a tiempo el 100% de sus pagos' }],
     beneficios: [{ tipo: 'walletback', nombre: 'Walletback', unidad: '%', base: 2, personal: 2.3, estimado_mes: 0.62 },

@@ -245,6 +245,7 @@ function Movimientos() {
 }
 
 function CaminoA({ progreso: p }) {
+  const navegar = useNavigate()
   const n = Math.max(1, p.repagos_requeridos)
   return (
     <div style={{ padding: '20px 16px 0' }}>
@@ -259,7 +260,7 @@ function CaminoA({ progreso: p }) {
           ))}
         </div>
         {p.faltan_pts_club > 0 && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'center', marginTop: 12, fontSize: 14, background: '#FFE8EF', color: '#A3165E', borderRadius: 14, padding: '8px 12px' }}>
+          <div role="button" tabIndex={0} onClick={() => navegar('/app/club')} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'center', marginTop: 12, fontSize: 14, background: '#FFE8EF', color: '#A3165E', borderRadius: 14, padding: '8px 12px', cursor: 'pointer' }}>
             <span>Llega a <b>{p.ruta_requerida}</b> en el Club PagoDirecto</span>
             <b style={{ whiteSpace: 'nowrap' }}>faltan {p.faltan_pts_club.toLocaleString('es-VE')} pts</b>
           </div>

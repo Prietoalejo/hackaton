@@ -37,6 +37,7 @@ export default function PanelPruebas({ userId, elegirUsuario, hoy, avanzarDia, a
     { to: '/app/pago', txt: '04 Pago' },
     conOferta && { to: `/app/quincena/${conOferta.id}`, txt: '05 Quincena' },
     { to: '/app/racha', txt: '07 Racha' },
+    { to: '/app/club', txt: 'Club' },
     enGracia && { to: `/app/gracia/${enGracia.id}`, txt: '08 Gracia' },
     { to: '/app/notificaciones', txt: '10 Push' },
   ].filter(Boolean)

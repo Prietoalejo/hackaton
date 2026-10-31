@@ -9,6 +9,7 @@ import Home from './pantallas/Home.jsx'
 import Detalle from './pantallas/Detalle.jsx'
 import PagoTicket from './pantallas/PagoTicket.jsx'
 import Quincena from './pantallas/Quincena.jsx'
+import Club from './pantallas/Club.jsx'
 import Comprobante from './pantallas/Comprobante.jsx'
 import Racha from './pantallas/Racha.jsx'
 import Gracia from './pantallas/Gracia.jsx'
@@ -95,6 +96,7 @@ export default function AppRoot() {
                 <Route path="quincena/:ticketId" element={<Quincena />} />
                 <Route path="comprobante" element={<Comprobante />} />
                 <Route path="racha" element={<Racha />} />
+                <Route path="club" element={<Club />} />
                 <Route path="gracia/:ticketId" element={<Gracia />} />
                 <Route path="notificaciones" element={<Notificaciones />} />
                 <Route path="*" element={<Navigate to="/app" replace />} />

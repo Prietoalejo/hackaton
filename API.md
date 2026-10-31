@@ -173,6 +173,9 @@ Recarga los datos sintéticos y vuelve el reloj al 2026-10-31. Tarda ~1 min.
 - `premiar[].tipo` ∈ `racha, multiplicador, puntos (trae "puntos"), descuento_nivel (trae "monto"), subida_nivel (trae "nuevo_nivel")`.
 - `tickets` es el cupo de movilidad (estacionamiento, parquímetro, peaje); `servicios_cupo` el de facturas (luz, internet, teléfono, seguro).
   `tickets.servicios` sigue listando todo lo que cubre el nivel.
+- `club_puntos.rutas`: las 7 rutas del Club para el carrusel de la pantalla Club, cada una con `nivel_club`, `nivel_nombre`,
+  `ruta`, `desde` (pts), `walletback_pct`, `tickets_gratis`, `credirecto_nivel` (nivel máximo de Credirecto que permite)
+  y `estado` ∈ `completada | actual | bloqueada`. `club_puntos.desglose`: `{servicios, credirecto, rutas}` en pts; `bono_ruta`.
 - `club` es el texto del nivel y la ruta del Club ("Viajero · Ruta del Café"); `club_puntos` trae el detalle.
   `club_puntos.puntos_credirecto`: la parte de esos puntos que vino de cuotas de Credirecto.
 - `racha.pagos` cuenta **días** con pago a tiempo en la semana (no pagos). Cuotas por debajo de `monto_min_premio`

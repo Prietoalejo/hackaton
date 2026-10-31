@@ -40,12 +40,22 @@ def calcular_club(eventos, tickets, hoy) -> dict:
     n = nivel_club(puntos)
     ruta = C.RUTAS_CLUB[n]
     siguiente = C.RUTAS_CLUB[n + 1] if n + 1 < len(C.RUTAS_CLUB) else None
+    # Todas las rutas para el carrusel del Club: completadas, la actual y las bloqueadas
+    rutas = [{"nivel_club": i, "nivel_nombre": r["nivel"], "ruta": r["ruta"], "desde": r["desde"],
+              "walletback_pct": r["walletback_pct"], "tickets_gratis": r["tickets_gratis"],
+              "credirecto_nivel": nivel_credirecto_por_club(i),
+              "estado": "completada" if i < n else "actual" if i == n else "bloqueada"}
+             for i, r in enumerate(C.RUTAS_CLUB)]
     return {
         "nombre": C.CLUB_NOMBRE, "nivel_club": n, "nivel_nombre": ruta["nivel"], "ruta": ruta["ruta"],
         "texto": f"{ruta['nivel']} · {ruta['ruta']}", "puntos": puntos, "puntos_credirecto": puntos_credirecto,
         "siguiente": ({"nivel_club": n + 1, "nivel_nombre": siguiente["nivel"], "ruta": siguiente["ruta"],
                        "desde": siguiente["desde"], "faltan": siguiente["desde"] - puntos} if siguiente else None),
         "puntos_por_pago": C.PUNTOS_POR_PAGO, "multiplicador": C.MULTIPLICADOR_PUNTOS,
+        "bono_ruta": C.BONO_RUTA_COMPLETADA,
+        "desglose": {"servicios": pagos * C.PUNTOS_POR_PAGO, "credirecto": puntos_credirecto,
+                     "rutas": completadas * C.BONO_RUTA_COMPLETADA},
+        "rutas": rutas,
     }
 
 

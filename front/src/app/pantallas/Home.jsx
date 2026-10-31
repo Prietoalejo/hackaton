@@ -124,7 +124,12 @@ function HomeNormal() {
 
       {/* Club PagoDirecto: los puntos de Credirecto se suman a este mismo Club (no hay puntos aparte) */}
       <div style={{ padding: '22px 20px 0' }}>
-        <h2 className="cd-h2">Club PagoDirecto</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10 }}>
+          <h2 className="cd-h2">Club PagoDirecto</h2>
+          <button onClick={() => navegar('/app/club')} style={{ border: 0, background: 'none', padding: 0, color: '#FF1F5A', font: "700 15px 'Outfit',sans-serif", cursor: 'pointer' }}>
+            Ver mi ruta
+          </button>
+        </div>
         {hab && (
           <Tarjeta role="button" tabIndex={0} onClick={() => navegar('/app/racha')}
             style={{ marginTop: 14, padding: 18, display: 'flex', gap: 14, alignItems: 'center', cursor: 'pointer' }}>
