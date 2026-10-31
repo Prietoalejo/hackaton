@@ -10,6 +10,7 @@ from datetime import timedelta
 
 from app import config as C
 from app.motor.quincena import fecha_de_quincena
+from app.motor.score import vence_original
 
 
 def gasto_admin(monto: float) -> float:
@@ -37,7 +38,7 @@ def deuda(ticket) -> float:
 
 def descuento_si_paga(ticket, hoy, nivel) -> float:
     """Descuento por nivel que tendría si salda la cuota hoy: solo antes del vencimiento."""
-    return descuento_por_nivel(ticket, nivel) if hoy < ticket["fecha_vencimiento"] else 0.0
+    return descuento_por_nivel(ticket, nivel) if hoy < vence_original(ticket) else 0.0
 
 
 def estado_por_atraso(dias: int) -> str:

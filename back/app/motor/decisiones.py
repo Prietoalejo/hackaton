@@ -5,7 +5,7 @@ from app import config as C
 from app.motor.club import puntos_de_cuota
 from app.motor.cobros import cubrir_monto, oferta_quincena
 from app.motor.niveles import evaluar_nivel
-from app.motor.score import ESTADOS_PROTEGIDOS, ESTADOS_VENCIDOS, dias_atraso, es_anticipado
+from app.motor.score import ESTADOS_PROTEGIDOS, ESTADOS_VENCIDOS, cuenta_para_premios, dias_atraso, es_anticipado
 
 
 def en_uso(tickets, cupo=None) -> list:
@@ -14,11 +14,16 @@ def en_uso(tickets, cupo=None) -> list:
 
 
 def racha(eventos, hoy) -> dict:
-    """Pagos a tiempo en la semana (lunes a domingo) que contiene `hoy`."""
+    """Días con algún pago a tiempo en la semana (lunes a domingo) que contiene `hoy`.
+
+    Cuenta días, no pagos: pagar varias cuotas el mismo día suma 1. Las cuotas de Credirecto
+    por debajo de C.MONTO_MIN_PREMIO no cuentan (no se puede llenar la racha con céntimos).
+    """
     lunes = hoy - timedelta(days=hoy.weekday())
-    fechas = [e["fecha"] for e in eventos
+    fechas = {e["fecha"] for e in eventos
               if e["tipo"] in ("pago_servicio", "repago_ticket") and e.get("a_tiempo") is True
-              and lunes <= e["fecha"] <= hoy]
+              and lunes <= e["fecha"] <= hoy
+              and (e["tipo"] != "repago_ticket" or cuenta_para_premios(e["monto"]))}
     semana = [lunes + timedelta(days=i) for i in range(7)]
     return {"pagos": min(len(fechas), C.META_RACHA), "meta": C.META_RACHA,
             "quedan_dias": 6 - hoy.weekday(), "multiplicador": len(fechas) >= C.META_RACHA,
@@ -136,7 +141,7 @@ def premios_por_pago(ticket, nivel, racha_despues) -> list:
     """Premios de saldar una cuota. Solo se premia lo que reduce el riesgo, nunca el uso.
     Racha y puntos son los del Club PagoDirecto: Credirecto no crea un sistema de puntos propio."""
     premios = []
-    if ticket["fecha_pago"] <= ticket["fecha_vencimiento"]:
+    if ticket["fecha_pago"] <= ticket["fecha_vencimiento"] and cuenta_para_premios(ticket["monto"]):
         premios.append({"tipo": "racha", "detalle": "+1 racha en el Club"})
     anticipado = es_anticipado(ticket)
     if anticipado:

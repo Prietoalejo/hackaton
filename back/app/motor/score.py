@@ -49,9 +49,19 @@ def ticket_en_ventana(ticket, hoy, dias: int = None) -> bool:
     return ticket["fecha_uso"] <= hoy
 
 
+def vence_original(ticket):
+    """Vencimiento antes de moverlo a la quincena: moverlo da más plazo, no convierte un pago en anticipado."""
+    return min(ticket["fecha_vencimiento"], ticket["fecha_uso"] + timedelta(days=C.PLAZO_BASE_DIAS))
+
+
 def es_anticipado(ticket) -> bool:
     return (ticket["estado"] == "pagado"
-            and ticket["fecha_pago"] <= ticket["fecha_vencimiento"] - timedelta(days=C.DIAS_ANTICIPADO))
+            and ticket["fecha_pago"] <= vence_original(ticket) - timedelta(days=C.DIAS_ANTICIPADO))
+
+
+def cuenta_para_premios(monto) -> bool:
+    """Puntos, racha y repagos solo cuentan desde un monto mínimo (sin tickets de céntimos)."""
+    return monto >= C.MONTO_MIN_PREMIO
 
 
 def calcular_score(eventos, tickets, usuario, hoy) -> dict:

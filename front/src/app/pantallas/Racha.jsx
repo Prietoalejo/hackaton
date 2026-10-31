@@ -106,7 +106,7 @@ export default function Racha() {
         <div style={{ borderRadius: 30, padding: '24px 20px 22px', color: '#fff', position: 'relative', background: 'linear-gradient(135deg,#0E0F2A 0%,#3A1440 45%,#A3165E 80%,#FF1F5A 100%)', boxShadow: '0 14px 34px rgba(58,20,64,.3)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ fontSize: 84, fontWeight: 700, lineHeight: 1 }}>{r.pagos}</span>
-            <span style={{ fontSize: 24, fontWeight: 600, lineHeight: 1.1 }}>de {r.meta}<br />pagos</span>
+            <span style={{ fontSize: 24, fontWeight: 600, lineHeight: 1.1 }}>de {r.meta}<br />días</span>
           </div>
           <div style={{ position: 'absolute', right: 18, top: 18, width: 92, height: 92, borderRadius: '50%', border: '2px dashed rgba(255,255,255,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: '#F2E6EE' }}>Mascota</div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 22 }}>
@@ -117,12 +117,12 @@ export default function Racha() {
               return <span key={d.iso} className="cd-dy" style={{ background: 'rgba(255,255,255,.14)', color: 'rgba(255,255,255,.75)' }}>{d.l}</span>
             })}
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 16, fontSize: 15 }}><span>Racha de 7 días</span><span style={{ fontWeight: 700 }}>{r.pagos} / {r.meta} pagos</span></div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 16, fontSize: 15 }}><span>Racha de 7 días</span><span style={{ fontWeight: 700 }}>{r.pagos} / {r.meta} días</span></div>
           <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.max(1, r.meta)}, minmax(0, 1fr))`, gap: 8, marginTop: 10 }} aria-hidden="true">
             {Array.from({ length: r.meta }, (_, i) => <span key={i} style={{ height: 8, borderRadius: 4, background: i < r.pagos ? '#fff' : 'rgba(255,255,255,.3)' }} />)}
           </div>
           <div style={{ fontSize: 15, fontWeight: 600, marginTop: 14 }}>
-            {r.multiplicador ? '¡Tienes el ×1,5 activo en el Club!' : `Completa ${r.meta} pagos y activa el ×1,5`}
+            {r.multiplicador ? '¡Tienes el ×1,5 activo en el Club!' : `Paga a tiempo ${r.meta} días distintos y activa el ×1,5`}
           </div>
         </div>
       </div>
@@ -131,7 +131,7 @@ export default function Racha() {
         <Tarjeta style={{ padding: 14, display: 'flex', gap: 10, alignItems: 'center' }}>
           <span style={{ width: 36, height: 36, borderRadius: '50%', border: '2px solid #FFB3C7', color: '#E0124F', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 12, flex: 'none' }}>×1,5</span>
           <span><span className="cd-mut" style={{ display: 'block', fontSize: 13 }}>Multiplicador</span>
-            <span style={{ fontWeight: 700 }}>{r.multiplicador || faltan === 0 ? '¡Activo!' : `Te ${faltan === 1 ? 'falta 1 pago' : `faltan ${faltan} pagos`}`}</span></span>
+            <span style={{ fontWeight: 700 }}>{r.multiplicador || faltan === 0 ? '¡Activo!' : `Te ${faltan === 1 ? 'falta 1 día' : `faltan ${faltan} días`}`}</span></span>
         </Tarjeta>
         <Tarjeta style={{ padding: 14, display: 'flex', gap: 10, alignItems: 'center' }}>
           <IcoReloj w={30} color="#E0124F" style={{ flex: 'none' }} />

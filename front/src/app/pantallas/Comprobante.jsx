@@ -25,6 +25,8 @@ export default function Comprobante() {
   const parcial = !varios && (pagos[0].deuda_restante ?? 0) > 0.0001
   const puntos = cs.reduce((s, x) => s + (x.puntos_club || 0), 0)
   const club = cs[cs.length - 1].club
+  // La racha cuenta días: pagar varias cuotas el mismo día suma 1 (o nada si hoy ya contaba)
+  const subeRacha = cs[cs.length - 1].racha_despues - cs[0].racha_antes
 
   return (
     <Pantalla reserva={130} pie={
@@ -55,10 +57,10 @@ export default function Comprobante() {
                 </span>
               </div>
               <div style={{ fontSize: 16, fontWeight: 500, marginTop: 6, lineHeight: 1.35 }}>
-                {anticipados.length > 1 ? `+${anticipados.length}` : '+1'} en tu racha y {puntos ? `+${entero(puntos)} pts (×1,5)` : 'puntos ×1,5'} en tu Club PagoDirecto
+                {subeRacha > 0 ? `+${subeRacha} en tu racha y ` : ''}{puntos ? `+${entero(puntos)} pts (×1,5)` : 'puntos ×1,5'} en tu Club PagoDirecto
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12, fontSize: 13, fontWeight: 600 }}>
-                <span style={{ background: '#C6F432', color: '#121412', padding: '6px 10px', borderRadius: 999 }}>Racha {anticipados[0].racha_antes} → {cs[cs.length - 1].racha_despues}</span>
+                <span style={{ background: '#C6F432', color: '#121412', padding: '6px 10px', borderRadius: 999 }}>Racha {cs[0].racha_antes} → {cs[cs.length - 1].racha_despues}</span>
                 {club && <span style={{ background: 'rgba(255,255,255,.14)', padding: '6px 10px', borderRadius: 999 }}>{club}</span>}
                 {liberados.length > 0 && (
                   <span style={{ background: 'rgba(255,255,255,.14)', padding: '6px 10px', borderRadius: 999 }}>

@@ -5,12 +5,13 @@ rutas. Credirecto no tiene puntos propios: sus cuotas pagadas a tiempo suman a e
 cada nivel de Credirecto se amarra a una ruta del Club (ver C.RUTA_MINIMA_POR_NIVEL).
 """
 from app import config as C
-from app.motor.score import es_anticipado
+from app.motor.score import cuenta_para_premios, es_anticipado
 
 
 def puntos_de_cuota(ticket, racha_completa=False) -> int:
-    """Puntos que una cuota pagada suma al Club (0 si no está pagada o se pagó tarde)."""
-    if ticket["estado"] != "pagado" or ticket["fecha_pago"] > ticket["fecha_vencimiento"]:
+    """Puntos que una cuota pagada suma al Club (0 si no está pagada, se pagó tarde o es de céntimos)."""
+    if (ticket["estado"] != "pagado" or ticket["fecha_pago"] > ticket["fecha_vencimiento"]
+            or not cuenta_para_premios(ticket["monto"])):
         return 0
     doble = es_anticipado(ticket) or racha_completa
     return int(C.PUNTOS_POR_PAGO * (C.MULTIPLICADOR_PUNTOS if doble else 1))

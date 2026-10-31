@@ -15,7 +15,7 @@ from app.motor.cobros import (comision_por_desfase, cuota, descuento_por_nivel, 
 from app.motor.club import puntos_de_cuota
 from app.motor.decisiones import en_uso, racha, validar_solicitud
 from app.motor.perfil import evaluar_usuario
-from app.motor.score import dias_atraso, es_anticipado
+from app.motor.score import dias_atraso, es_anticipado, vence_original
 from app.worker import mora
 from datos import generar
 from datos.comportamiento import Comportamiento
@@ -62,7 +62,7 @@ def _ticket_json(t, nivel, quincena, hoy) -> dict:
         "monto": t["monto"], "gasto_admin": t["gasto_admin"], "comision": t["comision"], "cuota": cuota(t),
         "pagado": t["monto_pagado"], "deuda": max(deuda(t), 0.0),
         "descuento_si_anticipa": (descuento_por_nivel(t, nivel)
-                                  if vivo and hoy < t["fecha_vencimiento"] and t["estado"] == "abierto" else 0.0),
+                                  if vivo and hoy < vence_original(t) and t["estado"] == "abierto" else 0.0),
         "gracia_hasta": gracia_hasta(t).isoformat(),
         "comision_si_atrasa": comision_por_desfase(t) if vivo and t["comision"] == 0 else 0.0,
         "oferta_quincena": oferta.isoformat() if oferta else None,
@@ -105,7 +105,7 @@ def _linea_de_tiempo(eventos, tickets, decisiones, fotos) -> list:
                 cuando = (f"{dias} días antes" if dias > 1 else "1 día antes" if dias == 1 else
                           "el día de cobro" if dias == 0 else f"con {-dias} días de atraso")
                 puntos = puntos_de_cuota(t)
-                texto = (f"Cuota pagada {cuando} · ticket renovado" + (" · racha +1" if dias > 0 else "")
+                texto = (f"Cuota pagada {cuando} · ticket renovado"
                          + (f" · +{puntos} pts Club" if puntos else ""))
             else:
                 texto = "Abono a la cuota"
@@ -428,7 +428,7 @@ def registrar_pago(body: PagoIn, conn=Depends(conexion)):
     comprobante = {
         "referencia": f"CD-{(t['id'] * 7919 + hoy.toordinal()) % 10**9:09d}", "fecha": hoy.isoformat(),
         "completo": completo,
-        "dias_antes": max(0, (t["fecha_vencimiento"] - hoy).days),
+        "dias_antes": max(0, (vence_original(t) - hoy).days),
         "anticipado": completo and es_anticipado(t),
         "cuota": t["monto"], "gasto_admin": t["gasto_admin"], "descuento": t["descuento"],
         "descuento_pct": int(round(C.DESCUENTO_NIVEL.get(perfil["nivel"], 0) * 100)) if t["descuento"] else 0,

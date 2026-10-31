@@ -174,6 +174,8 @@ Recarga los datos sintéticos y vuelve el reloj al 2026-10-31. Tarda ~1 min.
   `tickets.servicios` sigue listando todo lo que cubre el nivel.
 - `club` es el texto del nivel y la ruta del Club ("Viajero · Ruta del Café"); `club_puntos` trae el detalle.
   `club_puntos.puntos_credirecto`: la parte de esos puntos que vino de cuotas de Credirecto.
+- `racha.pagos` cuenta **días** con pago a tiempo en la semana (no pagos). Cuotas por debajo de `monto_min_premio`
+  no suman racha, puntos ni repagos. `comprobante.anticipado` y `dias_antes` se miden contra el vencimiento original.
 - `progreso` trae además `ruta_requerida` y `faltan_pts_club`: la ruta del Club que exige el siguiente nivel.
 - `beneficios` (motor de beneficios del Club): `{"ruta", "factor" (0–1,5), "pausa", "razones": [{"senal", "efecto", "texto"}],
   "beneficios": [{"tipo": "walletback" | "tickets_gratis", "nombre", "unidad", "base", "personal", "estimado_mes"?}],

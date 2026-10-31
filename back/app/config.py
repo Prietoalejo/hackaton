@@ -56,6 +56,8 @@ EDITABLES = [
     ("bono_racha_pct", "Motor de beneficios del Club", "Racha de la semana completa", "%", 10, 5),
     ("bono_score_pct", "Motor de beneficios del Club", "Trust Score alto (± si es bajo)", "%", 10, 5),
     ("castigo_riesgo_pct", "Motor de beneficios del Club", "Segmento En riesgo", "%", 30, 5),
+    # Evita "fabricar" puntos, racha y repagos con tickets de céntimos ($0,50 = parquímetro o peaje)
+    ("monto_min_premio", "Motor de beneficios del Club", "Cuota mínima para sumar puntos, racha y repagos", "USD", 0.5, 0.25),
 
     ("repagos_basico", "Repagos a tiempo para subir", "Básico", "", 1, 1),
     ("repagos_confiable", "Repagos a tiempo para subir", "Confiable", "", 3, 1),
@@ -165,7 +167,7 @@ RUTAS_CLUB = [
 ]
 BENEFICIO_MIN_PAGOS = 3      # pagos en la ventana para que la puntualidad y los anticipados cuenten
 MULTIPLICADOR_PUNTOS = 1.5   # pagar antes del vencimiento o con la racha completa
-META_RACHA = 3               # pagos en la semana para activar el ×1,5 (la misma racha del Club)
+META_RACHA = 3               # días con pago a tiempo en la semana para activar el ×1,5 (la misma racha del Club)
 
 # Mensajes por prioridad. Tono amable, nunca amenazante.
 MENSAJES = {
@@ -212,6 +214,7 @@ MARGEN_BAJADA = 0
 NIVELES = {}
 REPAGOS_POR_NIVEL = {}
 RUTA_MINIMA_POR_NIVEL = {}
+MONTO_MIN_PREMIO = 0.0
 GRACIA_DIAS = MORA_DIA = 0
 GASTO_ADMIN = COMISION = COMISION_MIN = 0.0
 DESCUENTO_NIVEL = {}
@@ -228,6 +231,7 @@ def _derivar():
     g["FRICCION_MAX"] = -abs(v["friccion_max"])
     g["UMBRALES_NIVEL"] = {1: v["umbral_basico"], 2: v["umbral_confiable"], 3: v["umbral_premium"]}
     g["MARGEN_BAJADA"] = v["margen_bajada"]
+    g["MONTO_MIN_PREMIO"] = float(v["monto_min_premio"])
     nombres = ["inicial", "basico", "confiable", "premium"]
     g["NIVELES"] = {n: {"tickets": int(v[f"tickets_{k}"]), "servicios_cupo": int(v[f"servicios_{k}"]),
                         "monto_max": float(v[f"max_{k}"]),

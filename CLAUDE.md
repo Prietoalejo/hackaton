@@ -149,7 +149,8 @@ Las funciones de `motor/` son puras: reciben datos y la fecha `hoy`, no tocan la
 
 - **Habilitación**: cédula + vehículo + `req_pagos` pagos de servicios a tiempo + `req_dias` días. Configurable.
 - **Score**: pesos de la guía. Verificación = 5 por cédula + 5 por vehículo. Fricción = −1 por rechazo de
-  fondos y −1 por día de atraso en 90 días, con piso −10. Anticipado = pagar 1+ días antes del vencimiento.
+  fondos y −1 por día de atraso en 90 días, con piso −10. Anticipado = pagar 1+ días antes del vencimiento
+  **original** (mover la cuota a la quincena da más plazo, pero no convierte un pago en anticipado ni da el descuento).
 - **Niveles**: por score con margen de 5 para bajar. Además, repagos a tiempo para subir
   (Básico 1, Confiable 3, Premium 10, sacado del "Camino a Premium 5 de 10") y 2 meses para Premium.
 - **Cuotas**: cuota = monto + gasto administrativo (10 %). Vencimiento = uso + 7 días; se puede mover a la
@@ -166,9 +167,11 @@ Las funciones de `motor/` son puras: reciben datos y la fecha `hoy`, no tocan la
   Van por el canal preferido del usuario; el aviso de mora va por push y Wisi.
 - **Cupos**: `tickets` (movilidad) y `servicios_cupo` (facturas) se cuentan por separado (`config.cupo_de`).
   Sin cupo de servicios libre el rechazo es `servicios_en_uso`.
-- **Premios**: racha (pagos a tiempo en la semana, meta 3 → ×1,5), ×1,5 por pagar antes, puntos del
+- **Premios**: racha (días con pago a tiempo en la semana, meta 3 → ×1,5; varias cuotas el mismo día suman 1), ×1,5 por pagar antes, puntos del
   Club PagoDirecto (100 por pago; son los mismos puntos del Club, no un sistema nuevo), descuento por nivel,
   subida de nivel. Usar el crédito no se premia.
+  Cuotas de menos de `monto_min_premio` ($0,50, configurable) no suman puntos, racha ni repagos para subir:
+  así no se puede subir de nivel con tickets de céntimos.
 - **Regla actual vs. Credirecto**: el generador simula los mismos usuarios con la regla actual (2 tickets,
   7 días, solo estacionamiento, para todos) y guarda sus métricas en `metricas_regla_actual`.
   Credirecto empieza a decidir el 7 sep 2026.

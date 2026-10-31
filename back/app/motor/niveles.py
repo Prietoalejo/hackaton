@@ -11,12 +11,13 @@ Solo aplica a usuarios habilitados.
 """
 from app import config as C
 from app.motor.club import calcular_club, nivel_credirecto_por_club
-from app.motor.score import meses_desde
+from app.motor.score import cuenta_para_premios, meses_desde
 
 
 def repagos_a_tiempo(tickets) -> int:
     return sum(1 for t in tickets
-               if t["estado"] == "pagado" and t["fecha_pago"] <= t["fecha_vencimiento"])
+               if t["estado"] == "pagado" and t["fecha_pago"] <= t["fecha_vencimiento"]
+               and cuenta_para_premios(t["monto"]))
 
 
 def _umbral(n, umbrales) -> float:

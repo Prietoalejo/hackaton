@@ -2,12 +2,13 @@
 from datetime import date, timedelta
 
 from app import config as C
+from app.motor.club import puntos_de_cuota
 from app.motor.cobros import oferta_quincena
 from app.motor.decisiones import decidir, racha
-from app.motor.niveles import nivel_por_score
+from app.motor.niveles import nivel_por_score, repagos_a_tiempo
 from app.motor.perfil import evaluar_usuario
 from app.motor.quincena import calcular_quincena, fecha_de_quincena
-from app.motor.score import calcular_score
+from app.motor.score import calcular_score, es_anticipado
 from app.worker.mora import aplicar_pago
 from tests.fabrica import HOY, evento, facturas, hace, historial_puntual, ticket, ticket_pagado, usuario
 
@@ -170,3 +171,30 @@ def test_motor_de_beneficios_personaliza_la_ruta():
     assert walletback(segmento=C.SEG_CONDUCTOR)[0]["a_tu_medida"]["tipo"] == "ticket_extra"
     with C.con_valores({"beneficio_max_pct": 100}):
         assert walletback()[0]["factor"] == 1.0                            # el tope es configurable
+
+
+def test_mover_a_quincena_no_convierte_un_pago_tardio_en_anticipado():
+    t = ticket(hace(10), monto=4.0, vence=hace(10) + timedelta(days=15))   # vencía hace 3 días; se movió +8
+    pagado, _, _ = aplicar_pago(t, 100, HOY, nivel=2)
+    assert pagado["estado"] == "pagado" and pagado["descuento"] == 0       # a tiempo, pero no antes
+    assert not es_anticipado(pagado) and puntos_de_cuota(pagado) == C.PUNTOS_POR_PAGO
+    antes = ticket(hace(2), monto=4.0, vence=hace(2) + timedelta(days=15))  # paga antes de la fecha original
+    pagado, _, _ = aplicar_pago(antes, 100, HOY, nivel=2)
+    assert pagado["descuento"] > 0 and es_anticipado(pagado)
+
+
+def test_tickets_de_centimos_no_suman_puntos_racha_ni_repagos():
+    chico, ev_chico = ticket_pagado(hace(5), dias_vs_vencimiento=-2, monto=0.01)
+    normal, ev_normal = ticket_pagado(hace(5), dias_vs_vencimiento=-2, monto=C.MONTO_MIN_PREMIO)
+    assert puntos_de_cuota(chico) == 0 and puntos_de_cuota(normal) > 0
+    assert repagos_a_tiempo([chico]) == 0 and repagos_a_tiempo([normal]) == 1
+    pago_chico = [e for e in ev_chico if e["tipo"] == "repago_ticket"]
+    assert racha(pago_chico, HOY)["pagos"] == 0
+
+
+def test_racha_cuenta_dias_no_pagos():
+    lunes = HOY - timedelta(days=HOY.weekday())
+    mismo_dia = [evento(lunes, "repago_ticket", monto=5.0, a_tiempo=True) for _ in range(3)]
+    assert racha(mismo_dia, HOY)["pagos"] == 1 and not racha(mismo_dia, HOY)["multiplicador"]
+    tres_dias = [evento(lunes + timedelta(days=i), "repago_ticket", monto=5.0, a_tiempo=True) for i in range(3)]
+    assert racha(tres_dias, HOY)["multiplicador"]

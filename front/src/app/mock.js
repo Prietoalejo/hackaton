@@ -26,6 +26,7 @@ const NIVEL_CONF = [
 const FACTURAS = ['luz', 'internet', 'telefono', 'seguro']
 const esFactura = (s) => FACTURAS.includes(s)
 const PUNTOS_POR_PAGO = 100
+const MONTO_MIN_PREMIO = 0.5 // USD: cuotas menores no suman puntos, racha ni repagos (igual que el back)
 const NOMBRE_SERV = {
   estacionamiento: 'Estacionamiento', parquimetro: 'Parquímetro', peaje: 'Peaje', luz: 'Luz',
   internet: 'Internet', telefono: 'Teléfono', seguro: 'Seguro',
@@ -318,6 +319,7 @@ export const apiMock = {
     const t = f?.tickets_abiertos.find((x) => x.id === Number(ticketId))
     if (!t) throw new ApiError(404, 'No encontramos ese ticket.')
     if (!t.oferta_quincena) throw new ApiError(409, 'Este ticket no tiene una fecha de quincena disponible.')
+    t.vence_original = t.vence_original || t.vence // el anticipado se mide contra la fecha original
     t.vence = t.oferta_quincena
     t.gracia_hasta = sumarDias(t.vence, 2)
     t.oferta_quincena = null
@@ -336,7 +338,9 @@ export const apiMock = {
     }
     if (!(monto > 0)) throw new ApiError(422, 'Ingresa un monto mayor a cero.')
     const dias = diasEntre(hoy, t.vence)
-    const anticipado = dias > 0
+    const diasAntes = diasEntre(hoy, t.vence_original || t.vence)
+    const anticipado = diasAntes > 0
+    const premia = t.monto >= MONTO_MIN_PREMIO
     const descuento = anticipado ? t.descuento_si_anticipa : 0
     const aPagar = rd(t.deuda - descuento)
     const total = rd(Math.min(monto, aPagar))
@@ -345,24 +349,26 @@ export const apiMock = {
     let puntos = 0
     if (completo) {
       f.tickets_abiertos = f.tickets_abiertos.filter((x) => x.id !== t.id)
-      if (dias >= 0) {
-        f.racha.pagos = Math.min(f.racha.meta, f.racha.pagos + 1)
+      if (dias >= 0 && premia) {
+        // La racha cuenta días con pago, no pagos: varias cuotas el mismo día suman 1
+        if (f.racha_ultimo_dia !== hoy) f.racha.pagos = Math.min(f.racha.meta, f.racha.pagos + 1)
+        f.racha_ultimo_dia = hoy
         f.racha.multiplicador = f.racha.pagos >= f.racha.meta
         // Puntos del mismo Club PagoDirecto: ×1,5 si paga antes o completó la racha
         puntos = Math.round(PUNTOS_POR_PAGO * (anticipado || f.racha.multiplicador ? 1.5 : 1))
         f.club_puntos.puntos_credirecto += puntos
       }
-      if (f.progreso) {
+      if (f.progreso && premia) {
         f.progreso.repagos_hechos = Math.min(f.progreso.repagos_requeridos, f.progreso.repagos_hechos + 1)
         f.progreso.faltan_repagos = f.progreso.repagos_requeridos - f.progreso.repagos_hechos
       }
     } else {
       t.pagado = rd(t.pagado + total)
     }
-    f.linea_de_tiempo.unshift({ fecha: hoy, tipo: 'Pago', texto: `Pago · Cuota ${NOMBRE_SERV[t.servicio]} ${t.comercio}${anticipado ? ` · ${dias} días antes` : ''}`, monto: total })
+    f.linea_de_tiempo.unshift({ fecha: hoy, tipo: 'Pago', texto: `Pago · Cuota ${NOMBRE_SERV[t.servicio]} ${t.comercio}${anticipado ? ` · ${diasAntes} días antes` : ''}`, monto: total })
     recalcular(f)
     const comprobante = {
-      referencia: `CD-${String(siguienteRef++).padStart(9, '0')}`, fecha: hoy, dias_antes: Math.max(0, dias),
+      referencia: `CD-${String(siguienteRef++).padStart(9, '0')}`, fecha: hoy, dias_antes: Math.max(0, diasAntes),
       anticipado: anticipado && completo, cuota: t.monto, gasto_admin: t.gasto_admin, descuento: completo ? descuento : 0,
       descuento_pct: NIVEL_CONF[f.nivel].descuento, comision: t.comision, total, ahorro: completo ? descuento : 0,
       racha_antes: rachaAntes, racha_despues: f.racha.pagos, ticket_disponible: completo,
