@@ -64,7 +64,8 @@ Recarga los datos sintéticos y vuelve el reloj al 2026-10-31. Tarda ~1 min.
    {"metrica": "Monto prestado", "unidad": "usd", "regla_actual": 7120.0, "ritmo": 9840.0, "mejor_si_sube": true},
    {"metrica": "Reuso", "unidad": "pct", "regla_actual": 52.0, "ritmo": 71.0, "mejor_si_sube": true},
    {"metrica": "Pérdida esperada", "unidad": "usd", "regla_actual": 840.0, "ritmo": 403.0, "mejor_si_sube": false},
-   {"metrica": "Comisiones cobradas", "unidad": "usd", "regla_actual": 604.0, "ritmo": 412.0, "mejor_si_sube": true},
+   {"metrica": "Ingresos (gasto adm. + comisiones)", "unidad": "usd", "regla_actual": 604.0, "ritmo": 412.0, "mejor_si_sube": true},
+   {"metrica": "Resultado neto (ingresos − pérdida)", "unidad": "usd", "regla_actual": -236.0, "ritmo": 9.0, "mejor_si_sube": true},
    {"metrica": "Usuarios habilitados", "unidad": "n", "regla_actual": 500, "ritmo": 312, "mejor_si_sube": true}],
  "semanal": [{"desde": "2026-08-09", "etiqueta": "9 ago", "repago_a_tiempo": 76.0, "mora": 10.2}]}
 ```

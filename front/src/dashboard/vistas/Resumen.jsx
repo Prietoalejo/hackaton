@@ -28,7 +28,7 @@ function Kpis({ k }) {
       <Kpi etiqueta="Monto prestado" valor={usd(k.monto_prestado, 0)}><div className="rt-bs">{bs(k.monto_prestado)}</div></Kpi>
       <Kpi etiqueta="Repago a tiempo" valor={pctAuto(k.repago_a_tiempo)}><Variacion delta={k.repago_delta_pp} mejorSiSube /></Kpi>
       <Kpi etiqueta="Mora" valor={pctAuto(k.mora)}><Variacion delta={k.mora_delta_pp} mejorSiSube={false} /></Kpi>
-      <Kpi etiqueta="Comisiones cobradas" valor={usd(k.comisiones, 0)}><div className="rt-bs">{bs(k.comisiones)}</div></Kpi>
+      <Kpi etiqueta="Ingresos cobrados" valor={usd(k.comisiones, 0)}><div className="rt-bs">{bs(k.comisiones)}</div></Kpi>
       <Kpi etiqueta="Reuso" valor={pctAuto(k.reuso)}><div className="rt-bs">Vuelven a usar Credirecto en 30 días</div></Kpi>
       <Kpi etiqueta="Pérdida esperada" valor={usd(k.perdida_esperada, 0)}><div className="rt-bs">{bs(k.perdida_esperada)}</div></Kpi>
     </div>
@@ -78,6 +78,9 @@ function Comparativo({ filas, usuarios }) {
             )
           })}
         </div>
+      </div>
+      <div className="rt-lbl" style={{ marginTop: 12 }}>
+        Ingresos y resultado: últimas 12 semanas; pérdida esperada: deuda en mora hoy. No incluye el walletback ni los tickets gratis del Club (sus valores aún son supuestos).
       </div>
     </section>
   )

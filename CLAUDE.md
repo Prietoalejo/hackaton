@@ -17,6 +17,12 @@ Son HTML exportados de una herramienta de diseño. No se ejecutan tal cual:
 - Los estilos están en línea (`style="..."`): son la fuente de verdad para tamaños, colores y espaciados.
 - `data-props` define variantes de una pantalla (por ejemplo `vista` en el home, `supera_maximo` en el pago, `estado` en el Resumen).
 
+**Los diseños son anteriores a varias reglas.** Dicen "Ritmo" (hoy Credirecto), Premium con 4 tickets, no
+tienen el cupo de pagos de servicios, las rutas del Club, el motor de beneficios ni la racha por días, y sus cifras
+(312 habilitados…) no son las de los datos. Úsalos para el estilo y la composición; donde choquen con las
+**Reglas de negocio** de esta guía, mandan las reglas. Pantallas que ya se alejaron a propósito del diseño:
+05 Quincena (antes → después y beneficios) y 02 Cohortes (antes vs. con Credirecto, barras por cohorte).
+
 ## Sistema visual
 
 ### App móvil (copia fiel del estilo PagoDirecto)
@@ -102,9 +108,11 @@ Pagar antes del vencimiento (o con la racha completa): pts ×1,5.
 
 ## Datos de ejemplo (coherentes en todas las pantallas)
 - Tasa: **1 USD = Bs 380**.
-- 500 usuarios: 312 habilitados (Inicial 96, Básico 104, Confiable 78, Premium 34) y 188 en espera.
-- Usuaria de ejemplo **u_0142 · María**: score 76, Confiable, segmento Puntual, quincena 15 y 30, 2 de 3 tickets disponibles, racha 2 de 3, Club "Viajero · Ruta del Café".
-- Su cuota: Ticket 1 · Estacionamiento C.C. El Tolón · vence 15 nov · Bs 1.821,02 (Bs 1.655,47 + gasto adm. Bs 165,55).
+- 500 usuarios: 336 habilitados (Inicial 130, Básico 106, Confiable 87, Premium 13) y 164 en espera.
+  Segmentos: Conductor diario 36, Puntual 98, Nuevo 36, En enfriamiento 119, En riesgo 47.
+  (Son los datos que genera `back/datos/generar.py`; los diseños usan cifras anteriores: 312 / 96·104·78·34.)
+- Usuaria de ejemplo **u_0142 · María**: score 77, Confiable, segmento Puntual, quincena 15 y 30, 2 de 3 tickets y 1 de 1 pago de servicios disponibles, racha 1 de 3, Club "Viajero · Ruta del Café".
+- Su cuota: Ticket 1 · Estacionamiento C.C. El Tolón · vence 7 nov (se puede mover al 15) · Bs 1.824,00 (Bs 1.656,80 + gasto adm. Bs 167,20).
 
 ## Índice de pantallas
 

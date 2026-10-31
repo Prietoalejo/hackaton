@@ -136,14 +136,19 @@ def resumen(conn, hoy) -> dict:
         "perdida_esperada": round(perdida, 2),
     }
     regla_hoy = regla.loc[pd.Timestamp(hoy)] if not regla.empty and pd.Timestamp(hoy) in regla.index else None
+    perdida_regla = round(float(regla_hoy["deuda_mora"]), 2) if regla_hoy is not None else None
+    ingresos_regla = round(_rango(regla, desde, hoy, "comisiones"), 2)
+    # Lo que gana el negocio: lo cobrado (gasto adm. neto de descuentos + comisiones) menos lo que se espera perder
+    neto_regla = round(ingresos_regla - perdida_regla, 2) if perdida_regla is not None else None
     comparativo = [
         ("Repago a tiempo", "pct", _repago(regla, semana, hoy), kpis["repago_a_tiempo"], True),
         ("Mora", "pct", _mora(regla, semana, hoy), kpis["mora"], False),
         ("Monto prestado", "usd", round(_rango(regla, desde, hoy, "prestado"), 2), kpis["monto_prestado"], True),
         ("Reuso", "pct", _reuso(regla, desde, hoy), kpis["reuso"], True),
-        ("Pérdida esperada", "usd", round(float(regla_hoy["deuda_mora"]), 2) if regla_hoy is not None else None,
-         kpis["perdida_esperada"], False),
-        ("Comisiones cobradas", "usd", round(_rango(regla, desde, hoy, "comisiones"), 2), kpis["comisiones"], True),
+        ("Pérdida esperada", "usd", perdida_regla, kpis["perdida_esperada"], False),
+        ("Ingresos (gasto adm. + comisiones)", "usd", ingresos_regla, kpis["comisiones"], True),
+        ("Resultado neto (ingresos − pérdida)", "usd", neto_regla,
+         round(kpis["comisiones"] - kpis["perdida_esperada"], 2), True),
         ("Usuarios habilitados", "n", int(regla_hoy["habilitados"]) if regla_hoy is not None else usuarios,
          habilitados, True),
     ]

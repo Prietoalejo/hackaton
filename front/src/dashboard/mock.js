@@ -81,10 +81,10 @@ function filaUsuario(id, nombre, score, nivel, segmento, usados, total, deuda, a
 
 function generarUsuarios() {
   const azar = rng(142)
-  // Cupos del diseño: 96/104/78/34 por nivel y 60/101/72/41/38 por segmento (suman 312), 188 en espera
-  const niveles = [...Array(96).fill(0), ...Array(104).fill(1), ...Array(78).fill(2), ...Array(34).fill(3)]
-  const segs = [...Array(60).fill('Conductor diario'), ...Array(101).fill('Puntual'), ...Array(72).fill('Nuevo'),
-    ...Array(41).fill('En enfriamiento'), ...Array(38).fill('En riesgo')]
+  // Mismos cupos que los datos generados: 130/106/87/13 por nivel y 36/98/36/119/47 por segmento (suman 336), 164 en espera
+  const niveles = [...Array(130).fill(0), ...Array(106).fill(1), ...Array(87).fill(2), ...Array(13).fill(3)]
+  const segs = [...Array(36).fill('Conductor diario'), ...Array(98).fill('Puntual'), ...Array(36).fill('Nuevo'),
+    ...Array(119).fill('En enfriamiento'), ...Array(47).fill('En riesgo')]
   const quitar = (arr, v) => { const i = arr.indexOf(v); if (i >= 0) arr.splice(i, 1) }
   FIJOS.forEach((f) => { if (f[3] !== null) { quitar(niveles, f[3]); quitar(segs, f[4]) } })
   const barajar = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(azar() * (i + 1)); [a[i], a[j]] = [a[j], a[i]] } return a }
@@ -277,7 +277,7 @@ function resumen() {
   return {
     hoy, desde: semanal[0].desde, ritmo_desde: '2026-09-07', hay_datos: true,
     kpis: {
-      usuarios_totales: 500, habilitados: 312, en_espera: 188, pct_habilitados: 62.4,
+      usuarios_totales: 500, habilitados: 336, en_espera: 164, pct_habilitados: 67.2,
       monto_prestado: 9840.0, repago_a_tiempo: 87.4, repago_delta_pp: 1.2, mora: 4.1, mora_delta_pp: 0.1,
       comisiones: 412.0, reuso: 71.0, perdida_esperada: 403.0,
     },
@@ -287,8 +287,9 @@ function resumen() {
       { metrica: 'Monto prestado', unidad: 'usd', regla_actual: 7120.0, ritmo: 9840.0, mejor_si_sube: true },
       { metrica: 'Reuso', unidad: 'pct', regla_actual: 52.0, ritmo: 71.0, mejor_si_sube: true },
       { metrica: 'Pérdida esperada', unidad: 'usd', regla_actual: 840.0, ritmo: 403.0, mejor_si_sube: false },
-      { metrica: 'Comisiones cobradas', unidad: 'usd', regla_actual: 604.0, ritmo: 412.0, mejor_si_sube: true },
-      { metrica: 'Usuarios habilitados', unidad: 'n', regla_actual: 500, ritmo: 312, mejor_si_sube: true },
+      { metrica: 'Ingresos (gasto adm. + comisiones)', unidad: 'usd', regla_actual: 604.0, ritmo: 412.0, mejor_si_sube: true },
+      { metrica: 'Resultado neto (ingresos − pérdida)', unidad: 'usd', regla_actual: -236.0, ritmo: 9.0, mejor_si_sube: true },
+      { metrica: 'Usuarios habilitados', unidad: 'n', regla_actual: 500, ritmo: 336, mejor_si_sube: true },
     ],
     semanal,
   }
@@ -342,7 +343,7 @@ function cohortes() {
     return { etiqueta: x.etiqueta, valor: Math.round(x.valor) }
   }
   return {
-    hoy: estado.hoy, semanas: 12, primer_mes_semanas: 4, habilitados: 312, ritmo_desde: '2026-09-07', cohortes: lista,
+    hoy: estado.hoy, semanas: 12, primer_mes_semanas: 4, habilitados: 336, ritmo_desde: '2026-09-07', cohortes: lista,
     grupos: { antes: grupo(false), con: grupo(true) },
     mejor_semana4: { repago_a_tiempo: extremo('repago_a_tiempo', true), reuso: extremo('reuso', true) },
     peor_semana4: { repago_a_tiempo: extremo('repago_a_tiempo', false), reuso: extremo('reuso', false) },
@@ -351,22 +352,22 @@ function cohortes() {
 
 function segmentos() {
   const L = [
-    [0, 'score < 40', 96, 'Estacionamiento'], [1, '40 – 59', 104, '+ parquímetros y peajes'],
-    [2, '60 – 79', 78, '+ luz, internet y teléfono'], [3, '≥ 80', 34, '+ seguros'],
+    [0, 'score < 40', 130, 'Estacionamiento'], [1, '40 – 59', 106, '+ parquímetros y peajes'],
+    [2, '60 – 79', 87, '+ luz, internet y teléfono'], [3, '≥ 80', 13, '+ seguros'],
   ]
   return {
-    hoy: estado.hoy, habilitados: 312, total: 500, margen_bajada: 5,
+    hoy: estado.hoy, habilitados: 336, total: 500, margen_bajada: 5,
     niveles: L.map(([nivel, rango, usuarios, texto]) => ({
       nivel, nombre: 'Credirecto ' + NOMBRES_NIVEL[nivel], rango, usuarios, tickets: TICKETS_NIVEL[nivel], servicios_cupo: SERVICIOS_CUPO_NIVEL[nivel], ruta_club: RUTA_NIVEL[nivel],
       monto_max: MAX_NIVEL[nivel], servicios: SERVICIOS_NIVEL[nivel], servicios_texto: texto,
     })),
     segmentos: [
-      { segmento: 'Conductor diario', descripcion: 'paga estacionamiento 4+ días por semana', usuarios: 60 },
-      { segmento: 'Puntual', descripcion: 'paga antes o el día de cobro', usuarios: 101 },
-      { segmento: 'Nuevo', descripcion: 'menos de 30 días con crédito', usuarios: 72 },
-      { segmento: 'En enfriamiento', descripcion: 'sin usar el crédito en 21+ días', usuarios: 41 },
-      { segmento: 'En riesgo', descripcion: 'atraso o score cayendo', usuarios: 38 },
-      { segmento: 'Sin crédito', descripcion: 'aún no habilitados', usuarios: 188 },
+      { segmento: 'Conductor diario', descripcion: 'paga estacionamiento 4+ días por semana', usuarios: 36 },
+      { segmento: 'Puntual', descripcion: 'paga antes o el día de cobro', usuarios: 98 },
+      { segmento: 'Nuevo', descripcion: 'menos de 30 días con crédito', usuarios: 36 },
+      { segmento: 'En enfriamiento', descripcion: 'sin usar el crédito en 21+ días', usuarios: 119 },
+      { segmento: 'En riesgo', descripcion: 'atraso o score cayendo', usuarios: 47 },
+      { segmento: 'Sin crédito', descripcion: 'aún no habilitados', usuarios: 164 },
     ],
     semana: {
       desde: sumarDias(estado.hoy, -6), hasta: estado.hoy, subieron: 41, bajaron: 12,
@@ -405,10 +406,10 @@ function decisiones() {
       ],
     },
     en_espera: {
-      total: 188,
+      total: 164,
       faltantes: [
-        { requisito: 'Verificar su vehículo', usuarios: 81 }, { requisito: 'Hacer 2 pagos de servicios a tiempo', usuarios: 64 },
-        { requisito: 'Verificar su cédula', usuarios: 27 }, { requisito: 'Menos de 30 días en PagoDirecto', usuarios: 16 },
+        { requisito: 'Hacer 2 pagos de servicios a tiempo', usuarios: 91 }, { requisito: 'Verificar su vehículo', usuarios: 70 },
+        { requisito: 'Menos de 30 días en PagoDirecto', usuarios: 28 }, { requisito: 'Verificar su cédula', usuarios: 19 },
       ],
     },
     mensajes: {
@@ -464,9 +465,9 @@ function calcular(v) {
     + (v.req_vehiculo ? 0 : 1.2) + (v.comision_pct - 5) * -0.1
   const mora = Math.max(0.5, 4.1 + dm)
   const rep = Math.min(99, 87.4 - dm * 1.4 + (v.pct_quinceneros - 35) * 0.05)
-  const hab = Math.max(0, Math.min(500, Math.round(312 + (2 - v.req_pagos) * 40 + (v.req_vehiculo ? 0 : 81) + (v.req_cedula ? 0 : 27) + (30 - v.req_dias) * 0.5)))
+  const hab = Math.max(0, Math.min(500, Math.round(336 + (2 - v.req_pagos) * 40 + (v.req_vehiculo ? 0 : 81) + (v.req_cedula ? 0 : 27) + (30 - v.req_dias) * 0.5)))
   const prest = 9840 * (1 + (v.tickets_confiable * v.max_confiable - 30) * 0.012 + (v.tickets_premium * v.max_premium - 80) * 0.003
-    + (v.tickets_basico * v.max_basico - 10) * 0.01) * (hab / 312)
+    + (v.tickets_basico * v.max_basico - 10) * 0.01) * (hab / 336)
   return { mora: r1(mora), rep: r1(rep), hab, prest: Math.round(prest) }
 }
 
