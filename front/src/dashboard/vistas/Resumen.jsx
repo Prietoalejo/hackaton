@@ -1,4 +1,4 @@
-// Vista 01 · Resumen (GET /resumen): KPIs, Credirecto vs. regla actual y gráfico semanal.
+// Vista 01 · Resumen (GET /resumen): KPIs, motor de Credirecto vs. regla actual y gráfico semanal.
 import { Link } from 'react-router-dom'
 import { bs, entero, fechaCorta, usd } from '../../formato.js'
 import { Boton, Encabezado, ErrorCaja, Esqueleto, Kpi, Spinner } from '../componentes.jsx'
@@ -50,13 +50,13 @@ function Comparativo({ filas, usuarios }) {
       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 12, alignItems: 'flex-end' }}>
         <div>
           <span style={{ fontSize: 13, fontWeight: 700, background: '#EEF4E4', color: '#3F6212', padding: '5px 12px', borderRadius: 6 }}>Mismos {entero(usuarios)} usuarios</span>
-          <h2 id="vs" style={{ margin: '12px 0 0', fontSize: 30, fontWeight: 700 }}>Credirecto vs. regla actual</h2>
-          <div style={{ color: '#6B6B80', fontSize: 15, marginTop: 4 }}>Regla actual: 2 tickets y 7 días para todos. Credirecto: cupo, servicios y plazo según cómo y cuándo paga cada uno.</div>
+          <h2 id="vs" style={{ margin: '12px 0 0', fontSize: 30, fontWeight: 700 }}>Motor Credirecto vs. regla actual</h2>
+          <div style={{ color: '#6B6B80', fontSize: 15, marginTop: 4 }}>Regla actual: 2 tickets y 7 días para todos. Motor: cupo, servicios y plazo según cómo y cuándo paga cada uno.</div>
         </div>
       </div>
       <div style={{ overflowX: 'auto', marginTop: 18 }}>
         <div className="rt-cmp" style={{ minWidth: 560, fontSize: 15 }}>
-          <div style={cab}>Métrica</div><div style={cab}>Regla actual</div><div style={cab}>Credirecto</div><div style={cab}>Diferencia</div>
+          <div style={cab}>Métrica</div><div style={cab}>Regla actual</div><div style={cab}>Motor</div><div style={cab}>Diferencia</div>
           {filas.map((f, i) => {
             const borde = i < filas.length - 1
             const sinBorde = borde ? undefined : { border: 0 }
@@ -124,7 +124,7 @@ function Grafico({ semanal, ritmoDesde, kpis }) {
         </div>
       </div>
       <div className="rt-lbl" style={{ marginTop: 12 }}>
-        {ritmoDesde ? `Credirecto se activó el ${fechaCorta(ritmoDesde)}. ` : ''}Última semana: repago {pctAuto(kpis.repago_a_tiempo)}, mora {pctAuto(kpis.mora)}.
+        {ritmoDesde ? `El motor se activó el ${fechaCorta(ritmoDesde)}. ` : ''}Última semana: repago {pctAuto(kpis.repago_a_tiempo)}, mora {pctAuto(kpis.mora)}.
       </div>
     </section>
   )
@@ -140,7 +140,7 @@ function EsqueletoResumen() {
     <>
       <div className="rt-grid">{[0, 1, 2, 3].map(kpi)}</div>
       <div className="rt-dk" style={{ height: 380, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 10 }} role="status">
-        <Spinner /><span style={{ color: '#6B6B80' }}>Recalculando Credirecto vs. regla actual…</span>
+        <Spinner /><span style={{ color: '#6B6B80' }}>Recalculando motor vs. regla actual…</span>
       </div>
       <div className="rt-card"><Esqueleto alto={260} /></div>
     </>
@@ -154,7 +154,7 @@ function Vacio() {
         <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M3 17l5-5 4 4 8-9" /><path d="M3 21h18" /></svg>
       </span>
       <div style={{ fontSize: 22, fontWeight: 700 }}>Todavía no hay pagos en este período</div>
-      <div className="rt-lbl" style={{ fontSize: 15, maxWidth: 460 }}>Credirecto necesita al menos 7 días de pagos para calcular scores y comparar con la regla actual. Avanza el reloj de demo o carga los datos de ejemplo.</div>
+      <div className="rt-lbl" style={{ fontSize: 15, maxWidth: 460 }}>El motor necesita al menos 7 días de pagos para calcular scores y comparar con la regla actual. Avanza el reloj de demo o carga los datos de ejemplo.</div>
       <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
         <Link to="/dashboard/configuracion" className="rt-btn rt-btn-primario">Ir al reloj de demo</Link>
       </div>
@@ -164,7 +164,7 @@ function Vacio() {
 
 /** Descarga un CSV con KPIs, comparativo y serie semanal. */
 function exportar(d) {
-  const filas = [['seccion', 'metrica', 'regla_actual', 'credirecto', 'valor']]
+  const filas = [['seccion', 'metrica', 'regla_actual', 'motor', 'valor']]
   Object.entries(d.kpis).forEach(([k, v]) => filas.push(['kpis', k, '', '', v]))
   d.comparativo.forEach((c) => filas.push(['comparativo', c.metrica, c.regla_actual, c.ritmo, '']))
   d.semanal.forEach((s) => {

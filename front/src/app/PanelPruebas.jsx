@@ -8,6 +8,7 @@ const RAPIDOS = [
   { id: 'u_0142', txt: 'María · habilitada' },
   { id: 'u_0333', txt: 'Carmen · sin Credirecto' },
   { id: 'u_0007', txt: 'Pedro · no paga' },
+  { id: 'u_0331', txt: 'Daniela · tickets y servicios', soloApi: true },
   { id: 'u_0058', txt: 'Andrea · cuota en gracia', soloMock: true },
 ]
 
@@ -47,7 +48,7 @@ export default function PanelPruebas({ userId, elegirUsuario, hoy, avanzarDia, a
       <div>
         <h1>Credirecto · pruebas</h1>
         <div style={{ fontSize: 13, color: '#6B6B80' }}>
-          {mock ? 'Datos simulados (VITE_MOCK=1)' : 'Conectado a la API de Credirecto'}
+          {mock ? 'Datos simulados (VITE_MOCK=1)' : 'Conectado a la API'}
         </div>
       </div>
 
@@ -60,7 +61,7 @@ export default function PanelPruebas({ userId, elegirUsuario, hoy, avanzarDia, a
 
       <section className="cd-pbox">
         <h2>Usuario</h2>
-        {RAPIDOS.filter((r) => mock || !r.soloMock).map((r) => (
+        {RAPIDOS.filter((r) => (mock ? !r.soloApi : !r.soloMock)).map((r) => (
           <button key={r.id} className="cd-pbtn" aria-pressed={userId === r.id} onClick={() => elegirUsuario(r.id)}>
             <b>{r.id}</b> · {r.txt}
           </button>

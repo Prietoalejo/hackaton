@@ -1,4 +1,4 @@
-// Componentes compartidos del dashboard Credirecto (plano: borde 1px, radio 12, sin sombras).
+// Componentes compartidos del dashboard de Credirecto (plano: borde 1px, radio 12, sin sombras).
 import { bs, usd } from '../formato.js'
 
 const cx = (...c) => c.filter(Boolean).join(' ')
@@ -108,7 +108,7 @@ export function Cargando({ texto = 'Cargando…', alto = 240 }) {
 /** Error legible de la API con botón para reintentar. */
 export function ErrorCaja({ error, onReintentar }) {
   const texto = error?.detail || (error?.message?.includes('fetch')
-    ? 'No hay conexión con el backend de Credirecto.' : error?.message) || 'No se pudo cargar la información.'
+    ? 'No hay conexión con el servidor.' : error?.message) || 'No se pudo cargar la información.'
   return (
     <div className="rt-card" role="alert" style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap', borderColor: '#F3C7C2' }}>
       <span style={{ width: 44, height: 44, borderRadius: 10, background: '#FDECEC', color: '#B42318', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}>

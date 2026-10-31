@@ -139,7 +139,7 @@ export default function PagoTicket() {
           </div>
 
           {total > 0 && (
-            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(total, 4)}, minmax(0, 1fr))`, gap: 8, marginTop: 14 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(total, 5)}, minmax(0, 1fr))`, gap: total >= 5 ? 6 : 8, marginTop: 14 }}>
               {fichas.map((e, i) => <FichaTicket key={i} n={i + 1} estado={e} rotulo={factura ? 'SERVICIO' : 'TICKET'} />)}
             </div>
           )}
