@@ -98,12 +98,18 @@ export const SERVICIOS_NIVEL = [
   { clave: 'seguro', nombre: 'Seguros', nivel: 3 },
 ]
 
+/** Dos cupos: tickets para movilidad y pagos de servicios para facturas (nunca un monto en Bs) */
+export const SERVICIOS_FACTURA = ['luz', 'internet', 'telefono', 'seguro']
+export const esFactura = (servicio) => SERVICIOS_FACTURA.includes(servicio)
+/** Cupo de pagos de servicios de la ficha (vacío si el back aún no lo manda) */
+export const cupoServicios = (ficha) => ficha?.servicios_cupo || { total: 0, usados: 0, disponibles: 0, cubre: [] }
+
 /** Lo que trae cada nivel (para "Camino a …") */
 export const BENEFICIO_NIVEL = [
   'Inicial: 1 ticket para estacionamiento.',
-  'Básico: 2 tickets y parquímetros y peajes con crédito.',
-  'Confiable: 3 tickets y luz, internet y teléfono con crédito.',
-  'Premium: 4 tickets y seguros con crédito.',
+  'Básico: 2 tickets para estacionamiento, parquímetros y peajes.',
+  'Confiable: 3 tickets + 1 pago de servicios (luz, internet o teléfono).',
+  'Premium: 5 tickets + 3 pagos de servicios, incluidos seguros.',
 ]
 
 /** Fondo de las tarjetas Credirecto (casi negro con brillo lima); cada diseño mueve el brillo */

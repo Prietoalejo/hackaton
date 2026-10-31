@@ -12,6 +12,7 @@ from app import config as C
 from app import db, metricas, reloj
 from app.motor.cobros import (comision_por_desfase, cuota, descuento_por_nivel, deuda, gracia_hasta, nuevo_ticket,
                               oferta_quincena)
+from app.motor.club import puntos_de_cuota
 from app.motor.decisiones import en_uso, racha, validar_solicitud
 from app.motor.perfil import evaluar_usuario
 from app.motor.score import dias_atraso, es_anticipado
@@ -74,10 +75,18 @@ NOMBRE_SERVICIO = {"estacionamiento": "Estacionamiento", "parquimetro": "Parquí
                    "luz": "Luz", "internet": "Internet", "telefono": "Teléfono", "seguro": "Seguro"}
 
 
+def texto_cupo(nivel) -> str:
+    """"3 tickets y 1 pago de servicios" (lo que da un nivel; nunca un monto en Bs)."""
+    n = C.NIVELES[nivel]
+    texto = f"{n['tickets']} {'ticket' if n['tickets'] == 1 else 'tickets'}"
+    if n["servicios_cupo"]:
+        texto += f" y {n['servicios_cupo']} {'pago' if n['servicios_cupo'] == 1 else 'pagos'} de servicios"
+    return texto
+
+
 def _mensaje_subida(nivel) -> str:
-    extras = {1: " y puedes pagar parquímetros y peajes", 2: " y puedes pagar luz e internet", 3: " y seguros"}
-    return C.MENSAJE_SUBIDA.format(nivel=C.NOMBRES_NIVEL[nivel], tickets=C.NIVELES[nivel]["tickets"],
-                                   extra=extras.get(nivel, ""))
+    extras = {1: " y puedes pagar parquímetros y peajes", 2: " para luz, internet y teléfono", 3: " (ahora también seguros)"}
+    return C.MENSAJE_SUBIDA.format(nivel=C.NOMBRES_NIVEL[nivel], cupo=texto_cupo(nivel), extra=extras.get(nivel, ""))
 
 
 def _linea_de_tiempo(eventos, tickets, decisiones, fotos) -> list:
@@ -95,7 +104,9 @@ def _linea_de_tiempo(eventos, tickets, decisiones, fotos) -> list:
                 dias = (t["fecha_vencimiento"] - e["fecha"]).days
                 cuando = (f"{dias} días antes" if dias > 1 else "1 día antes" if dias == 1 else
                           "el día de cobro" if dias == 0 else f"con {-dias} días de atraso")
-                texto = f"Cuota pagada {cuando} · ticket renovado" + (" · racha +1" if dias > 0 else "")
+                puntos = puntos_de_cuota(t)
+                texto = (f"Cuota pagada {cuando} · ticket renovado" + (" · racha +1" if dias > 0 else "")
+                         + (f" · +{puntos} pts Club" if puntos else ""))
             else:
                 texto = "Abono a la cuota"
             linea.append((e["fecha"], 1, "Pago", texto, e["monto"]))
@@ -113,7 +124,7 @@ def _linea_de_tiempo(eventos, tickets, decisiones, fotos) -> list:
     for (_, a, _), (fecha_b, b, score) in zip(fotos, fotos[1:]):
         if a is not None and b is not None and a != b:
             texto = (f"{C.NOMBRES_NIVEL[a]} → {C.NOMBRES_NIVEL[b]} (score {score}) · de "
-                     f"{C.NIVELES[a]['tickets']} a {C.NIVELES[b]['tickets']} tickets")
+                     f"{texto_cupo(a)} a {texto_cupo(b)}")
             linea.append((fecha_b, 4, "Nivel", texto, None))
     linea.sort(key=lambda x: (x[0], x[1]), reverse=True)
     return [{"fecha": f.isoformat(), "tipo": tipo, "texto": texto, "monto": monto}
@@ -146,7 +157,8 @@ def _ficha(conn, user_id) -> dict:
             if p["tipo"] == "subida_nivel":
                 notificaciones.append({"fecha": fecha.isoformat(), "tipo": "subida_nivel", "titulo": "Nuevo nivel",
                                        "mensaje": _mensaje_subida(p["nuevo_nivel"]), "canal": "push"})
-    usados = len(en_uso(tickets))
+    usados = len(en_uso(tickets, "tickets"))
+    servicios_usados = len(en_uso(tickets, "servicios"))
     vivos = sorted((t for t in tickets if t["estado"] != "pagado"), key=lambda t: (t["fecha_vencimiento"], t["id"]))
     primer_uso = min((t["fecha_uso"] for t in tickets), default=None)
     return {
@@ -155,13 +167,17 @@ def _ficha(conn, user_id) -> dict:
         "habilitado_desde": perfil["habilitado_desde"].isoformat() if perfil["habilitado_desde"] else None,
         "cohorte": primer_uso.strftime("%Y-%m") if primer_uso else None,
         "nivel": nivel, "nivel_nombre": C.NOMBRES_NIVEL[nivel] if nivel is not None else None,
-        "segmento": perfil["segmento"], "quincena": perfil["quincena"], "club": usuario["club"],
+        "segmento": perfil["segmento"], "quincena": perfil["quincena"], "club": perfil["club"]["texto"],
         "saldo_wallet": round(usuario["saldo_wallet"], 4), "modo_recuperacion": usuario["modo_recuperacion"],
         "estado_mora": perfil["estado_mora"],
         "trust_score": perfil["trust_score"], "razones": perfil["razones"], "checklist": perfil["checklist"],
         "tickets": {"total": C.NIVELES[nivel]["tickets"] if nivel is not None else 0, "usados": usados,
                     "disponibles": decision["prestar"]["tickets"], "monto_max": decision["prestar"]["monto_max"],
                     "servicios": decision["prestar"]["servicios"]},
+        "servicios_cupo": {"total": C.NIVELES[nivel]["servicios_cupo"] if nivel is not None else 0,
+                           "usados": servicios_usados, "disponibles": decision["prestar"]["servicios_cupo"],
+                           "cubre": [s for s in decision["prestar"]["servicios"] if s in C.SERVICIOS_FACTURA]},
+        "club_puntos": perfil["club"],
         "progreso": perfil["progreso"],
         "racha": racha(eventos, hoy),
         "deuda_total": round(sum(max(deuda(t), 0.0) for t in vivos), 2),
@@ -332,6 +348,10 @@ def _texto_rechazo(motivo, perfil, prestar, servicio, monto) -> str:
     if motivo == "maximo_en_uso":
         return (f"Ya estás usando tus {C.NIVELES[nivel]['tickets']} tickets. Paga una cuota y tu ticket vuelve "
                 f"a estar disponible.")
+    if motivo == "servicios_en_uso":
+        if not C.NIVELES[nivel]["servicios_cupo"]:
+            return f"Credirecto {C.NOMBRES_NIVEL[nivel]} todavía no incluye pagos de servicios."
+        return ("Ya estás usando tus pagos de servicios con crédito. Paga esa cuota y vuelve a estar disponible.")
     resto = round(monto - prestar["monto_max"], 2)
     return f"Tu ticket cubre hasta ${prestar['monto_max']:.2f}; no tienes saldo para los ${resto:.2f} restantes."
 
@@ -414,6 +434,9 @@ def registrar_pago(body: PagoIn, conn=Depends(conexion)):
         "comision": t["comision"], "total": aplicado, "ahorro": t["descuento"],
         "racha_antes": racha_antes, "racha_despues": racha(eventos + [evento], hoy)["pagos"],
         "ticket_disponible": completo,
+        # Mismos puntos del Club PagoDirecto (no son puntos nuevos de Credirecto)
+        "puntos_club": puntos_de_cuota(t, racha(eventos + [evento], hoy)["multiplicador"]) if completo else 0,
+        "club": perfil["club"]["texto"],
     }
     return {"aplicado": aplicado, "deuda_restante": max(deuda(t), 0.0), "comprobante": comprobante,
             "ticket": _ticket_json(t, perfil["nivel"], perfil["quincena"], hoy),

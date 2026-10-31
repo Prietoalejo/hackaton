@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { bs, fechaCorta } from '../../formato.js'
 import { useApp } from '../contexto.js'
-import { diasEntre, fondoCD, proximoTicket, ticketEnGracia } from '../util.js'
+import { cupoServicios, diasEntre, fondoCD, plural, proximoTicket, ticketEnGracia } from '../util.js'
 import { Avatar, BotonCircular, BotonSoporte, Pantalla, Tarjeta } from '../componentes/Base.jsx'
 import {
   IcoCampana, IcoCheck, IcoClub, IcoDepositar, IcoEnviar, IcoLlama, IcoMas, IcoReloj, IcoServicio, IcoTicket, LogoCD,
@@ -122,9 +122,22 @@ function HomeNormal() {
         </div>
       )}
 
-      {/* Club PagoDirecto (decorativo) */}
+      {/* Club PagoDirecto: los puntos de Credirecto se suman a este mismo Club (no hay puntos aparte) */}
       <div style={{ padding: '22px 20px 0' }}>
         <h2 className="cd-h2">Club PagoDirecto</h2>
+        {hab && (
+          <Tarjeta role="button" tabIndex={0} onClick={() => navegar('/app/racha')}
+            style={{ marginTop: 14, padding: 18, display: 'flex', gap: 14, alignItems: 'center', cursor: 'pointer' }}>
+            <span style={{ width: 60, height: 60, borderRadius: 18, background: fondoCD('120% 90% at 90% 120%', 0.5, 30, 70), display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}><LogoCD /></span>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}><span style={{ fontWeight: 700, fontSize: 17 }}>Paga tu cuota a tiempo</span><span style={{ fontWeight: 700, whiteSpace: 'nowrap' }}>+{ficha.club_puntos?.puntos_por_pago ?? 100} pts</span></div>
+              <span className="cd-mut" style={{ display: 'block', fontSize: 14, lineHeight: 1.3, marginTop: 4 }}>
+                Suma a tu racha y a tu ruta del Club. ×1,5 si pagas antes.
+                {ficha.club_puntos?.puntos_credirecto > 0 && ` Llevas ${ficha.club_puntos.puntos_credirecto.toLocaleString('es-VE')} pts con Credirecto.`}
+              </span>
+            </div>
+          </Tarjeta>
+        )}
         <Tarjeta style={{ marginTop: 14, padding: 18, display: 'flex', gap: 14, alignItems: 'center' }}>
           <span style={{ width: 60, height: 60, borderRadius: 18, background: '#F3F4F8', color: '#FF1F5A', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}><IcoClub /></span>
           <div style={{ flex: 1 }}>
@@ -183,8 +196,10 @@ function HomeNormal() {
 /** Tarjeta Credirecto del home 02: nivel, tickets disponibles y próxima cuota */
 function CredirectoHabilitado({ ficha, gracia }) {
   const { total, disponibles } = ficha.tickets
+  const serv = cupoServicios(ficha)
   const proximo = proximoTicket(ficha)
   const chico = total >= 4
+  const mini = total >= 5
   return (
     <div style={{ height: '100%', borderRadius: 26, color: '#fff', background: fondoCD(), padding: '18px 18px 16px', display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -197,11 +212,16 @@ function CredirectoHabilitado({ ficha, gracia }) {
         <span style={{ fontSize: 16, color: '#C9CCC4', marginRight: 4, whiteSpace: 'nowrap' }}>de {total}</span>
         <span role="img" aria-label={`${disponibles} tickets disponibles, ${total - disponibles} usados`} style={{ display: 'flex', gap: chico ? 4 : 6 }}>
           {Array.from({ length: total }, (_, i) => (
-            <IcoTicket key={i} w={chico ? 27 : 34} h={chico ? 23 : 29} color={i < disponibles ? '#C6F432' : 'rgba(255,255,255,.28)'} />
+            <IcoTicket key={i} w={mini ? 22 : chico ? 27 : 34} h={mini ? 19 : chico ? 23 : 29} color={i < disponibles ? '#C6F432' : 'rgba(255,255,255,.28)'} />
           ))}
         </span>
       </div>
-      <div style={{ marginTop: 14 }}>
+      <div style={{ marginTop: 14, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        {serv.total > 0 && (
+          <span style={{ fontSize: 12, background: 'rgba(198,244,50,.16)', color: '#D7F86E', padding: '5px 11px', borderRadius: 999, whiteSpace: 'nowrap' }}>
+            + {serv.disponibles} de {serv.total} servicios
+          </span>
+        )}
         <span style={{ fontSize: 12, background: gracia ? 'rgba(245,166,35,.25)' : 'rgba(18,20,18,.6)', color: gracia ? '#FFD38A' : '#fff', padding: '5px 11px', borderRadius: 999, whiteSpace: 'nowrap' }}>
           {gracia ? `Sin comisión hasta ${fechaCorta(gracia.gracia_hasta)}` : proximo ? `Cuota ${fechaCorta(proximo.vence)}` : 'Sin cuotas pendientes'}
         </span>

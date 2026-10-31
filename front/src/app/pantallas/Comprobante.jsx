@@ -40,12 +40,21 @@ export default function Comprobante() {
                 <IcoLlama encendida color="#C6F432" w={20} />
                 <span style={{ fontWeight: 700, color: '#D7F86E' }}>Pagaste {c.dias_antes} {c.dias_antes === 1 ? 'día' : 'días'} antes</span>
               </div>
-              <div style={{ fontSize: 16, fontWeight: 500, marginTop: 6, lineHeight: 1.35 }}>+1 pago en tu racha y puntos ×1,5 en el Club</div>
+              <div style={{ fontSize: 16, fontWeight: 500, marginTop: 6, lineHeight: 1.35 }}>
+                +1 en tu racha y {c.puntos_club ? `+${c.puntos_club} pts (×1,5)` : 'puntos ×1,5'} en tu Club PagoDirecto
+              </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12, fontSize: 13, fontWeight: 600 }}>
                 <span style={{ background: '#C6F432', color: '#121412', padding: '6px 10px', borderRadius: 999 }}>Racha {c.racha_antes} → {c.racha_despues}</span>
+                {c.club && <span style={{ background: 'rgba(255,255,255,.14)', padding: '6px 10px', borderRadius: 999 }}>{c.club}</span>}
                 {c.ticket_disponible && <span style={{ background: 'rgba(255,255,255,.14)', padding: '6px 10px', borderRadius: 999 }}>Ticket {numero} disponible otra vez</span>}
               </div>
             </TarjetaCredirecto>
+          )}
+
+          {!c.anticipado && c.puntos_club > 0 && (
+            <div style={{ margin: '16px 14px 0', borderRadius: 18, padding: '12px 14px', background: '#FFE8EF', color: '#A3165E', fontWeight: 600, fontSize: 15 }}>
+              +{c.puntos_club} pts en tu Club PagoDirecto{c.club ? ` · ${c.club}` : ''}
+            </div>
           )}
 
           <div style={{ padding: '18px 22px 0' }}>

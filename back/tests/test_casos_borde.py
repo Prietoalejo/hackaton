@@ -4,7 +4,7 @@ from datetime import timedelta
 
 from app import config as C
 from app.motor.cobros import comision_por_desfase, cuota, deuda
-from app.motor.decisiones import validar_solicitud
+from app.motor.decisiones import prestar_para, validar_solicitud
 from app.motor.perfil import evaluar_usuario
 from app.motor.score import calcular_score
 from app.worker.mora import aplicar_recarga, pausar_por_fallo_tecnico, procesar_usuario
@@ -22,8 +22,8 @@ def test_1_arranque_en_frio():
     perfil, decision = evaluar_usuario(u, facturas(1, desde_hace=60), [], HOY)
     assert not perfil["habilitado"] and perfil["nivel"] is None
     assert perfil["segmento"] == C.SEG_SIN_CREDITO
-    assert decision["prestar"] == {"tickets": 0, "plazo_dias": None, "monto_max": 0.0, "servicios": [],
-                                   "motivo": "no_habilitado"}
+    assert decision["prestar"] == {"tickets": 0, "servicios_cupo": 0, "plazo_dias": None, "monto_max": 0.0,
+                                   "servicios": [], "motivo": "no_habilitado"}
     pagos = next(c for c in perfil["checklist"] if c["requisito"] == "pagos")
     assert not pagos["ok"] and pagos["detalle"] == "1 de 2"
 
@@ -103,6 +103,21 @@ def test_5_ticket_mayor_al_limite():
     assert validar_solicitud(prestar, "estacionamiento", 4.0, saldo_wallet=0)["resultado"] == "aprobada"
     assert validar_solicitud(prestar, "seguro", 4.0, saldo_wallet=0)["motivo"] == "servicio_no_cubierto"
     assert validar_solicitud({**prestar, "tickets": 0}, "estacionamiento", 4.0, 0)["motivo"] == "maximo_en_uso"
+
+
+def test_5b_tickets_y_pagos_de_servicios_son_cupos_distintos():
+    # Confiable: 3 tickets (movilidad) + 1 pago de servicios (facturas); nunca un cupo en dinero
+    assert (C.NIVELES[2]["tickets"], C.NIVELES[2]["servicios_cupo"]) == (3, 1)
+    assert (C.NIVELES[3]["tickets"], C.NIVELES[3]["servicios_cupo"]) == (5, 3)
+    assert C.NIVELES[0]["servicios_cupo"] == C.NIVELES[1]["servicios_cupo"] == 0
+    prestar = prestar_para(True, 2, [ticket(hace(2), servicio="luz")], False)
+    assert prestar["tickets"] == 3 and prestar["servicios_cupo"] == 0
+    assert validar_solicitud(prestar, "internet", 4.0, 0)["motivo"] == "servicios_en_uso"
+    assert validar_solicitud(prestar, "estacionamiento", 4.0, 0)["resultado"] == "aprobada"
+    prestar = prestar_para(True, 2, [ticket(hace(2)) for _ in range(3)], False)
+    assert prestar["tickets"] == 0 and prestar["servicios_cupo"] == 1
+    assert validar_solicitud(prestar, "estacionamiento", 4.0, 0)["motivo"] == "maximo_en_uso"
+    assert validar_solicitud(prestar, "luz", 4.0, 0)["resultado"] == "aprobada"
 
 
 def test_6_fallo_tecnico():

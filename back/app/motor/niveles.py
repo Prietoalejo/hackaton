@@ -4,10 +4,13 @@
 2. Margen para bajar: si venía de un nivel más alto, lo conserva mientras el score no caiga más de
    MARGEN_BAJADA puntos bajo el umbral de ese nivel (nadie rebota por un mal día).
 3. Requisitos: repagos a tiempo (REPAGOS_POR_NIVEL) y, para Premium, X_MESES_HISTORIAL meses.
-   El nivel final es el menor entre el del score y el de los requisitos.
+4. Club PagoDirecto: cada nivel está amarrado a una ruta del Club (RUTA_MINIMA_POR_NIVEL); hay que
+   haberla desbloqueado con puntos del Club.
+   El nivel final es el menor entre el del score, el de los requisitos y el del Club.
 Solo aplica a usuarios habilitados.
 """
 from app import config as C
+from app.motor.club import calcular_club, nivel_credirecto_por_club
 from app.motor.score import meses_desde
 
 
@@ -47,7 +50,9 @@ def evaluar_nivel(score, historial, usuario, hoy, nivel_anterior=None, umbrales=
     repagos = repagos_a_tiempo(historial["tickets"]) + repagos_extra
     por_score = nivel_por_score(score, nivel_anterior, umbrales)
     por_requisitos = nivel_por_requisitos(repagos, usuario, hoy)
-    nivel = min(por_score, por_requisitos)
+    club = calcular_club(historial["eventos"], historial["tickets"], hoy)
+    por_club = nivel_credirecto_por_club(club["nivel_club"])
+    nivel = min(por_score, por_requisitos, por_club)
 
     progreso = None
     if nivel < 3:
@@ -61,8 +66,11 @@ def evaluar_nivel(score, historial, usuario, hoy, nivel_anterior=None, umbrales=
             "repagos_requeridos": requeridos,
             "faltan_repagos": max(0, requeridos - repagos),
         }
+        ruta = C.RUTAS_CLUB[C.RUTA_MINIMA_POR_NIVEL[siguiente]]
+        progreso.update(ruta_requerida=f"{ruta['nivel']} · {ruta['ruta']}",
+                        faltan_pts_club=max(0, ruta["desde"] - club["puntos"]))
     return {"nivel": nivel, "nivel_score": por_score, "nivel_requisitos": por_requisitos,
-            "repagos_a_tiempo": repagos, "progreso": progreso}
+            "nivel_club": por_club, "club": club, "repagos_a_tiempo": repagos, "progreso": progreso}
 
 
 def calcular_nivel(score, historial, usuario, hoy, nivel_anterior=None, umbrales=None) -> int:

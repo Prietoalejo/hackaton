@@ -17,6 +17,7 @@ export default function Racha() {
   const [error, setError] = useState(null)
   const r = ficha.racha || { pagos: 0, meta: 3, quedan_dias: 0, multiplicador: false }
   const faltan = Math.max(0, r.meta - r.pagos)
+  const club = ficha.club_puntos || { puntos_por_pago: 100, multiplicador: 1.5, puntos_credirecto: 0 }
   const ticket = proximoTicket(ficha)
 
   // Semana actual (lunes a domingo): días con pago marcados, días pasados sin pago tachados
@@ -86,6 +87,24 @@ export default function Racha() {
           <IcoReloj w={30} color="#E0124F" style={{ flex: 'none' }} />
           <span><span className="cd-mut" style={{ display: 'block', fontSize: 13 }}>El reloj corre</span>
             <span style={{ fontWeight: 700 }}>{r.quedan_dias > 0 ? `Quedan ${r.quedan_dias} ${r.quedan_dias === 1 ? 'día' : 'días'}` : 'Empieza hoy'}</span></span>
+        </Tarjeta>
+      </div>
+
+      {/* Los puntos son los del Club PagoDirecto: Credirecto solo los suma */}
+      <div style={{ padding: '12px 16px 0' }}>
+        <Tarjeta style={{ padding: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
+            <span style={{ fontWeight: 700, fontSize: 17 }}>Club PagoDirecto</span>
+            <span className="cd-mut" style={{ fontSize: 13 }}>{ficha.club || 'Nivel Turista'}</span>
+          </div>
+          <div style={{ fontSize: 14, marginTop: 6, lineHeight: 1.4 }}>
+            Cada cuota pagada a tiempo suma <b>{club.puntos_por_pago} pts</b> a tu ruta del Club; si pagas antes o completas la racha, <b>{Math.round(club.puntos_por_pago * club.multiplicador)} pts</b>.
+          </div>
+          {club.puntos_credirecto > 0 && (
+            <div style={{ display: 'inline-block', marginTop: 10, fontSize: 13, fontWeight: 600, color: '#A3165E', background: '#FFE8EF', padding: '5px 12px', borderRadius: 999 }}>
+              {club.puntos_credirecto.toLocaleString('es-VE')} pts ganados con Credirecto
+            </div>
+          )}
         </Tarjeta>
       </div>
 

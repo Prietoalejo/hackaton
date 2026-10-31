@@ -95,8 +95,12 @@ def test_premiar_pago_anticipado():
     t, ev = ticket_pagado(hace(4), dias_vs_vencimiento=-3)    # pagado hoy, 3 días antes
     assert t["fecha_pago"] == HOY
     ctx = _contexto(u, tickets + [t], eventos + ev, HOY, nivel_anterior=1)
-    tipos = [p["tipo"] for p in decidir(ctx, tickets + [t], eventos + ev, HOY)["premiar"]]
-    assert tipos[:3] == ["racha", "multiplicador", "puntos"]
+    premios = decidir(ctx, tickets + [t], eventos + ev, HOY)["premiar"]
+    assert [p["tipo"] for p in premios][:3] == ["racha", "multiplicador", "puntos"]
+    # Los puntos son los del Club PagoDirecto (×1,5 por pagar antes), no un sistema nuevo
+    puntos = next(p for p in premios if p["tipo"] == "puntos")
+    assert puntos["puntos"] == int(C.PUNTOS_POR_PAGO * C.MULTIPLICADOR_PUNTOS)
+    assert C.CLUB_NOMBRE in puntos["detalle"]
 
     ctx = _contexto(u, tickets, eventos, HOY, nivel_anterior=ctx["nivel"])
     assert decidir(ctx, tickets, eventos, HOY)["premiar"] == []    # usar no se premia
@@ -116,9 +120,29 @@ def test_segmento_en_riesgo_por_pago_con_comision():
 def test_configuracion_editable():
     tickets, eventos = historial_puntual()
     normal, _ = evaluar_usuario(usuario(), eventos, tickets, HOY)
-    with C.con_valores({"umbral_basico": 0, "umbral_confiable": 0, "umbral_premium": 0, "repagos_premium": 0}):
+    sin_topes = {"umbral_basico": 0, "umbral_confiable": 0, "umbral_premium": 0, "repagos_premium": 0,
+                 "ruta_basico": 1, "ruta_confiable": 1, "ruta_premium": 1}
+    with C.con_valores(sin_topes):
         todo_premium, _ = evaluar_usuario(usuario(), eventos, tickets, HOY)
         assert todo_premium["nivel"] == 3
     assert evaluar_usuario(usuario(), eventos, tickets, HOY)[0]["nivel"] == normal["nivel"]
     with C.con_valores({"req_vehiculo": True}):
         assert not evaluar_usuario(usuario(vehiculo_verificado=False), facturas(), [], HOY)[0]["habilitado"]
+
+
+def test_niveles_amarrados_a_las_rutas_del_club():
+    from app.motor.club import calcular_club, nivel_credirecto_por_club
+    # Rutas reales del Club PagoDirecto y la que exige cada nivel de Credirecto
+    assert [r["ruta"] for r in C.RUTAS_CLUB][:4] == ["Ruta Colonial", "Ruta Falcón", "Ruta del Café", "Ruta de Paria"]
+    assert [nivel_credirecto_por_club(n) for n in range(len(C.RUTAS_CLUB))] == [0, 1, 2, 3, 3, 3, 3]
+    # 9 pagos = 900 pts: sigue en Turista · Ruta Colonial; 10 pagos completan la ruta (+500 de bono)
+    pagos = [evento(hace(i + 1), "pago_servicio", "luz", 5.0, a_tiempo=True) for i in range(10)]
+    assert calcular_club(pagos[:9], [], HOY)["texto"] == "Turista · Ruta Colonial"
+    club = calcular_club(pagos, [], HOY)
+    assert club["texto"] == "Caminante · Ruta Falcón" and club["puntos"] == 1500
+    # Con score y repagos de Premium, el Club lo deja en el nivel de su ruta
+    tickets, eventos = historial_puntual()
+    with C.con_valores({"umbral_basico": 0, "umbral_confiable": 0, "umbral_premium": 0, "repagos_premium": 0}):
+        perfil, _ = evaluar_usuario(usuario(), eventos, tickets, HOY)
+        assert perfil["nivel"] == nivel_credirecto_por_club(perfil["club"]["nivel_club"]) < 3
+        assert perfil["progreso"]["ruta_requerida"].startswith(C.RUTAS_CLUB[C.RUTA_MINIMA_POR_NIVEL[perfil["nivel"] + 1]]["nivel"])

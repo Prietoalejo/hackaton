@@ -26,7 +26,12 @@ EDITABLES = [
     ("tickets_inicial", "Tickets por nivel", "Inicial", "", 1, 1),
     ("tickets_basico", "Tickets por nivel", "Básico", "", 2, 1),
     ("tickets_confiable", "Tickets por nivel", "Confiable", "", 3, 1),
-    ("tickets_premium", "Tickets por nivel", "Premium", "", 4, 1),
+    ("tickets_premium", "Tickets por nivel", "Premium", "", 5, 1),
+
+    ("servicios_inicial", "Pagos de servicios por nivel", "Inicial", "", 0, 1),
+    ("servicios_basico", "Pagos de servicios por nivel", "Básico", "", 0, 1),
+    ("servicios_confiable", "Pagos de servicios por nivel", "Confiable", "", 1, 1),
+    ("servicios_premium", "Pagos de servicios por nivel", "Premium", "", 3, 1),
 
     ("max_inicial", "Máximo por ticket", "Inicial", "USD", 5.0, 1),
     ("max_basico", "Máximo por ticket", "Básico", "USD", 5.0, 1),
@@ -37,6 +42,11 @@ EDITABLES = [
     ("plazo_basico", "Plazos máximos", "Básico", "días", 14, 1),
     ("plazo_confiable", "Plazos máximos", "Confiable", "días", 15, 1),
     ("plazo_premium", "Plazos máximos", "Premium", "días", 30, 1),
+
+    # Nivel del Club PagoDirecto (1 Turista, 2 Caminante, 3 Viajero, 4 Conocedor…) que exige cada nivel
+    ("ruta_basico", "Ruta del Club para cada nivel", "Básico desde", "nivel", 2, 1),
+    ("ruta_confiable", "Ruta del Club para cada nivel", "Confiable desde", "nivel", 3, 1),
+    ("ruta_premium", "Ruta del Club para cada nivel", "Premium desde", "nivel", 4, 1),
 
     ("repagos_basico", "Repagos a tiempo para subir", "Básico", "", 1, 1),
     ("repagos_confiable", "Repagos a tiempo para subir", "Confiable", "", 3, 1),
@@ -80,7 +90,9 @@ RITMO_DESDE = date(2026, 9, 7)   # día en que Ritmo empezó a decidir en los da
 
 NOMBRES_NIVEL = ["Inicial", "Básico", "Confiable", "Premium"]
 SERVICIOS = ["estacionamiento", "parquimetro", "peaje", "luz", "internet", "telefono", "seguro"]
+# El crédito tiene dos cupos: tickets (movilidad) y pagos de servicios (facturas). No hay cupo en dinero.
 SERVICIOS_MOVILIDAD = ["estacionamiento", "parquimetro", "peaje"]
+SERVICIOS_FACTURA = ["luz", "internet", "telefono", "seguro"]
 SERVICIOS_POR_NIVEL = {
     0: ["estacionamiento"],
     1: ["estacionamiento", "parquimetro", "peaje"],
@@ -90,8 +102,13 @@ SERVICIOS_POR_NIVEL = {
 SERVICIOS_TEXTO = {0: "Estacionamiento", 1: "+ parquímetros y peajes",
                    2: "+ luz, internet y teléfono", 3: "+ seguros"}
 
+
+def cupo_de(servicio) -> str:
+    """"tickets" para movilidad, "servicios" para facturas: cada uno gasta de su propio cupo."""
+    return "servicios" if servicio in SERVICIOS_FACTURA else "tickets"
+
 # Regla actual (antes de Ritmo): igual para todos
-REGLA_ACTUAL = {"tickets": 2, "plazo_dias": 7, "monto_max": 5.0, "servicios": ["estacionamiento"]}
+REGLA_ACTUAL = {"tickets": 2, "servicios_cupo": 0, "plazo_dias": 7, "monto_max": 5.0, "servicios": ["estacionamiento"]}
 
 # --- Segmentos -----------------------------------------------------------------------
 SEG_SIN_CREDITO = "Sin crédito"
@@ -119,9 +136,24 @@ CONDUCTOR_SEMANAS = 4        # ...en promedio de las últimas 4 semanas
 
 # --- Comunicar y premiar ---------------------------------------------------------------
 DIAS_RECORDATORIO = 2
-PUNTOS_POR_PAGO = 100
-MULTIPLICADOR_PUNTOS = 1.5
-META_RACHA = 3               # pagos en la semana para activar el ×1,5
+# Los puntos NO son un sistema nuevo: se suman al saldo de puntos del Club PagoDirecto (el de
+# Hitos / Beneficios / Puntos y el progreso de la ruta). Ritmo solo dice cuántos aporta Credirecto.
+CLUB_NOMBRE = "Club PagoDirecto"
+PUNTOS_POR_PAGO = 100        # pts del Club por pago (servicio en PagoDirecto o cuota de Credirecto a tiempo)
+BONO_RUTA_COMPLETADA = 500   # "+500 puntos obtenidos" al completar una ruta
+# Niveles y rutas del Club tal como están en la app (pts para desbloquear cada ruta). El Club anuncia
+# 10 niveles "de Turista a Leyenda"; la app muestra hoy estos 7, los 3 últimos aún no están publicados.
+RUTAS_CLUB = [
+    {"nivel": "Turista", "ruta": "Ruta Colonial", "desde": 0},
+    {"nivel": "Caminante", "ruta": "Ruta Falcón", "desde": 1000},
+    {"nivel": "Viajero", "ruta": "Ruta del Café", "desde": 4000},
+    {"nivel": "Conocedor", "ruta": "Ruta de Paria", "desde": 11000},
+    {"nivel": "Explorador", "ruta": "Ruta de Los Llanos", "desde": 24000},
+    {"nivel": "Trotamundo", "ruta": "Ruta Andina", "desde": 45000},
+    {"nivel": "Baqueano", "ruta": "Ruta del Zulia", "desde": 76000},
+]
+MULTIPLICADOR_PUNTOS = 1.5   # pagar antes del vencimiento o con la racha completa
+META_RACHA = 3               # pagos en la semana para activar el ×1,5 (la misma racha del Club)
 
 # Mensajes por prioridad. Tono amable, nunca amenazante.
 MENSAJES = {
@@ -140,11 +172,11 @@ MENSAJES = {
     "mover_quincena": {"prioridad": 5, "nombre": "Mover a quincena", "descripcion": "cuota cae lejos de su recarga",
                        "mensaje": "Tu cuota vence el {fecha}. ¿La movemos al {dia}, tu día de cobro? Sin costo.",
                        "canal": "preferido"},
-    "falta_poco": {"prioridad": 6, "nombre": "Falta poco para subir", "descripcion": "a 1 repago de ganar un ticket más",
-                   "mensaje": "Te falta 1 pago a tiempo para ganar un ticket más.",
+    "falta_poco": {"prioridad": 6, "nombre": "Falta poco para subir", "descripcion": "a 1 repago de subir de nivel",
+                   "mensaje": "Te falta 1 pago a tiempo para subir de nivel y ganar más tickets.",
                    "canal": "preferido"},
 }
-MENSAJE_SUBIDA = "¡Subiste a Credirecto {nivel}! Ahora tienes {tickets} tickets{extra}."
+MENSAJE_SUBIDA = "¡Subiste a Credirecto {nivel}! Ahora tienes {cupo}{extra}."
 
 # Quien no está habilitado o tiene el crédito congelado no ve la opción de pagar con Credirecto:
 # esos intentos no cuentan como solicitudes.
@@ -156,6 +188,7 @@ MOTIVOS_RECHAZO = {
     "deuda_vencida": "Deuda vencida",
     "servicio_no_cubierto": "Servicio no cubierto por su nivel",
     "maximo_en_uso": "Máximo de tickets en uso",
+    "servicios_en_uso": "Pagos de servicios en uso",
     "saldo_insuficiente": "Sin saldo para el excedente",
 }
 
@@ -166,6 +199,7 @@ UMBRALES_NIVEL = {}
 MARGEN_BAJADA = 0
 NIVELES = {}
 REPAGOS_POR_NIVEL = {}
+RUTA_MINIMA_POR_NIVEL = {}
 GRACIA_DIAS = MORA_DIA = 0
 GASTO_ADMIN = COMISION = COMISION_MIN = 0.0
 DESCUENTO_NIVEL = {}
@@ -183,11 +217,15 @@ def _derivar():
     g["UMBRALES_NIVEL"] = {1: v["umbral_basico"], 2: v["umbral_confiable"], 3: v["umbral_premium"]}
     g["MARGEN_BAJADA"] = v["margen_bajada"]
     nombres = ["inicial", "basico", "confiable", "premium"]
-    g["NIVELES"] = {n: {"tickets": int(v[f"tickets_{k}"]), "monto_max": float(v[f"max_{k}"]),
+    g["NIVELES"] = {n: {"tickets": int(v[f"tickets_{k}"]), "servicios_cupo": int(v[f"servicios_{k}"]),
+                        "monto_max": float(v[f"max_{k}"]),
                         "plazo_dias": int(v[f"plazo_{k}"]), "servicios": SERVICIOS_POR_NIVEL[n]}
                     for n, k in enumerate(nombres)}
     g["REPAGOS_POR_NIVEL"] = {0: 0, 1: int(v["repagos_basico"]), 2: int(v["repagos_confiable"]),
                               3: int(v["repagos_premium"])}
+    # Índice (0 = Turista) en RUTAS_CLUB que exige cada nivel de Credirecto
+    g["RUTA_MINIMA_POR_NIVEL"] = {0: 0, 1: int(v["ruta_basico"]) - 1, 2: int(v["ruta_confiable"]) - 1,
+                                  3: int(v["ruta_premium"]) - 1}
     g["GRACIA_DIAS"] = int(v["gracia_dias"])
     g["MORA_DIA"] = int(v["mora_dia"])
     g["GASTO_ADMIN"] = v["gasto_admin_pct"] / 100
@@ -217,6 +255,9 @@ def validar(valores: dict) -> dict:
     candidato = {**VALORES, **limpios}
     if not candidato["umbral_basico"] <= candidato["umbral_confiable"] <= candidato["umbral_premium"]:
         raise ValueError("Los umbrales deben ir de menor a mayor: Básico ≤ Confiable ≤ Premium.")
+    rutas = [candidato["ruta_basico"], candidato["ruta_confiable"], candidato["ruta_premium"]]
+    if rutas != sorted(rutas) or not 1 <= rutas[0] or rutas[-1] > len(RUTAS_CLUB):
+        raise ValueError(f"Las rutas del Club van de menor a mayor, entre 1 y {len(RUTAS_CLUB)}.")
     if candidato["mora_dia"] <= candidato["gracia_dias"]:
         raise ValueError("La mora debe empezar después de los días de gracia.")
     return limpios

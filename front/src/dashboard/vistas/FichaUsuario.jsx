@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
 import { bs, fechaCorta, SERVICIOS, usd } from '../../formato.js'
 import { Chip, ErrorCaja, Esqueleto, Segmentos } from '../componentes.jsx'
 import { useDatos } from '../datos.jsx'
-import { listaY, MENOS, numAuto, tickets } from '../util.js'
+import { cupo, listaY, MENOS, numAuto } from '../util.js'
 
 const colorGrande = (s) => (s >= 60 ? '#3F6212' : s >= 40 ? '#15152B' : '#B42318')
 const montoCorto = (n) => usd(n, Number.isInteger(n) ? 0 : 2)
@@ -62,6 +62,11 @@ function Cupo({ u }) {
       <div style={{ fontSize: 28, fontWeight: 700 }}>{t.disponibles} <span style={{ fontSize: 16, color: '#6B6B80', fontWeight: 500 }}>de {t.total}</span></div>
       <div className="rt-lbl">Hasta {montoCorto(t.monto_max)} por ticket · {bs(t.monto_max)}</div>
       <Segmentos total={t.total} llenos={t.disponibles} desde="fin" />
+      {u.servicios_cupo?.total > 0 && (
+        <div className="rt-lbl" style={{ marginTop: 8 }}>
+          Pagos de servicios: <b style={{ color: '#15152B' }}>{u.servicios_cupo.disponibles} de {u.servicios_cupo.total}</b> disponibles
+        </div>
+      )}
     </div>
   )
 }
@@ -95,6 +100,7 @@ function Progreso({ u }) {
   const partes = []
   if (p.faltan_puntos > 0) partes.push(plural(p.faltan_puntos, 'punto', 'puntos'))
   if (p.faltan_repagos > 0) partes.push(plural(p.faltan_repagos, 'repago', 'repagos'))
+  if (p.faltan_pts_club > 0) partes.push(`${p.faltan_pts_club.toLocaleString('es-VE')} pts del Club (${p.ruta_requerida})`)
   const texto = partes.length ? `Le faltan ${partes.join(' y ')} para ${p.siguiente_nombre}` : `Listo para subir a ${p.siguiente_nombre} en el próximo recálculo`
   return (
     <div style={caja}>
@@ -129,9 +135,9 @@ function Prestar({ p }) {
   return (
     <div style={{ borderRadius: 10, padding: 18, background: '#F5F6F8', color: '#15152B' }} title={p.plazo_dias ? `Plazo: ${p.plazo_dias} días` : undefined}>
       <div style={{ ...ROTULO, color: '#3F6212' }}>PRESTAR</div>
-      <div style={TITULO}>{p.tickets > 0 ? `Aprobado: ${tickets(p.tickets)}` : 'Sin tickets libres'}</div>
+      <div style={TITULO}>{p.tickets > 0 || p.servicios_cupo > 0 ? `Aprobado: ${cupo(p.tickets, p.servicios_cupo ?? 0)}` : 'Sin tickets libres'}</div>
       <div style={{ fontSize: 13, color: '#6B6B80' }}>
-        {p.tickets > 0
+        {p.tickets > 0 || p.servicios_cupo > 0
           ? `Hasta ${montoCorto(p.monto_max)} c/u · ${servicios.join(', ')}`
           : 'Se le renueva un ticket cuando pague su cuota'}
       </div>
@@ -241,7 +247,7 @@ export default function FichaUsuario({ id }) {
           {u.habilitado && u.racha && (
             <Chip tono={u.racha.multiplicador ? 'positivo' : 'negativo'}>Racha {u.racha.pagos} de {u.racha.meta}{u.racha.multiplicador ? ' · ×1,5' : ''}</Chip>
           )}
-          {u.club && <Chip>Club: {u.club}</Chip>}
+          {u.club && <Chip>Club: {u.club}{u.club_puntos?.puntos_credirecto ? ` · ${u.club_puntos.puntos_credirecto} pts con Credirecto` : ''}</Chip>}
         </div>
       </div>
 
