@@ -114,26 +114,37 @@ function Cuotas() {
   const { ficha, recargarFicha } = useApp()
   const navegar = useNavigate()
   const lista = ticketsOrdenados(ficha)
-  const [sel, setSel] = useState(lista[0]?.id ?? null)
+  const [sel, setSel] = useState(() => (lista[0] ? [lista[0].id] : []))
   const [cargando, setCargando] = useState(false)
   const [error, setError] = useState(null)
-  const elegido = lista.find((t) => t.id === sel)
+  const elegidos = lista.filter((t) => sel.includes(t.id))
+  const totalElegido = elegidos.reduce((s, t) => s + t.deuda, 0)
+  // Una sola cuota en gracia abre su pantalla; varias se pagan completas de una vez
+  const soloGracia = elegidos.length === 1 && elegidos[0].estado === 'gracia'
+
+  const alternar = (id) => setSel((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]))
 
   const pagar = async () => {
-    if (!elegido) return
-    if (elegido.estado === 'gracia') { navegar(`/app/gracia/${elegido.id}`); return }
+    if (!elegidos.length) return
+    if (soloGracia) { navegar(`/app/gracia/${elegidos[0].id}`); return }
     setCargando(true); setError(null)
-    try {
-      const r = await datos.pagar({ user_id: ficha.user_id, ticket_id: elegido.id, monto: elegido.deuda, origen: 'usuario' })
-      const numero = numeroTicket(ficha, elegido.id)
-      // Primero navegamos (la cuota desaparece de la ficha al refrescarla)
-      navegar('/app/comprobante', { state: { ...r, numero, nivel: ficha.nivel_nombre, hora: horaAhora() } })
-      recargarFicha()
-    } catch (e) {
-      setError(mensajeError(e))
-    } finally {
-      setCargando(false)
+    // POST /pagos cobra una cuota por llamada: se pagan en orden y se para en el primer error
+    const pagos = []
+    let fallo = null
+    for (const t of elegidos) {
+      try {
+        const r = await datos.pagar({ user_id: ficha.user_id, ticket_id: t.id, monto: t.deuda, origen: 'usuario' })
+        pagos.push({ ...r, numero: numeroTicket(ficha, t.id) })
+      } catch (e) {
+        fallo = mensajeError(e)
+        break
+      }
     }
+    setCargando(false)
+    if (!pagos.length) { setError(fallo); return }
+    // Primero navegamos (las cuotas desaparecen de la ficha al refrescarla)
+    navegar('/app/comprobante', { state: { pagos, error: fallo, nivel: ficha.nivel_nombre, hora: horaAhora() } })
+    recargarFicha()
   }
 
   if (!lista.length) {
@@ -153,9 +164,10 @@ function Cuotas() {
     <>
       {lista.map((t, i) => {
         const e = estadoCuota(ficha, t)
-        const activa = t.id === sel
+        const activa = sel.includes(t.id)
         return (
-          <Tarjeta key={t.id} role="radio" aria-checked={activa} tabIndex={0} onClick={() => setSel(t.id)}
+          <Tarjeta key={t.id} role="checkbox" aria-checked={activa} tabIndex={0} onClick={() => alternar(t.id)}
+            onKeyDown={(ev) => { if (ev.key === ' ' || ev.key === 'Enter') { ev.preventDefault(); alternar(t.id) } }}
             style={{ marginTop: 14, padding: 18, display: 'flex', gap: 12, alignItems: 'center', cursor: 'pointer', boxShadow: activa ? '0 0 0 2px #FF1F5A, 0 8px 28px rgba(21,21,43,.06)' : undefined }}>
             <span style={{ width: 24, height: 24, borderRadius: '50%', border: activa ? '0' : '2px solid #B9BCCB', background: activa ? '#FF1F5A' : 'transparent', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}>
               {activa && <IcoCheck w={14} />}
@@ -176,9 +188,11 @@ function Cuotas() {
         )
       })}
       <MensajeError style={{ marginTop: 12 }}>{error}</MensajeError>
-      {elegido && (
+      {elegidos.length > 0 && (
         <BotonPildora style={{ width: '100%', marginTop: 14, height: 54, fontSize: 18 }} cargando={cargando} onClick={pagar}>
-          {elegido.estado === 'gracia' ? 'Ver mi cuota' : `Pagar ${bs(elegido.deuda)}`}
+          {soloGracia ? 'Ver mi cuota'
+            : elegidos.length > 1 ? `Pagar ${elegidos.length} cuotas · ${bs(totalElegido)}`
+            : `Pagar ${bs(totalElegido)}`}
         </BotonPildora>
       )}
       <Nota total={ficha.tickets.total} />
