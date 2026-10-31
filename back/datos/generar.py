@@ -1,10 +1,10 @@
-"""Datos sintéticos de Ritmo: 500 usuarios, historial del 1 may al 31 oct 2026.
+"""Datos sintéticos de Credirecto: 500 usuarios, historial del 1 may al 31 oct 2026.
 
 Uso, desde back/:  python -m datos.generar
 Borra todo (menos la configuración guardada) y vuelve a cargar. Se puede correr varias veces.
 
 Se simulan dos mundos con las mismas intenciones de cada usuario (ver comportamiento.py):
-- "Ritmo" (lo que queda en la base): regla actual hasta RITMO_DESDE; desde ahí decide el motor.
+- "Credirecto" (lo que queda en la base): regla actual hasta RITMO_DESDE; desde ahí decide el motor.
 - "Regla actual" (contrafactual): todos con 2 tickets, 7 días, solo estacionamiento. Solo se guardan
   sus métricas diarias (tabla metricas_regla_actual), hasta 90 días después de hoy para que el
   reloj de demo pueda avanzar.
@@ -88,7 +88,7 @@ def ticket_a_la_fecha(t, d):
 
 
 def _eventos_de_ticket(t) -> list:
-    """Eventos del mundo Ritmo de un ticket: uso, comisión si pasó la gracia, y repago."""
+    """Eventos del mundo Credirecto de un ticket: uso, comisión si pasó la gracia, y repago."""
     uid, vence, plan = t["user_id"], t["fecha_vencimiento"], t["_plan"]
     base = {"user_id": uid, "servicio": t["servicio"], "ticket_id": t["id"]}
     eventos = [{**base, "fecha": t["fecha_uso"], "tipo": "uso_ticket", "monto": t["monto"], "a_tiempo": None}]
@@ -169,7 +169,7 @@ def _historia(lote, u):
             t["_plan"] = cp.plan_de_pago(u, t, False, None, False, riesgo=not habilitado)
             tickets_regla.append(t)
 
-        # Mundo Ritmo (solo hasta hoy)
+        # Mundo Credirecto (solo hasta hoy)
         if d > FECHA_RELOJ:
             continue
         ritmo = d >= C.RITMO_DESDE
@@ -299,7 +299,7 @@ def construir() -> Lote:
 
 
 def metricas_regla_actual(lote) -> list:
-    """Métricas diarias del mundo "regla actual", con las mismas definiciones que /resumen usa para Ritmo."""
+    """Métricas diarias del mundo "regla actual", con las mismas definiciones que /resumen usa para Credirecto."""
     dias = list(_dias(INICIO_HISTORIAL, FIN_REGLA_ACTUAL))
     m = {d: dict(prestado=0.0, usos=0, usos_reusados=0, vencidos=0, a_tiempo=0, llegaron_a_mora=0,
                  comisiones=0.0, deuda_mora=0.0) for d in dias}

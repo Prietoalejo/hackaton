@@ -2,7 +2,7 @@
 
 Todo es determinista: cada decisión sale de un generador aleatorio sembrado con (semilla, usuario, fecha),
 así el historial que arma `generar.py` y los días que avanza `POST /simular-dia` siguen el mismo patrón,
-y los mundos "regla actual" y "Ritmo" comparten las mismas intenciones de cada usuario.
+y los mundos "regla actual" y "Credirecto" comparten las mismas intenciones de cada usuario.
 """
 import random
 from datetime import date, timedelta
@@ -39,7 +39,7 @@ COMERCIOS = {
     "luz": ["Corpoelec"], "internet": ["CANTV", "Inter", "NetUno"],
     "telefono": ["Movistar", "Digitel", "Movilnet"], "seguro": ["Seguros Caracas", "Mercantil Seguros"],
 }
-# Efecto de Ritmo y del riesgo sobre la probabilidad de pagar a tiempo
+# Efecto de Credirecto y del riesgo sobre la probabilidad de pagar a tiempo
 BONO_QUINCENA = 0.06       # la cuota cae en su día de cobro
 BONO_RECORDATORIO = 0.04   # recibe recordatorio a su hora
 BONO_DESCUENTO = 0.10      # Confiable y Premium anticipan más por el descuento
@@ -137,8 +137,8 @@ def intencion(usuario, hoy):
 def plan_de_pago(usuario, ticket, ritmo, nivel, alineado, riesgo):
     """Fecha en que el usuario pagará la cuota, o None si nunca la paga.
 
-    El mismo sorteo sirve para los dos mundos: Ritmo solo sube la probabilidad de pagar a tiempo,
-    así que todo lo que se paga a tiempo con la regla actual también se paga a tiempo con Ritmo.
+    El mismo sorteo sirve para los dos mundos: Credirecto solo sube la probabilidad de pagar a tiempo,
+    así que todo lo que se paga a tiempo con la regla actual también se paga a tiempo con Credirecto.
     """
     p = PERFILES[usuario["perfil_sintetico"]]
     r = rng("pago", usuario["id"], ticket["fecha_uso"], ticket["servicio"])
@@ -166,7 +166,7 @@ def acepta_quincena(usuario, ticket) -> bool:
 
 
 def planificar(usuario, ticket, nivel, hoy, riesgo=False) -> None:
-    """Con Ritmo, si le ofrecen mover la cuota a su quincena y acepta, la mueve. Luego fija cuándo pagará."""
+    """Con Credirecto, si le ofrecen mover la cuota a su quincena y acepta, la mueve. Luego fija cuándo pagará."""
     ritmo = hoy >= C.RITMO_DESDE
     alineado = False
     if ritmo and nivel is not None:

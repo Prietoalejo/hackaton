@@ -1,4 +1,4 @@
-# API de Ritmo · contrato entre back y front
+# API de Credirecto · contrato entre back y front
 
 Base: `http://localhost:8000` (en el front, `import.meta.env.VITE_API_URL`). JSON en todas las respuestas.
 CORS abierto. Errores: `{"detail": "texto legible en español"}` con 404 (no existe), 409 (regla de negocio), 422 (datos inválidos).

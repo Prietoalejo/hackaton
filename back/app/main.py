@@ -1,4 +1,4 @@
-"""API de Ritmo. Contrato en /API.md. Uso, desde back/:  uvicorn app.main:app --reload"""
+"""API de Credirecto. Contrato en /API.md. Uso, desde back/:  uvicorn app.main:app --reload"""
 from contextlib import asynccontextmanager
 from datetime import timedelta
 from typing import Literal, Optional
@@ -36,7 +36,7 @@ async def ciclo_de_vida(_app):
     yield
 
 
-app = FastAPI(title="Ritmo", description="Motor de comportamiento para Credirecto", lifespan=ciclo_de_vida)
+app = FastAPI(title="Credirecto", description="Motor de comportamiento de Credirecto", lifespan=ciclo_de_vida)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 

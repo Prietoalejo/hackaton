@@ -46,7 +46,7 @@ export default function PanelPruebas({ userId, elegirUsuario, hoy, avanzarDia, a
       <div>
         <h1>Credirecto · pruebas</h1>
         <div style={{ fontSize: 13, color: '#6B6B80' }}>
-          {mock ? 'Datos simulados (VITE_MOCK=1)' : 'Conectado a la API de Ritmo'}
+          {mock ? 'Datos simulados (VITE_MOCK=1)' : 'Conectado a la API de Credirecto'}
         </div>
       </div>
 

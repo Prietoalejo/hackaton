@@ -1,4 +1,4 @@
-"""Parámetros de negocio de Ritmo.
+"""Parámetros de negocio de Credirecto.
 
 Todos los números de negocio viven aquí. Los que aparecen en la vista Configuración del dashboard
 están en `EDITABLES`: se pueden cambiar en caliente con `aplicar(valores)` (lo hace PUT /config).
@@ -76,7 +76,7 @@ QUINCENA_DEFECTO = [15, 30]
 QUINCENA_MIN_EVENTOS = 4
 FIN_DE_MES_DESDE = 28            # los días 28 a 31 cuentan como "fin de mes"
 DIA_FIN_DE_MES = 30
-RITMO_DESDE = date(2026, 9, 7)   # día en que Ritmo empezó a decidir en los datos sintéticos
+RITMO_DESDE = date(2026, 9, 7)   # día en que Credirecto empezó a decidir en los datos sintéticos
 
 NOMBRES_NIVEL = ["Inicial", "Básico", "Confiable", "Premium"]
 SERVICIOS = ["estacionamiento", "parquimetro", "peaje", "luz", "internet", "telefono", "seguro"]
@@ -90,7 +90,7 @@ SERVICIOS_POR_NIVEL = {
 SERVICIOS_TEXTO = {0: "Estacionamiento", 1: "+ parquímetros y peajes",
                    2: "+ luz, internet y teléfono", 3: "+ seguros"}
 
-# Regla actual (antes de Ritmo): igual para todos
+# Regla actual (antes de Credirecto): igual para todos
 REGLA_ACTUAL = {"tickets": 2, "plazo_dias": 7, "monto_max": 5.0, "servicios": ["estacionamiento"]}
 
 # --- Segmentos -----------------------------------------------------------------------

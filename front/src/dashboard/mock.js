@@ -1,4 +1,4 @@
-// Datos simulados de Ritmo. SOLO se usan si VITE_MOCK=1 (ver datos.js).
+// Datos simulados de Credirecto. SOLO se usan si VITE_MOCK=1 (ver datos.js).
 // Respetan exactamente las formas de /API.md y los valores de ejemplo de disenos/dashboard/.
 import { ApiError } from '../api.js'
 

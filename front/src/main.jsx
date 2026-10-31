@@ -11,8 +11,8 @@ function Inicio() {
   return (
     <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', background: '#F3F4F8' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
-        <h1 style={{ margin: 0, color: '#15152B' }}>Credirecto × Ritmo</h1>
-        <Link to="/dashboard">Dashboard Ritmo</Link>
+        <h1 style={{ margin: 0, color: '#15152B' }}>Credirecto</h1>
+        <Link to="/dashboard">Dashboard de Credirecto</Link>
         <Link to="/app">App móvil (pruebas)</Link>
       </div>
     </div>

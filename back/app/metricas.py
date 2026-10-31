@@ -1,6 +1,6 @@
 """Consultas de las vistas del dashboard (solo lectura).
 
-Las métricas del mundo Ritmo se calculan desde las tablas reales con las mismas definiciones que
+Las métricas del mundo Credirecto se calculan desde las tablas reales con las mismas definiciones que
 `datos/generar.py` usa para guardar el contrafactual "regla actual" en metricas_regla_actual:
 - repago a tiempo de una semana = cuotas que vencían esa semana pagadas a más tardar el día de vencimiento
 - mora de una semana = cuotas que vencían MORA_DIA días antes y llegaron a mora
@@ -31,7 +31,7 @@ def _etiqueta(d):
     return f"{d.day} {MESES_MIN[d.month - 1]}"
 
 
-# --- Tickets del mundo Ritmo ------------------------------------------------------------
+# --- Tickets del mundo Credirecto ------------------------------------------------------------
 
 def _tickets_df(conn) -> pd.DataFrame:
     t = db.tickets

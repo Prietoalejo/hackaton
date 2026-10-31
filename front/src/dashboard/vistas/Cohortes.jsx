@@ -91,7 +91,7 @@ export default function Cohortes() {
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 18, marginTop: 16, fontSize: 13, color: '#6B6B80' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><span style={{ width: 18, height: 18, borderRadius: 6, border: '1.5px dashed #C9CBD6' }} />Aún no llega a esa semana</span>
-            {d?.ritmo_desde && <span>Ritmo empezó a decidir el {fechaCorta(d.ritmo_desde)}: mira el salto desde la cohorte de {mesRitmo}.</span>}
+            {d?.ritmo_desde && <span>Credirecto empezó a decidir el {fechaCorta(d.ritmo_desde)}: mira el salto desde la cohorte de {mesRitmo}.</span>}
           </div>
         </section>
       )}

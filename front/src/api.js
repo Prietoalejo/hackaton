@@ -1,4 +1,4 @@
-// Cliente de la API de Ritmo. El contrato está en /API.md.
+// Cliente de la API de Credirecto. El contrato está en /API.md.
 const BASE = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/$/, '')
 
 export class ApiError extends Error {

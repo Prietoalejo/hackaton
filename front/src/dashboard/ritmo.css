@@ -1,4 +1,4 @@
-/* Estilos del dashboard Ritmo. Todo va con prefijo rt- para no chocar con la app móvil.
+/* Estilos del dashboard Credirecto. Todo va con prefijo rt- para no chocar con la app móvil.
    Valores copiados de las clases del <helmet> de disenos/dashboard/*.html */
 
 .rt-wrap { display: flex; flex-wrap: wrap; gap: 24px; padding: 24px; background: #F3F4F8; font-family: 'Outfit', system-ui, sans-serif; color: #15152B; min-height: 100vh; align-items: flex-start; }

@@ -1,4 +1,4 @@
--- Ritmo · esquema de base de datos. Se puede ejecutar varias veces: solo crea lo que falta.
+-- Credirecto · esquema de base de datos. Se puede ejecutar varias veces: solo crea lo que falta.
 
 create table if not exists reloj (
   id int primary key check (id = 1),

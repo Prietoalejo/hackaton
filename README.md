@@ -1,7 +1,7 @@
-# Credirecto × Ritmo
+# Credirecto
 
-Hackatón de PagoDirecto. **Ritmo** es el motor que decide, con cómo y cuándo paga cada usuario, a quién
-habilitarle Credirecto, cuántos tickets darle, qué comunicarle y cómo premiarlo.
+Hackatón de PagoDirecto. **Credirecto** es el motor que decide, con cómo y cuándo paga cada usuario, a quién
+habilitarle el crédito, cuántos tickets darle, qué comunicarle y cómo premiarlo.
 
 ```
 hackaton/
@@ -9,7 +9,7 @@ hackaton/
 ├── API.md         # contrato JSON entre back y front
 ├── disenos/       # diseños de referencia (HTML exportados)
 ├── back/          # FastAPI + motor + datos sintéticos (Python 3.11+, Postgres)
-└── front/         # React (Vite) + Recharts: dashboard Ritmo y app móvil de pruebas
+└── front/         # React (Vite) + Recharts: dashboard Credirecto y app móvil de pruebas
 ```
 
 ## Correrlo en local

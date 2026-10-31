@@ -1,9 +1,9 @@
-# Credirecto × Ritmo — guía para programar
+# Credirecto — guía para programar
 
 Este proyecto implementa dos cosas:
 
 1. **App móvil (PagoDirecto)**: 9 pantallas de Credirecto + notificaciones push.
-2. **Ritmo**: dashboard web interno (desktop 1440 px) que calcula un Trust Score por usuario y decide a quién habilitar Credirecto, cuántos tickets darle, qué comunicarle y cómo premiarlo.
+2. **Dashboard de Credirecto**: panel web interno (desktop 1440 px) que calcula un Trust Score por usuario y decide a quién habilitar el crédito, cuántos tickets darle, qué comunicarle y cómo premiarlo.
 
 Los diseños de referencia están en `disenos/`. Implementa las pantallas para que se vean igual que esos archivos.
 
@@ -31,7 +31,7 @@ Son HTML exportados de una herramienta de diseño. No se ejecutan tal cual:
 - Barra inferior: Home, Movimientos, [mascota al centro, 96 px reservados], Mis pagos, Menú.
 - Pantalla base 390 × 844.
 
-### Dashboard Ritmo (plano, sin efectos)
+### Dashboard de Credirecto (plano, sin efectos)
 - Misma fuente Outfit. Fondo `#F3F4F8`; tarjetas blancas con borde `1px #E3E5EA`, radio 12 px, **sin sombras ni degradados**.
 - Primario `#15152B`; positivo `#3F6212`/`#4D7C0F` sobre `#EEF4E4`; negativo `#B42318` sobre `#FDECEC`; enlaces `#1F4FB8`.
 - Menú lateral fijo de 248 px con las 6 vistas; en móvil se apila arriba.
@@ -81,17 +81,17 @@ Pagar antes del vencimiento: +1 en la racha y puntos ×1,5 en el Club.
 
 App (`disenos/app/`): 01 home sin Credirecto (carrusel con checklist) · 02 home habilitado (carrusel con tickets) · 03 detalle (tickets, cuotas/movimientos, camino a Premium, servicios) · 04 pago con ticket · 05 mover cuota a la quincena · 06 comprobante de pago anticipado · 07 racha · 08 período de gracia · 09 modo recuperación · 10 notificaciones push.
 
-Dashboard (`disenos/dashboard/`): 01 Resumen (KPIs, Ritmo vs. regla actual, gráfico semanal) · 02 Cohortes (mapa de calor) · 03 Segmentos y niveles · 04 Decisiones · 05 Usuarios (tabla + ficha) · 06 Configuración (parámetros, simular, reloj de demo).
+Dashboard (`disenos/dashboard/`): 01 Resumen (KPIs, Credirecto vs. regla actual, gráfico semanal) · 02 Cohortes (mapa de calor) · 03 Segmentos y niveles · 04 Decisiones · 05 Usuarios (tabla + ficha) · 06 Configuración (parámetros, simular, reloj de demo).
 
 ## Forma de trabajar
 - Primero los componentes compartidos (tokens, tarjetas, botones, encabezado, barra inferior, menú lateral), luego pantalla por pantalla.
-- Centraliza las reglas de negocio (niveles, score, cobros) en un solo módulo con la configuración, para que la vista Configuración de Ritmo las edite.
+- Centraliza las reglas de negocio (niveles, score, cobros) en un solo módulo con la configuración, para que la vista Configuración de Credirecto las edite.
 - Usa los datos de ejemplo de arriba como mocks hasta que exista el backend.
 - Después de cada pantalla, compárala con su archivo en `disenos/`.
 
 ---
 
-# Back (Ritmo) · cómo está hecho
+# Back (Credirecto) · cómo está hecho
 
 El back implementa las reglas de esta guía. Contrato JSON: `API.md`. Cómo correrlo: `README.md`.
 
@@ -137,8 +137,8 @@ Las funciones de `motor/` son puras: reciben datos y la fecha `hoy`, no tocan la
   Van por el canal preferido del usuario; el aviso de mora va por push y Wisi.
 - **Premios**: racha (pagos a tiempo en la semana, meta 3 → ×1,5), ×1,5 por pagar antes, puntos del
   Club (100 por pago), descuento por nivel, subida de nivel. Usar el crédito no se premia.
-- **Regla actual vs. Ritmo**: el generador simula los mismos usuarios con la regla actual (2 tickets,
+- **Regla actual vs. Credirecto**: el generador simula los mismos usuarios con la regla actual (2 tickets,
   7 días, solo estacionamiento, para todos) y guarda sus métricas en `metricas_regla_actual`.
-  Ritmo empieza a decidir el 7 sep 2026.
+  Credirecto empieza a decidir el 7 sep 2026.
 - **Datos sintéticos**: 500 usuarios (u_0001…u_0500); `u_0142` María, `u_0333` Carmen y `u_0007` Pedro
   son de historia y no se mueven solos al avanzar el reloj.
