@@ -5,14 +5,16 @@ import { api } from './api.js'
 import { fijarTasa } from './formato.js'
 import DashboardRoot from './dashboard/DashboardRoot.jsx'
 import AppRoot from './app/AppRoot.jsx'
+import { LogoCredirecto, LogoPagoDirecto } from './marcas.jsx'
 import './base.css'
 
 function Inicio() {
   return (
     <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', background: '#F3F4F8' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
-        <h1 style={{ margin: 0, color: '#15152B' }}>Credirecto × Ritmo</h1>
-        <Link to="/dashboard">Dashboard Ritmo</Link>
+        <LogoPagoDirecto alto={36} texto="#15152B" />
+        <LogoCredirecto alto={44} texto="#15152B" />
+        <Link to="/dashboard">Dashboard de Credirecto</Link>
         <Link to="/app">App móvil (pruebas)</Link>
       </div>
     </div>

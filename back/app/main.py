@@ -37,7 +37,7 @@ async def ciclo_de_vida(_app):
     yield
 
 
-app = FastAPI(title="Ritmo", description="Motor de comportamiento para Credirecto", lifespan=ciclo_de_vida)
+app = FastAPI(title="Credirecto · API", description="Motor de comportamiento para Credirecto", lifespan=ciclo_de_vida)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 

@@ -1,4 +1,6 @@
 // Iconos SVG copiados de los diseños (disenos/app/*.html).
+import { MarcaCredirecto } from '../../marcas.jsx'
+
 const S = ({ w = 24, h, vb = '0 0 24 24', sw = 1.8, stroke = 'currentColor', fill = 'none', children, style }) => (
   <svg width={w} height={h ?? w} viewBox={vb} fill={fill} stroke={stroke} strokeWidth={sw} aria-hidden="true" style={style}>
     {children}
@@ -20,11 +22,8 @@ export const IcoLlama = ({ encendida, w = 22, color }) =>
 export const IcoUsuario = ({ w = 26 }) => <S w={w}><circle cx="12" cy="8" r="4" /><path d="M4 21c1-4 4-6 8-6s7 2 8 6" /></S>
 
 /** Logo Credirecto: dos píldoras entrelazadas */
-export const LogoCD = ({ w = 30, h = 20, color = '#C6F432', sw = 3.2, style }) => (
-  <svg width={w} height={h} viewBox="0 0 30 20" fill="none" stroke={color} strokeWidth={sw} aria-hidden="true" style={style}>
-    <rect x="2" y="5" width="15" height="11" rx="5.5" /><rect x="13" y="4" width="15" height="11" rx="5.5" />
-  </svg>
-)
+/** Eslabón de Credirecto (marca oficial); `w` × `h` es la caja, la marca conserva su proporción */
+export const LogoCD = ({ w = 30, h = 20, style }) => <MarcaCredirecto alto={h} style={{ width: w, ...style }} />
 
 /** Ticket (carrito) de las tarjetas */
 export const IcoTicket = ({ w = 34, h = 29, color = 'currentColor', sw = 1.7 }) => (

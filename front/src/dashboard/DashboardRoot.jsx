@@ -1,4 +1,4 @@
-// Dashboard Ritmo: layout común (menú lateral de 248 px + reloj de demo) y rutas anidadas.
+// Dashboard de Credirecto: layout común (menú lateral de 248 px + reloj de demo) y rutas anidadas.
 import { useEffect, useRef, useState } from 'react'
 import { Navigate, NavLink, Route, Routes, useLocation } from 'react-router-dom'
 import { fechaReloj } from '../formato.js'
@@ -10,6 +10,7 @@ import Segmentos from './vistas/Segmentos.jsx'
 import Decisiones from './vistas/Decisiones.jsx'
 import Usuarios from './vistas/Usuarios.jsx'
 import Configuracion from './vistas/Configuracion.jsx'
+import { LogoCredirecto, LogoPagoDirecto } from '../marcas.jsx'
 import './ritmo.css'
 
 const VISTAS = [
@@ -23,11 +24,11 @@ const VISTAS = [
 
 function Logo() {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '4px 10px 18px' }}>
-      <span style={{ width: 42, height: 42, borderRadius: 8, background: '#15152B', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <svg width="26" height="18" viewBox="0 0 30 20" fill="none" stroke="#C6F432" strokeWidth="3.2" aria-hidden="true"><rect x="2" y="5" width="15" height="11" rx="5.5" /><rect x="13" y="4" width="15" height="11" rx="5.5" /></svg>
+    <div style={{ padding: '4px 10px 18px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <LogoCredirecto alto={30} texto="#15152B" style={{ maxWidth: '100%' }} />
+      <span className="rt-lbl" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        Panel de crédito · <LogoPagoDirecto alto={14} texto="#15152B" />
       </span>
-      <span><span style={{ display: 'block', fontWeight: 800, fontSize: 19 }}>Ritmo</span><span className="rt-lbl">· Credirecto</span></span>
     </div>
   )
 }
@@ -95,7 +96,7 @@ function RelojDemo() {
 
 function Menu() {
   return (
-    <nav className="rt-side" aria-label="Vistas de Ritmo">
+    <nav className="rt-side" aria-label="Vistas del dashboard">
       <Logo />
       {VISTAS.map(([ruta, nombre]) => (
         <NavLink key={ruta} to={`/dashboard/${ruta}`} className={({ isActive }) => (isActive ? 'on' : undefined)}>{nombre}</NavLink>
@@ -116,7 +117,7 @@ function ScrollArriba() {
 export default function DashboardRoot() {
   useEffect(() => {
     const anterior = document.title
-    document.title = 'Ritmo · Credirecto'
+    document.title = 'Credirecto · Dashboard'
     return () => { document.title = anterior }
   }, [])
 

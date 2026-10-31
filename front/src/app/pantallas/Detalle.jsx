@@ -10,6 +10,7 @@ import {
 } from '../util.js'
 import { BotonPildora, Encabezado, MensajeError, Pantalla, Tarjeta } from '../componentes/Base.jsx'
 import { IcoCandado, IcoCheck, IcoFlecha, IcoServicio, IcoTicket, LogoCD } from '../componentes/Iconos.jsx'
+import { LogoCredirecto } from '../../marcas.jsx'
 
 export default function Detalle() {
   const { ficha } = useApp()
@@ -86,12 +87,7 @@ export default function Detalle() {
   )
 }
 
-const Titulo = () => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-    <LogoCD w={38} h={26} color="#9CCB12" sw={3.4} />
-    <span style={{ fontWeight: 600, fontSize: 26, letterSpacing: '-.01em' }}>Credirecto</span>
-  </div>
-)
+const Titulo = () => <LogoCredirecto alto={28} texto="#15152B" />
 
 /** Texto y color de la línea de estado de una cuota */
 function estadoCuota(ficha, t) {

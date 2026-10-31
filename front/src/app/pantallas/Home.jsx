@@ -9,6 +9,7 @@ import { Avatar, BotonCircular, BotonSoporte, Pantalla, Tarjeta } from '../compo
 import {
   IcoCampana, IcoCheck, IcoClub, IcoDepositar, IcoEnviar, IcoLlama, IcoMas, IcoReloj, IcoServicio, IcoTicket, LogoCD,
 } from '../componentes/Iconos.jsx'
+import { LogoCredirecto, MarcaPagoDirecto } from '../../marcas.jsx'
 import Recuperacion from './Recuperacion.jsx'
 
 const POS = { wallet: 0, credirecto: -314, banco: -580 }
@@ -72,7 +73,7 @@ function HomeNormal() {
           <button className="cd-fr" onClick={() => setVista('wallet')} aria-label="Wallet PagoDirecto">
             <div style={{ height: '100%', borderRadius: 26, color: '#fff', padding: '22px 16px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: 'radial-gradient(70% 60% at 100% 0%, rgba(40,40,130,.85) 0%, rgba(40,40,130,0) 70%), radial-gradient(60% 50% at 20% 100%, rgba(40,40,130,.7) 0%, rgba(40,40,130,0) 70%), linear-gradient(135deg,#FF1F5A 0%,#B3165E 55%,#4A1452 100%)' }}>
               <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                <span style={{ fontSize: 50, fontWeight: 800, lineHeight: 0.9 }}>p</span>
+                <MarcaPagoDirecto alto={46} color="#fff" />
                 <div><div style={{ fontSize: 16, opacity: 0.92 }}>Saldo disponible</div><div style={{ fontSize: 28, fontWeight: 700 }}>{bs(ficha.saldo_wallet)}</div></div>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 2px' }}>
@@ -202,7 +203,7 @@ function CredirectoHabilitado({ ficha, gracia }) {
   return (
     <div style={{ height: '100%', borderRadius: 26, color: '#fff', background: fondoCD(), padding: '18px 18px 16px', display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 7 }}><LogoCD /><span style={{ fontWeight: 600, fontSize: 19 }}>Credirecto</span></span>
+        <LogoCredirecto alto={22} />
         <span style={{ fontSize: 12, fontWeight: 700, background: '#C6F432', color: '#121412', padding: '5px 11px', borderRadius: 999 }}>{ficha.nivel_nombre}</span>
       </div>
       {serv.total > 0 ? (
@@ -262,7 +263,7 @@ function CredirectoPorActivar({ ficha, avisar }) {
   return (
     <div style={{ height: '100%', borderRadius: 26, color: '#fff', background: fondoCD(), padding: compacto ? '14px 14px 12px' : '16px 16px 14px', display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 7 }}><LogoCD /><span style={{ fontWeight: 600, fontSize: 18 }}>Credirecto</span></span>
+        <LogoCredirecto alto={20} />
         <span style={{ fontSize: 12, fontWeight: 600, background: 'rgba(198,244,50,.16)', color: '#D7F86E', padding: '4px 10px', borderRadius: 999 }}>{listos} de {lista.length} listos</span>
       </div>
       <div style={{ fontSize: 18, fontWeight: 700, marginTop: compacto ? 8 : 12 }}>Activa tu Credirecto</div>
