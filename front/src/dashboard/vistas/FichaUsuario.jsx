@@ -61,6 +61,11 @@ function Cupo({ u }) {
       <div className="rt-lbl">Tickets disponibles</div>
       <div style={{ fontSize: 28, fontWeight: 700 }}>{t.disponibles} <span style={{ fontSize: 16, color: '#6B6B80', fontWeight: 500 }}>de {t.total}</span></div>
       <div className="rt-lbl">Hasta {montoCorto(t.monto_max)} por ticket · {bs(t.monto_max)}</div>
+      {t.ajuste ? (
+        <div className="rt-lbl" style={{ color: t.ajuste > 0 ? '#3F6212' : '#B42318' }}>
+          Base del nivel {t.base} · {t.ajuste > 0 ? '+' : MENOS}{Math.abs(t.ajuste)} por su ritmo de pago
+        </div>
+      ) : null}
       <Segmentos total={t.total} llenos={t.disponibles} desde="fin" />
       {u.servicios_cupo?.total > 0 && (
         <div className="rt-lbl" style={{ marginTop: 8 }}>

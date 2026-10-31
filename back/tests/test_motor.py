@@ -4,7 +4,7 @@ from datetime import date, timedelta
 from app import config as C
 from app.motor.club import puntos_de_cuota
 from app.motor.cobros import oferta_quincena
-from app.motor.decisiones import decidir, racha
+from app.motor.decisiones import decidir, prestar_para, racha
 from app.motor.niveles import nivel_por_score, repagos_a_tiempo
 from app.motor.perfil import evaluar_usuario
 from app.motor.quincena import calcular_quincena, fecha_de_quincena
@@ -202,3 +202,61 @@ def test_racha_cuenta_dias_no_pagos():
     assert racha(mismo_dia, HOY)["pagos"] == 1 and not racha(mismo_dia, HOY)["multiplicador"]
     tres_dias = [evento(lunes + timedelta(days=i), "repago_ticket", monto=5.0, a_tiempo=True) for i in range(3)]
     assert racha(tres_dias, HOY)["multiplicador"]
+
+
+def test_cupo_variable_dentro_del_nivel():
+    from app.motor.beneficios import ajuste_cupo
+    from app.motor.decisiones import cupo_nivel
+    # Confiable (3 + 1): buen ritmo → 4 + 2; en riesgo → 2 + 1 (nunca menos de 1)
+    assert cupo_nivel(2, 1) == {"tickets": 4, "servicios_cupo": 2}
+    assert cupo_nivel(2, -1) == {"tickets": 2, "servicios_cupo": 1}
+    assert cupo_nivel(0, -1) == {"tickets": 1, "servicios_cupo": 0}
+    bueno = {"pausa": False, "razones": [{"senal": "puntualidad", "efecto": 0.15}, {"senal": "anticipados", "efecto": 0.15}]}
+    solo_racha = {"pausa": False, "razones": [{"senal": "racha", "efecto": 0.10}, {"senal": "score", "efecto": 0.10}]}
+    riesgo = {"pausa": False, "razones": [{"senal": "riesgo", "efecto": -0.30}]}
+    assert ajuste_cupo(bueno) == 1 and ajuste_cupo(solo_racha) == 0 and ajuste_cupo(riesgo) == -1
+    assert ajuste_cupo({"pausa": True, "razones": []}) == -1
+    with C.con_valores({"ajuste_cupo_max": 0}):
+        assert ajuste_cupo(bueno) == 0                                     # se apaga desde Configuración
+    # El préstamo usa el cupo personal
+    assert prestar_para(True, 2, [], False, ajuste=1)["tickets"] == 4
+
+
+def test_beneficios_se_entregan():
+    from app.motor.beneficios import calcular_beneficios, walletback_de_pago
+    from app.motor.club import calcular_club
+    from app.worker.mora import aplicar_pago
+    tickets, eventos = historial_puntual()
+    club = calcular_club(eventos, tickets, HOY)
+    perfil = {"trust_score": 70, "segmento": C.SEG_PUNTUAL, "quincena": []}
+    b = calcular_beneficios(perfil, club, eventos, tickets, HOY)
+    pct = b["beneficios"][0]["personal"]
+    # Walletback: solo por pagar a tiempo, nunca por usar crédito
+    assert walletback_de_pago(b, 10.0, True) == round(10 * pct / 100, 2) > 0
+    assert walletback_de_pago(b, 10.0, False) == 0
+    # Cuota sin gasto administrativo (Puntual): una vez al mes
+    assert b["a_tu_medida"]["tipo"] == "cuota_sin_gasto" and b["a_tu_medida"]["disponible"]
+    t = ticket(hace(2), monto=4.0)
+    pagada, _, _ = aplicar_pago(t, 100, HOY, nivel=1, sin_gasto=True)
+    assert pagada["descuento"] == pagada["gasto_admin"] > 0
+    despues = calcular_beneficios(perfil, club, eventos, tickets + [pagada], HOY)
+    assert not despues["a_tu_medida"]["disponible"]
+    # Tickets gratis: se descuentan los usados en el mes
+    usados = [evento(HOY, "ticket_gratis", "estacionamiento", 3.0)] * 5
+    gratis = calcular_beneficios(perfil, club, eventos + usados, tickets, HOY)["beneficios"][1]
+    assert gratis["usados_mes"] == 5 and gratis["disponibles"] == 0
+
+
+def test_bajar_de_nivel_avisa_con_un_consejo():
+    tickets, eventos = historial_puntual()
+    ctx = _contexto(usuario(), tickets, eventos, HOY)
+    ctx = {**ctx, "nivel": 1, "nivel_anterior": 2, "ajuste_cupo": 0}
+    m = decidir(ctx, tickets, eventos, HOY)["comunicar"]
+    assert m["tipo"] == "bajada_nivel" and "Básico" in m["mensaje"] and "2 tickets" in m["mensaje"]
+
+
+def test_consejo_prioriza_atrasos_recientes():
+    from app.motor.decisiones import senal_mas_debil
+    base = [{"senal": "puntualidad", "aporte": 38, "max": 40}, {"senal": "anticipados", "aporte": 0, "max": 15}]
+    assert senal_mas_debil(base + [{"senal": "friccion", "aporte": -1, "max": -10}]) == "anticipados"
+    assert senal_mas_debil(base + [{"senal": "friccion", "aporte": -4, "max": -10}]) == "friccion"

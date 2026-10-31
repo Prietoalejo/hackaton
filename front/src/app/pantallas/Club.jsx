@@ -151,8 +151,9 @@ function TarjetaRuta({ r, recorrido, club, ficha, siguiente }) {
 
       {!bloqueada && !completada && wb ? (
         <>
-          <div style={{ fontSize: 40, fontWeight: 700, marginTop: 18, letterSpacing: '-.01em' }}>{bs(wb.estimado_mes ?? 0)}</div>
-          <span style={{ ...chip, height: 32, fontSize: 14 }}>Walletback estimado este mes · {String(wb.personal).replace('.', ',')} %</span>
+          <div style={{ fontSize: 40, fontWeight: 700, marginTop: 18, letterSpacing: '-.01em' }}>{bs(wb.recibido_mes ?? 0)}</div>
+          <span style={{ ...chip, height: 32, fontSize: 14 }}>Walletback recibido · {String(wb.personal).replace('.', ',')} %</span>
+          {wb.estimado_mes > 0 && <div className="cd-mut" style={{ fontSize: 13, marginTop: 6 }}>Estimado este mes: {bs(wb.estimado_mes)}</div>}
         </>
       ) : (
         <>

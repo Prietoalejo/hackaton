@@ -14,6 +14,7 @@ from sqlalchemy import func, select
 
 from app import config as C
 from app import db
+from app.motor.decisiones import cupo_nivel
 from app.motor.habilitacion import FALTANTES
 from app.motor.perfil import evaluar_usuario
 from app.motor.score import dias_atraso
@@ -368,7 +369,8 @@ def listar_usuarios(conn, q=None, nivel=None, segmento=None, limit=50, offset=0)
                     func.max(hoy - t.c.fecha_vencimiento).label("atraso"))
              .where(t.c.estado != "pagado").group_by(t.c.user_id).subquery())
     consulta = (select(u.c.id, u.c.nombre, u.c.modo_recuperacion, p.c.trust_score, p.c.nivel, p.c.segmento,
-                       p.c.habilitado, vivos.c.usados, vivos.c.servicios_usados, vivos.c.deuda, vivos.c.atraso)
+                       p.c.habilitado, p.c.ajuste_cupo, vivos.c.usados, vivos.c.servicios_usados, vivos.c.deuda,
+                       vivos.c.atraso)
                 .join(p, p.c.user_id == u.c.id).outerjoin(vivos, vivos.c.user_id == u.c.id))
     if q:
         consulta = consulta.where((u.c.id.ilike(f"%{q}%")) | (u.c.nombre.ilike(f"%{q}%")))
@@ -385,9 +387,10 @@ def listar_usuarios(conn, q=None, nivel=None, segmento=None, limit=50, offset=0)
         "nivel_nombre": C.NOMBRES_NIVEL[f["nivel"]] if f["nivel"] is not None else None,
         "segmento": f["segmento"], "habilitado": f["habilitado"],
         "tickets_usados": int(f["usados"] or 0) if f["habilitado"] else None,
-        "tickets_total": C.NIVELES[f["nivel"]]["tickets"] if f["nivel"] is not None else None,
+        "tickets_total": cupo_nivel(f["nivel"], f["ajuste_cupo"] or 0)["tickets"] if f["nivel"] is not None else None,
         "servicios_usados": int(f["servicios_usados"] or 0) if f["habilitado"] else None,
-        "servicios_total": C.NIVELES[f["nivel"]]["servicios_cupo"] if f["nivel"] is not None else None,
+        "servicios_total": (cupo_nivel(f["nivel"], f["ajuste_cupo"] or 0)["servicios_cupo"]
+                            if f["nivel"] is not None else None),
         "monto_max": C.NIVELES[f["nivel"]]["monto_max"] if f["nivel"] is not None else None,
         "deuda": round(float(f["deuda"] or 0), 2), "dias_atraso": max(0, int(f["atraso"] or 0)),
         "modo_recuperacion": f["modo_recuperacion"],

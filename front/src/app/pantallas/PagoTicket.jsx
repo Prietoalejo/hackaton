@@ -55,6 +55,23 @@ export default function PagoTicket() {
 
   const elegirServicio = (s) => { setServicio(s); setComercio(COMERCIOS[s][0]); setError(null) }
 
+  const gratis = ficha.beneficios?.beneficios?.find((b) => b.tipo === 'tickets_gratis')
+  const quedanGratis = servicio === 'estacionamiento' ? (gratis?.disponibles ?? 0) : 0
+  const usarGratis = async () => {
+    if (!(montoBs > 0)) { setError('Ingresa el monto a pagar.'); return }
+    setCargando(true); setError(null)
+    try {
+      const r = await datos.crearTicket({ user_id: ficha.user_id, servicio, monto: montoUsd, comercio: comercio.trim(), gratis: true })
+      recargarFicha()
+      avisar(`Listo: tu ticket gratis del Club cubrió ${bs(r.cubierto_por_beneficio)}${r.pagado_con_saldo > 0 ? ` y pagaste ${bs(r.pagado_con_saldo)} con tu saldo` : ''}. Sin cuota que pagar.`)
+      navegar('/app')
+    } catch (e) {
+      setError(mensajeError(e))
+    } finally {
+      setCargando(false)
+    }
+  }
+
   const pagar = async () => {
     if (!(montoBs > 0)) { setError('Ingresa el monto a pagar.'); return }
     setCargando(true); setError(null)
@@ -127,6 +144,23 @@ export default function PagoTicket() {
         </Tarjeta>
       </div>
 
+      {quedanGratis > 0 && (
+        <div style={{ padding: '12px 16px 0' }}>
+          <Tarjeta style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12, background: '#FFE8EF', boxShadow: 'none' }}>
+            <span style={{ flex: 1, minWidth: 0 }}>
+              <span style={{ display: 'block', fontWeight: 700, color: '#A3165E' }}>
+                {quedanGratis === 1 ? 'Tienes 1 ticket gratis' : `Tienes ${quedanGratis} tickets gratis`} del Club
+              </span>
+              <span style={{ fontSize: 13, color: '#6B2A4A' }}>Lo paga PagoDirecto: no usa tu cupo ni genera cuota.</span>
+            </span>
+            <button onClick={usarGratis} disabled={cargando}
+              style={{ height: 38, padding: '0 14px', border: 0, borderRadius: 999, background: '#FF1F5A', color: '#fff', font: "700 14px 'Outfit',sans-serif", flex: 'none', opacity: cargando ? 0.6 : 1 }}>
+              Usar gratis
+            </button>
+          </Tarjeta>
+        </div>
+      )}
+
       <div style={{ padding: '12px 16px 0' }}>
         <Tarjeta style={{ padding: '18px 20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><LogoCD w={26} h={18} color="#8CC20B" /><span style={{ fontSize: 20, fontWeight: 700 }}>Usar 1 {unidad}</span></div>
@@ -139,7 +173,7 @@ export default function PagoTicket() {
           </div>
 
           {total > 0 && (
-            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(total, 5)}, minmax(0, 1fr))`, gap: total >= 5 ? 6 : 8, marginTop: 14 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${total > 4 ? 3 : total}, minmax(0, 1fr))`, gap: 8, marginTop: 14 }}>
               {fichas.map((e, i) => <FichaTicket key={i} n={i + 1} estado={e} rotulo={factura ? 'SERVICIO' : 'TICKET'} />)}
             </div>
           )}

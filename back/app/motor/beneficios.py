@@ -20,6 +20,10 @@ def _pagos_con_fecha(eventos, hoy) -> list:
             and en_ventana(e["fecha"], hoy, C.VENTANA_DIAS)]
 
 
+def _este_mes(fecha, hoy) -> bool:
+    return fecha is not None and (fecha.year, fecha.month) == (hoy.year, hoy.month) and fecha <= hoy
+
+
 def _gasto_mensual(eventos, hoy) -> float:
     """USD pagados en PagoDirecto en los últimos 30 días (para estimar el walletback)."""
     return sum(e["monto"] or 0.0 for e in eventos
@@ -99,6 +103,34 @@ def _a_tu_medida(perfil, factor) -> dict | None:
     return None
 
 
+def ajuste_cupo(factor) -> int:
+    """Tickets (y pagos de servicios) que gana o pierde dentro de su nivel: ±ajuste_cupo_max.
+
+    Solo cuentan las señales de riesgo (puntualidad, anticipados, score, riesgo), no la racha de la
+    semana, para que el cupo no cambie cada lunes. En modo recuperación pierde cupo.
+    """
+    tope = int(C.VALORES["ajuste_cupo_max"])
+    if factor["pausa"]:
+        return -tope
+    s = sum(r["efecto"] for r in factor["razones"] if r["senal"] != "racha")
+    if s >= C.CUPO_SUBE_DESDE:
+        return tope
+    if s <= C.CUPO_BAJA_DESDE:
+        return -tope
+    return 0
+
+
+def walletback_pct(beneficios) -> float:
+    return next(b["personal"] for b in beneficios["beneficios"] if b["tipo"] == "walletback")
+
+
+def walletback_de_pago(beneficios, monto, a_tiempo) -> float:
+    """Walletback que se acredita a la wallet por pagar una cuota a tiempo (USD). Nunca por usar crédito."""
+    if not a_tiempo or monto <= 0:
+        return 0.0
+    return round(monto * walletback_pct(beneficios) / 100, 2)
+
+
 def calcular_beneficios(perfil, club, eventos, tickets, hoy) -> dict:
     """Beneficios de la ruta del Club para esta persona: base fija × factor personal + uno a su medida."""
     ruta = C.RUTAS_CLUB[club["nivel_club"]]
@@ -108,14 +140,23 @@ def calcular_beneficios(perfil, club, eventos, tickets, hoy) -> dict:
     a_medida = _a_tu_medida(perfil, f)
     if a_medida and a_medida["tipo"] == "ticket_extra":
         tickets_gratis += 1
+    if a_medida and a_medida["tipo"] == "cuota_sin_gasto":
+        # Una vez al mes: ya la usó si este mes saldó una cuota con todo el gasto administrativo descontado
+        usada = any(t["estado"] == "pagado" and _este_mes(t["fecha_pago"], hoy)
+                    and t["gasto_admin"] > 0 and t["descuento"] >= t["gasto_admin"] for t in tickets)
+        a_medida = {**a_medida, "disponible": not usada and not f["pausa"]}
+    gratis_usados = sum(1 for e in eventos if e["tipo"] == "ticket_gratis" and _este_mes(e["fecha"], hoy))
+    recibido = round(sum(e["monto"] or 0.0 for e in eventos if e["tipo"] == "walletback" and _este_mes(e["fecha"], hoy)), 2)
     return {
         "ruta": club["texto"], "factor": f["factor"], "pausa": f["pausa"], "razones": f["razones"],
         "beneficios": [
             {"tipo": "walletback", "nombre": "Walletback", "unidad": "%", "base": ruta["walletback_pct"],
-             "personal": walletback,
+             "personal": walletback, "recibido_mes": recibido,
              "estimado_mes": round(_gasto_mensual(eventos, hoy) * walletback / 100, 2)},
             {"tipo": "tickets_gratis", "nombre": "Tickets gratis de estacionamiento al mes", "unidad": "",
-             "base": ruta["tickets_gratis"], "personal": tickets_gratis},
+             "base": ruta["tickets_gratis"], "personal": tickets_gratis, "usados_mes": gratis_usados,
+             "disponibles": 0 if f["pausa"] else max(0, tickets_gratis - gratis_usados)},
         ],
         "a_tu_medida": a_medida,
+        "ajuste_cupo": ajuste_cupo(f),
     }

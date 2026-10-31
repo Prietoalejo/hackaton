@@ -32,12 +32,30 @@ def racha(eventos, hoy) -> dict:
 
 # --- Prestar ---------------------------------------------------------------------------
 
-def prestar_para(habilitado, nivel, tickets, modo_recuperacion, condiciones=None) -> dict:
-    """Cupo de hoy. `condiciones` reemplaza las del nivel (la regla actual usa C.REGLA_ACTUAL)."""
+def cupo_nivel(nivel, ajuste=0) -> dict:
+    """Cupo de un nivel con el ajuste personal (±): nunca menos de 1 ticket ni de 1 pago de servicios
+    si el nivel los incluye."""
+    n = C.NIVELES[nivel]
+    return {"tickets": max(1, n["tickets"] + ajuste),
+            "servicios_cupo": max(1, n["servicios_cupo"] + ajuste) if n["servicios_cupo"] else 0}
+
+
+def texto_cupo(nivel, ajuste=0) -> str:
+    """"3 tickets y 1 pago de servicios" (lo que da un nivel; nunca un monto en Bs)."""
+    c = cupo_nivel(nivel, ajuste)
+    texto = f"{c['tickets']} {'ticket' if c['tickets'] == 1 else 'tickets'}"
+    if c["servicios_cupo"]:
+        texto += f" y {c['servicios_cupo']} {'pago' if c['servicios_cupo'] == 1 else 'pagos'} de servicios"
+    return texto
+
+
+def prestar_para(habilitado, nivel, tickets, modo_recuperacion, condiciones=None, ajuste=0) -> dict:
+    """Cupo de hoy. `condiciones` reemplaza las del nivel (la regla actual usa C.REGLA_ACTUAL);
+    `ajuste` es el cupo variable personal dentro del nivel."""
     if not habilitado:
         return {"tickets": 0, "servicios_cupo": 0, "plazo_dias": None, "monto_max": 0.0, "servicios": [],
                 "motivo": "no_habilitado"}
-    cond = condiciones or C.NIVELES[nivel]
+    cond = condiciones or {**C.NIVELES[nivel], **cupo_nivel(nivel, ajuste)}
     prestar = {"tickets": max(0, cond["tickets"] - len(en_uso(tickets, "tickets"))),
                "servicios_cupo": max(0, cond.get("servicios_cupo", 0) - len(en_uso(tickets, "servicios"))),
                "plazo_dias": cond["plazo_dias"], "monto_max": cond["monto_max"],
@@ -51,7 +69,7 @@ def prestar_para(habilitado, nivel, tickets, modo_recuperacion, condiciones=None
 
 def _prestar(perfil, tickets) -> dict:
     return prestar_para(perfil["habilitado"], perfil["nivel"], tickets,
-                        perfil["usuario"].get("modo_recuperacion"))
+                        perfil["usuario"].get("modo_recuperacion"), ajuste=perfil.get("ajuste_cupo", 0))
 
 
 def descontar_cupo(prestar, servicio) -> None:
@@ -85,6 +103,33 @@ def validar_solicitud(prestar, servicio, monto, saldo_wallet) -> dict:
 
 # --- Comunicar -------------------------------------------------------------------------
 
+CONSEJOS = {
+    "puntualidad": "Paga tus cuotas a tiempo y lo recuperas.",
+    "friccion": "Evita atrasos y pagos rechazados: se borran en unas semanas.",
+    "constancia": "Usa PagoDirecto con más frecuencia y vuelves a subir.",
+    "anticipados": "Paga antes del vencimiento y subes más rápido.",
+    "antiguedad": "Sigue pagando con PagoDirecto: la antigüedad también suma.",
+    "verificacion": "Verifica tu cédula y tu vehículo y sumas puntos.",
+}
+
+
+def senal_mas_debil(razones) -> str:
+    """La parte del score donde más puntos se pierden (la fricción cuenta lo que resta).
+    Si hay atrasos o rechazos recientes (fricción ≤ −3), eso va primero: es lo que más rápido se arregla."""
+    friccion = next((r for r in razones if r["senal"] == "friccion"), None)
+    if friccion and friccion["aporte"] <= -3:
+        return "friccion"
+    def perdido(r):
+        if r["max"] < 0:
+            return r["aporte"] / r["max"] if r["max"] else 0
+        return (r["max"] - r["aporte"]) / r["max"] if r["max"] else 0
+    return max(razones, key=perdido)["senal"]
+
+
+def consejo(razones) -> str:
+    return CONSEJOS.get(senal_mas_debil(razones), CONSEJOS["puntualidad"])
+
+
 def _mensaje(tipo, usuario, hoy, **valores) -> dict:
     plantilla = C.MENSAJES[tipo]
     canal = usuario.get("canal_preferido", "push") if plantilla["canal"] == "preferido" else plantilla["canal"]
@@ -102,6 +147,11 @@ def _comunicar(perfil, tickets, eventos, hoy):
 
     if any(d == C.MORA_DIA for d in atrasos.values()):
         return _mensaje("aviso_mora", usuario, hoy)
+    anterior = perfil.get("nivel_anterior")
+    if anterior is not None and perfil["nivel"] is not None and perfil["nivel"] < anterior:
+        return _mensaje("bajada_nivel", usuario, hoy, nivel=C.NOMBRES_NIVEL[perfil["nivel"]],
+                        cupo=texto_cupo(perfil["nivel"], perfil.get("ajuste_cupo", 0)),
+                        consejo=consejo(perfil["razones"]))
     for t in vivos:
         if atrasos.get(t["id"]) == C.GRACIA_DIAS + 1:
             return _mensaje("comision", usuario, hoy, monto=f"${t['comision']:.2f}".replace(".", ","))

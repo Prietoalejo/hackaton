@@ -56,6 +56,8 @@ EDITABLES = [
     ("bono_racha_pct", "Motor de beneficios del Club", "Racha de la semana completa", "%", 10, 5),
     ("bono_score_pct", "Motor de beneficios del Club", "Trust Score alto (± si es bajo)", "%", 10, 5),
     ("castigo_riesgo_pct", "Motor de beneficios del Club", "Segmento En riesgo", "%", 30, 5),
+    # Cupo variable: ±tickets (y pagos de servicios) dentro del nivel según cómo paga
+    ("ajuste_cupo_max", "Cupo variable dentro del nivel", "Tickets que puede ganar o perder", "", 1, 1),
     # Evita "fabricar" puntos, racha y repagos con tickets de céntimos ($0,50 = parquímetro o peaje)
     ("monto_min_premio", "Motor de beneficios del Club", "Cuota mínima para sumar puntos, racha y repagos", "USD", 0.5, 0.25),
 
@@ -168,6 +170,8 @@ RUTAS_CLUB = [
     {"nivel": "Baqueano", "ruta": "Ruta del Zulia", "desde": 76000, "walletback_pct": 4.0, "tickets_gratis": 4},
 ]
 BENEFICIO_MIN_PAGOS = 3      # pagos en la ventana para que la puntualidad y los anticipados cuenten
+CUPO_SUBE_DESDE = 0.25       # señales de riesgo a favor (sin la racha) para ganar cupo: p. ej. puntual + anticipa
+CUPO_BAJA_DESDE = -0.15      # cualquier señal en contra (atrasos, riesgo, score bajo) quita cupo
 MULTIPLICADOR_PUNTOS = 1.5   # pagar antes del vencimiento o con la racha completa
 META_RACHA = 3               # días con pago a tiempo en la semana para activar el ×1,5 (la misma racha del Club)
 
@@ -176,19 +180,22 @@ MENSAJES = {
     "aviso_mora": {"prioridad": 1, "nombre": "Aviso de mora", "descripcion": "día 8, entra en modo recuperación",
                    "mensaje": "Tu crédito está en pausa. Cada recarga paga primero tu cuota y recuperas tus tickets.",
                    "canal": "push+wisi"},
-    "comision": {"prioridad": 2, "nombre": "Comisión", "descripcion": "al aplicar el 5 % por desfase",
+    "bajada_nivel": {"prioridad": 2, "nombre": "Bajada de nivel", "descripcion": "el día que baja de nivel, con un consejo",
+                     "mensaje": "Por ahora tu Credirecto es {nivel}: tienes {cupo}. {consejo}",
+                     "canal": "preferido"},
+    "comision": {"prioridad": 3, "nombre": "Comisión", "descripcion": "al aplicar el 5 % por desfase",
                  "mensaje": "Se sumó una comisión de {monto} a tu cuota. Págala cuando puedas y todo vuelve a la normalidad.",
                  "canal": "preferido"},
-    "gracia": {"prioridad": 3, "nombre": "Gracia", "descripcion": "día 1 después del vencimiento",
+    "gracia": {"prioridad": 4, "nombre": "Gracia", "descripcion": "día 1 después del vencimiento",
                "mensaje": "Tu cuota venció ayer. Tienes {dias} días sin comisión: a cualquiera le pasa.",
                "canal": "preferido"},
-    "recordatorio": {"prioridad": 4, "nombre": "Recordatorio", "descripcion": "2 días antes, a su hora habitual",
+    "recordatorio": {"prioridad": 5, "nombre": "Recordatorio", "descripcion": "2 días antes, a su hora habitual",
                      "mensaje": "Tu cuota de Credirecto vence en 2 días. Paga tu cuota y tu ticket vuelve a estar disponible.",
                      "canal": "preferido"},
-    "mover_quincena": {"prioridad": 5, "nombre": "Mover a quincena", "descripcion": "cuota cae lejos de su recarga",
+    "mover_quincena": {"prioridad": 6, "nombre": "Mover a quincena", "descripcion": "cuota cae lejos de su recarga",
                        "mensaje": "Tu cuota vence el {fecha}. ¿La movemos al {dia}, tu día de cobro? Sin costo.",
                        "canal": "preferido"},
-    "falta_poco": {"prioridad": 6, "nombre": "Falta poco para subir", "descripcion": "a 1 repago de subir de nivel",
+    "falta_poco": {"prioridad": 7, "nombre": "Falta poco para subir", "descripcion": "a 1 repago de subir de nivel",
                    "mensaje": "Te falta 1 pago a tiempo para subir de nivel y ganar más tickets.",
                    "canal": "preferido"},
 }

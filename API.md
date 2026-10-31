@@ -181,6 +181,11 @@ Recarga los datos sintéticos y vuelve el reloj al 2026-10-31. Tarda ~1 min.
 - `racha.pagos` cuenta **días** con pago a tiempo en la semana (no pagos). Cuotas por debajo de `monto_min_premio`
   no suman racha, puntos ni repagos. `comprobante.anticipado` y `dias_antes` se miden contra el vencimiento original.
 - `progreso` trae además `ruta_requerida` y `faltan_pts_club`: la ruta del Club que exige el siguiente nivel.
+- `tickets` y `servicios_cupo` traen `base` (del nivel) y `ajuste` (cupo variable ±1); `total` ya lo incluye.
+- `ritmo`: `{"senal_debil", "consejo"}` para mostrarle al usuario qué mejorar.
+- `POST /tickets` acepta `"gratis": true` (ticket gratis del Club, solo estacionamiento): responde
+  `{"ticket": null, "gratis": true, "cubierto_por_beneficio", "pagado_con_saldo", "usuario"}`.
+- El comprobante de `POST /pagos` trae `walletback` (USD acreditados) y `beneficio_sin_gasto`.
 - `beneficios` (motor de beneficios del Club): `{"ruta", "factor" (0–1,5), "pausa", "razones": [{"senal", "efecto", "texto"}],
   "beneficios": [{"tipo": "walletback" | "tickets_gratis", "nombre", "unidad", "base", "personal", "estimado_mes"?}],
   "a_tu_medida": {"tipo", "nombre", "detalle"} | null}`.

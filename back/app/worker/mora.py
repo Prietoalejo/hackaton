@@ -14,7 +14,7 @@ from app import db, reloj
 from app.motor.cobros import comision_por_desfase, deuda, descuento_si_paga, estado_por_atraso, nuevo_ticket
 from app.motor.decisiones import descontar_cupo, validar_solicitud
 from app.motor.perfil import evaluar_usuario
-from app.motor.score import ESTADOS_IMPAGOS, ESTADOS_VENCIDOS
+from app.motor.score import ESTADOS_IMPAGOS, ESTADOS_VENCIDOS, vence_original
 
 
 def _evento(user_id, hoy, tipo, monto, ticket=None, a_tiempo=None, servicio=None) -> dict:
@@ -27,14 +27,18 @@ def resolver_estado(usuario, tickets) -> dict:
     return {**usuario, "modo_recuperacion": any(t["estado"] == "mora" for t in tickets)}
 
 
-def aplicar_pago(ticket, monto, hoy, nivel):
+def aplicar_pago(ticket, monto, hoy, nivel, sin_gasto=False):
     """Pago del usuario a un ticket → (ticket, evento repago_ticket, monto aplicado).
 
     Si con este pago salda la cuota antes del vencimiento, se aplica el descuento de su nivel.
+    `sin_gasto` (beneficio del Club "1 cuota al mes sin gasto administrativo"): si paga a tiempo,
+    el descuento es todo el gasto administrativo.
     Nunca se devuelve efectivo: si paga de más, solo se aplica lo que debe.
     """
     t = dict(ticket)
     descuento = descuento_si_paga(t, hoy, nivel)
+    if sin_gasto and hoy <= vence_original(t):
+        descuento = t["gasto_admin"]
     debe_con_descuento = round(deuda(t) - descuento, 2)
     aplicado = round(min(monto, debe_con_descuento), 2)
     t["monto_pagado"] = round(t["monto_pagado"] + aplicado, 2)

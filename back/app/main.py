@@ -13,7 +13,8 @@ from app import db, metricas, reloj
 from app.motor.cobros import (comision_por_desfase, cuota, descuento_por_nivel, deuda, gracia_hasta, nuevo_ticket,
                               oferta_quincena)
 from app.motor.club import puntos_de_cuota
-from app.motor.decisiones import en_uso, racha, validar_solicitud
+from app.motor.beneficios import walletback_de_pago
+from app.motor.decisiones import consejo, cupo_nivel, en_uso, racha, senal_mas_debil, texto_cupo, validar_solicitud
 from app.motor.perfil import evaluar_usuario
 from app.motor.score import dias_atraso, es_anticipado, vence_original
 from app.worker import mora
@@ -70,18 +71,10 @@ def _ticket_json(t, nivel, quincena, hoy) -> dict:
 
 
 TITULOS = {"aviso_mora": "Modo recuperación", "comision": "Credirecto", "gracia": "Credirecto",
-           "recordatorio": "Credirecto", "mover_quincena": "Fecha de pago", "falta_poco": "Credirecto"}
+           "recordatorio": "Credirecto", "mover_quincena": "Fecha de pago", "falta_poco": "Credirecto",
+           "bajada_nivel": "Tu nivel"}
 NOMBRE_SERVICIO = {"estacionamiento": "Estacionamiento", "parquimetro": "Parquímetro", "peaje": "Peaje",
                    "luz": "Luz", "internet": "Internet", "telefono": "Teléfono", "seguro": "Seguro"}
-
-
-def texto_cupo(nivel) -> str:
-    """"3 tickets y 1 pago de servicios" (lo que da un nivel; nunca un monto en Bs)."""
-    n = C.NIVELES[nivel]
-    texto = f"{n['tickets']} {'ticket' if n['tickets'] == 1 else 'tickets'}"
-    if n["servicios_cupo"]:
-        texto += f" y {n['servicios_cupo']} {'pago' if n['servicios_cupo'] == 1 else 'pagos'} de servicios"
-    return texto
 
 
 def _mensaje_subida(nivel) -> str:
@@ -114,6 +107,10 @@ def _linea_de_tiempo(eventos, tickets, decisiones, fotos) -> list:
             linea.append((e["fecha"], 1, "Comisión", f"Comisión por desfase · {servicio}", e["monto"]))
         elif e["tipo"] == "debito_wallet":
             linea.append((e["fecha"], 1, "Mora", "Débito de la wallet para la cuota en mora", e["monto"]))
+        elif e["tipo"] == "walletback":
+            linea.append((e["fecha"], 0, "Beneficio", "Walletback del Club a tu wallet", e["monto"]))
+        elif e["tipo"] == "ticket_gratis":
+            linea.append((e["fecha"], 2, "Beneficio", f"Ticket gratis del Club · {servicio}", e["monto"]))
         elif e["tipo"] == "recarga":
             linea.append((e["fecha"], 0, "Recarga", "Recarga de saldo", e["monto"]))
     for fecha, comunicar in decisiones:
@@ -158,6 +155,9 @@ def _ficha(conn, user_id) -> dict:
                 notificaciones.append({"fecha": fecha.isoformat(), "tipo": "subida_nivel", "titulo": "Nuevo nivel",
                                        "mensaje": _mensaje_subida(p["nuevo_nivel"]), "canal": "push"})
     usados = len(en_uso(tickets, "tickets"))
+    ajuste = perfil["ajuste_cupo"]
+    cupo = cupo_nivel(nivel, ajuste) if nivel is not None else {"tickets": 0, "servicios_cupo": 0}
+    base = cupo_nivel(nivel) if nivel is not None else cupo
     servicios_usados = len(en_uso(tickets, "servicios"))
     vivos = sorted((t for t in tickets if t["estado"] != "pagado"), key=lambda t: (t["fecha_vencimiento"], t["id"]))
     primer_uso = min((t["fecha_uso"] for t in tickets), default=None)
@@ -171,14 +171,16 @@ def _ficha(conn, user_id) -> dict:
         "saldo_wallet": round(usuario["saldo_wallet"], 4), "modo_recuperacion": usuario["modo_recuperacion"],
         "estado_mora": perfil["estado_mora"],
         "trust_score": perfil["trust_score"], "razones": perfil["razones"], "checklist": perfil["checklist"],
-        "tickets": {"total": C.NIVELES[nivel]["tickets"] if nivel is not None else 0, "usados": usados,
+        "tickets": {"total": cupo["tickets"], "base": base["tickets"], "ajuste": ajuste, "usados": usados,
                     "disponibles": decision["prestar"]["tickets"], "monto_max": decision["prestar"]["monto_max"],
                     "servicios": decision["prestar"]["servicios"]},
-        "servicios_cupo": {"total": C.NIVELES[nivel]["servicios_cupo"] if nivel is not None else 0,
+        "servicios_cupo": {"total": cupo["servicios_cupo"], "base": base["servicios_cupo"],
                            "usados": servicios_usados, "disponibles": decision["prestar"]["servicios_cupo"],
                            "cubre": [s for s in decision["prestar"]["servicios"] if s in C.SERVICIOS_FACTURA]},
         "club_puntos": perfil["club"],
         "beneficios": perfil["beneficios"],
+        # Qué mueve su score, dicho para el usuario: lo más débil y un consejo
+        "ritmo": {"senal_debil": senal_mas_debil(perfil["razones"]), "consejo": consejo(perfil["razones"])},
         "progreso": perfil["progreso"],
         "racha": racha(eventos, hoy),
         "deuda_total": round(sum(max(deuda(t), 0.0) for t in vivos), 2),
@@ -301,6 +303,7 @@ class TicketIn(BaseModel):
     servicio: str
     monto: float = Field(gt=0)
     comercio: Optional[str] = None
+    gratis: bool = False      # usar un ticket gratis de estacionamiento del Club (no genera cuota)
 
 
 class PagoIn(BaseModel):
@@ -357,11 +360,39 @@ def _texto_rechazo(motivo, perfil, prestar, servicio, monto) -> str:
     return f"Tu ticket cubre hasta ${prestar['monto_max']:.2f}; no tienes saldo para los ${resto:.2f} restantes."
 
 
+def _usar_ticket_gratis(conn, body, hoy, usuario, perfil):
+    """Ticket gratis de estacionamiento (beneficio del Club): lo paga PagoDirecto, no usa cupo ni genera cuota.
+    Cubre hasta el máximo por ticket del nivel; el resto se paga con saldo."""
+    if body.servicio != "estacionamiento":
+        raise HTTPException(409, "Los tickets gratis del Club son para estacionamiento.")
+    gratis = next(b for b in perfil["beneficios"]["beneficios"] if b["tipo"] == "tickets_gratis")
+    if gratis["disponibles"] <= 0:
+        raise HTTPException(409, "Ya usaste tus tickets gratis de este mes. Sigue pagando a tiempo y el mes que viene tienes más.")
+    tope = C.NIVELES[perfil["nivel"] if perfil["nivel"] is not None else 0]["monto_max"]
+    cubre = round(min(body.monto, tope), 2)
+    resto = round(body.monto - cubre, 2)
+    if resto > usuario["saldo_wallet"] + 1e-9:
+        raise HTTPException(409, f"Tu ticket gratis cubre hasta ${tope:.2f}; no tienes saldo para los ${resto:.2f} restantes.")
+    nuevos = [{"user_id": body.user_id, "fecha": hoy, "tipo": "ticket_gratis", "servicio": body.servicio,
+               "monto": cubre, "ticket_id": None, "a_tiempo": None}]
+    if resto > 0:
+        usuario["saldo_wallet"] = round(usuario["saldo_wallet"] - resto, 4)
+        db.actualizar_usuarios(conn, [usuario])
+        nuevos.append({"user_id": body.user_id, "fecha": hoy, "tipo": "pago_servicio", "servicio": body.servicio,
+                       "monto": resto, "ticket_id": None, "a_tiempo": None})
+    db.insertar_eventos(conn, nuevos)
+    mora.recalcular_usuario(conn, body.user_id, hoy)
+    return {"ticket": None, "gratis": True, "cubierto_por_beneficio": cubre, "cubierto_por_credito": 0.0,
+            "pagado_con_saldo": resto, "usuario": _ficha(conn, body.user_id)}
+
+
 @app.post("/tickets", status_code=201)
 def crear_ticket(body: TicketIn, conn=Depends(conexion)):
     if body.servicio not in C.SERVICIOS:
         raise HTTPException(422, f"Servicio desconocido: {body.servicio}.")
     hoy, usuario, _, _, perfil, decision = _contexto(conn, body.user_id)
+    if body.gratis:
+        return _usar_ticket_gratis(conn, body, hoy, usuario, perfil)
     prestar = decision["prestar"]
     v = validar_solicitud(prestar, body.servicio, body.monto, usuario["saldo_wallet"])
     ticket_id = db.siguiente_id(conn, db.tickets) if v["resultado"] != "rechazada" else None
@@ -407,7 +438,7 @@ def registrar_pago(body: PagoIn, conn=Depends(conexion)):
     t = _cargar_ticket(conn, body.ticket_id, body.user_id)
     if t["estado"] == "pagado":
         raise HTTPException(409, "Esa cuota ya está pagada.")
-    hoy, _, eventos, _, perfil, _ = _contexto(conn, body.user_id)
+    hoy, usuario, eventos, _, perfil, _ = _contexto(conn, body.user_id)
 
     if body.origen == "fallo_tecnico":
         t = mora.pausar_por_fallo_tecnico(t)
@@ -420,18 +451,32 @@ def registrar_pago(body: PagoIn, conn=Depends(conexion)):
     if body.monto <= 0:
         raise HTTPException(422, "El monto del pago debe ser mayor que 0.")
     racha_antes = racha(eventos, hoy)["pagos"]
-    t, evento, aplicado = mora.aplicar_pago(t, body.monto, hoy, perfil["nivel"])
+    beneficios = perfil["beneficios"]
+    a_medida = beneficios["a_tu_medida"] or {}
+    sin_gasto = a_medida.get("tipo") == "cuota_sin_gasto" and bool(a_medida.get("disponible"))
+    t, evento, aplicado = mora.aplicar_pago(t, body.monto, hoy, perfil["nivel"], sin_gasto=sin_gasto)
+    nuevos = [evento]
+    # Beneficio del Club entregado: walletback a la wallet por pagar a tiempo
+    walletback = walletback_de_pago(beneficios, aplicado, evento["a_tiempo"])
+    if walletback > 0:
+        usuario["saldo_wallet"] = round(usuario["saldo_wallet"] + walletback, 4)
+        db.actualizar_usuarios(conn, [usuario])
+        nuevos.append({"user_id": body.user_id, "fecha": hoy, "tipo": "walletback", "servicio": t["servicio"],
+                       "monto": walletback, "ticket_id": t["id"], "a_tiempo": None})
     db.actualizar_tickets(conn, [t])
-    db.insertar_eventos(conn, [evento])
+    db.insertar_eventos(conn, nuevos)
     perfil, _ = mora.recalcular_usuario(conn, body.user_id, hoy)
     completo = t["estado"] == "pagado"
+    cuota_gratis = completo and t["gasto_admin"] > 0 and t["descuento"] >= t["gasto_admin"]
     comprobante = {
         "referencia": f"CD-{(t['id'] * 7919 + hoy.toordinal()) % 10**9:09d}", "fecha": hoy.isoformat(),
         "completo": completo,
         "dias_antes": max(0, (vence_original(t) - hoy).days),
         "anticipado": completo and es_anticipado(t),
         "cuota": t["monto"], "gasto_admin": t["gasto_admin"], "descuento": t["descuento"],
-        "descuento_pct": int(round(C.DESCUENTO_NIVEL.get(perfil["nivel"], 0) * 100)) if t["descuento"] else 0,
+        "descuento_pct": (100 if cuota_gratis else
+                          int(round(C.DESCUENTO_NIVEL.get(perfil["nivel"], 0) * 100)) if t["descuento"] else 0),
+        "beneficio_sin_gasto": cuota_gratis, "walletback": walletback,
         "comision": t["comision"], "total": aplicado, "ahorro": t["descuento"],
         "racha_antes": racha_antes, "racha_despues": racha(eventos + [evento], hoy)["pagos"],
         "ticket_disponible": completo,

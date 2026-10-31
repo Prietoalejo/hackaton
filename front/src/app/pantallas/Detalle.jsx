@@ -52,6 +52,16 @@ export default function Detalle() {
         {serv.total > 0 && (
           <div style={{ fontSize: 17, fontWeight: 600, color: '#3B6B00' }}>+ {serv.disponibles} de {plural(serv.total, 'pago', 'pagos')} de servicios</div>
         )}
+        {ficha.tickets.ajuste > 0 && (
+          <span style={{ display: 'inline-block', marginTop: 8, fontSize: 13, fontWeight: 600, color: '#3B6B00', background: '#F1FBD2', padding: '5px 12px', borderRadius: 999 }}>
+            +1 ticket{serv.total > 0 ? ' y +1 servicio' : ''} por tu buen ritmo de pago
+          </span>
+        )}
+        {ficha.tickets.ajuste < 0 && ficha.tickets.total < ficha.tickets.base && (
+          <span style={{ display: 'inline-block', marginTop: 8, fontSize: 13, fontWeight: 600, color: '#8A4B00', background: '#FFF1D6', padding: '5px 12px', borderRadius: 999 }}>
+            Por ahora 1 ticket menos: paga a tiempo y lo recuperas
+          </span>
+        )}
       </div>
 
       {/* Tarjeta en perspectiva (decorativa) */}
@@ -62,11 +72,11 @@ export default function Detalle() {
       <div style={{ padding: '0 16px' }}>
         <Tarjeta style={{ marginTop: -36, padding: '50px 20px 22px', position: 'relative', zIndex: 1 }}>
           <div className="cd-mut" style={{ textAlign: 'center', fontSize: 16 }}>Tus tickets · {plural(usados, 'usado', 'usados')}</div>
-          <FilaCupo total={total} usados={usados} chico={total >= 5} icono={() => <IcoTicket w={30} h={26} sw={1.6} />} />
+          <FilaCupo total={total} usados={usados} icono={() => <IcoTicket w={30} h={26} sw={1.6} />} />
           {serv.total > 0 && (
             <>
               <div className="cd-mut" style={{ textAlign: 'center', fontSize: 16, marginTop: 20 }}>Tus pagos de servicios · {plural(serv.usados, 'usado', 'usados')}</div>
-              <FilaCupo total={serv.total} usados={serv.usados} chico={total >= 5}
+              <FilaCupo total={serv.total} usados={serv.usados} ancho={total}
                 icono={(i) => <IcoServicio servicio={facturas[i]?.servicio || 'factura'} w={26} />} />
             </>
           )}
@@ -81,6 +91,7 @@ export default function Detalle() {
         {pestana === 'cuotas' ? <Cuotas /> : <Movimientos />}
       </div>
 
+      <TuRitmo ficha={ficha} />
       {ficha.progreso && <CaminoA progreso={ficha.progreso} />}
       <ServiciosCubiertos />
     </Pantalla>
@@ -195,10 +206,12 @@ function Cuotas() {
 }
 
 /** Fila de círculos de un cupo (tickets o pagos de servicios); se achica para que quepan 5 */
-function FilaCupo({ total, usados, icono, chico = total >= 5 }) {
-  const lado = chico ? 50 : 66
+function FilaCupo({ total, usados, icono, ancho = total }) {
+  // `ancho`: círculos de la fila más larga, para que tickets y servicios tengan el mismo tamaño
+  const chico = ancho >= 5
+  const lado = ancho >= 6 ? 42 : chico ? 50 : 66
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', gap: chico ? 8 : total >= 4 ? 14 : 22, marginTop: 14 }}>
+    <div style={{ display: 'flex', justifyContent: 'center', gap: ancho >= 6 ? 6 : chico ? 8 : total >= 4 ? 14 : 22, marginTop: 14 }}>
       {Array.from({ length: total }, (_, i) => {
         const usado = i < usados
         return (
@@ -255,6 +268,45 @@ function Movimientos() {
           </div>
         )
       })}
+    </div>
+  )
+}
+
+// Partes del score dichas al usuario (el dashboard las muestra con su nombre técnico)
+const PARTES = {
+  puntualidad: 'Pagas a tiempo', constancia: 'Usas PagoDirecto seguido', antiguedad: 'Tiempo con nosotros',
+  anticipados: 'Pagas antes', verificacion: 'Cédula y vehículo', friccion: 'Atrasos y rechazos',
+}
+
+/** Qué sube y qué baja tu nivel: cada parte del Trust Score y un consejo concreto */
+function TuRitmo({ ficha }) {
+  const razones = ficha.razones || []
+  if (!razones.length) return null
+  return (
+    <div style={{ padding: '20px 16px 0' }}>
+      <Tarjeta style={{ padding: '18px 20px' }}>
+        <div style={{ fontWeight: 700, fontSize: 16 }}>Lo que mueve tu nivel</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
+          {razones.map((r) => {
+            const resta = r.max < 0
+            if (resta && !r.aporte) return null
+            const p = resta ? Math.min(1, r.aporte / r.max) : Math.max(0, Math.min(1, r.aporte / r.max))
+            return (
+              <div key={r.senal} style={{ display: 'grid', gridTemplateColumns: '1fr 90px', gap: 10, alignItems: 'center', fontSize: 14 }}>
+                <span style={{ color: resta ? '#D6104D' : '#15152B' }}>{PARTES[r.senal] || r.nombre}</span>
+                <span style={{ height: 8, borderRadius: 4, background: '#E6E8EE', overflow: 'hidden' }} aria-label={`${Math.round(p * 100)} %`}>
+                  <span style={{ display: 'block', height: '100%', width: `${p * 100}%`, background: resta ? '#FF6B8F' : '#8CC20B' }} />
+                </span>
+              </div>
+            )
+          })}
+        </div>
+        {ficha.ritmo?.consejo && (
+          <div style={{ marginTop: 12, fontSize: 14, background: '#F1FBD2', color: '#2C4F00', borderRadius: 12, padding: '8px 12px' }}>
+            <b>Para subir:</b> {ficha.ritmo.consejo}
+          </div>
+        )}
+      </Tarjeta>
     </div>
   )
 }

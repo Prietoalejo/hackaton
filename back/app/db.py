@@ -62,6 +62,7 @@ perfiles = Table(
     Column("user_id", Text, primary_key=True), Column("trust_score", Integer), Column("razones", JSONB),
     Column("habilitado", Boolean), Column("nivel", Integer), Column("segmento", Text),
     Column("estado_mora", Text), Column("quincena", ARRAY(Integer)), Column("actualizado", Date),
+    Column("ajuste_cupo", Integer),
 )
 
 decisiones = Table(

@@ -52,5 +52,8 @@ def evaluar_usuario(usuario, eventos, tickets, hoy, nivel_anterior=None, score_h
     }
     perfil["beneficios"] = calcular_beneficios(
         {**perfil, "modo_recuperacion": usuario.get("modo_recuperacion")}, club, eventos, tickets, hoy)
+    # Cupo variable dentro del nivel. En Inicial (arranque en frío) solo puede quedarse igual.
+    ajuste = perfil["beneficios"]["ajuste_cupo"] if habilitado else 0
+    perfil["ajuste_cupo"] = min(ajuste, 0) if nivel == 0 else ajuste
     contexto = {**perfil, "usuario": usuario, "nivel_anterior": nivel_anterior}
     return perfil, decidir(contexto, tickets, eventos, hoy)

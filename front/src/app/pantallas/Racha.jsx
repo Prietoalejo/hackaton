@@ -27,6 +27,8 @@ const porque = (b) => {
 /** Beneficios de la ruta del Club, personalizados por el motor (base × factor + uno a tu medida) */
 export function BeneficiosRuta({ b }) {
   const pct = Math.round(b.factor * 100)
+  const recibido = b.beneficios.find((x) => x.tipo === 'walletback')?.recibido_mes ?? 0
+  const gratis = b.beneficios.find((x) => x.tipo === 'tickets_gratis')
   const tono = b.pausa ? '#D6104D' : pct > 100 ? '#3B6B00' : pct < 100 ? '#8A4B00' : '#5D5D70'
   const fondo = b.pausa ? '#FFE3EA' : pct > 100 ? '#F1FBD2' : pct < 100 ? '#FFF1D6' : '#EEF0F5'
   return (
@@ -48,10 +50,18 @@ export function BeneficiosRuta({ b }) {
             </span>
           </div>
         ))}
+        <div className="cd-mut" style={{ fontSize: 12, marginTop: 4 }}>
+          {[
+            recibido > 0 && `Walletback recibido este mes: ${bs(recibido)}`,
+            gratis && !b.pausa && (gratis.disponibles > 0 ? `Te ${gratis.disponibles === 1 ? 'queda 1 ticket gratis' : `quedan ${gratis.disponibles} tickets gratis`} este mes` : gratis.personal > 0 && 'Ya usaste tus tickets gratis de este mes'),
+          ].filter(Boolean).join(' · ')}
+        </div>
         {b.a_tu_medida && (
           <div style={{ marginTop: 12, background: '#FFE8EF', borderRadius: 14, padding: '10px 12px' }}>
             <div style={{ fontWeight: 700, color: '#A3165E', fontSize: 15 }}>{b.a_tu_medida.nombre}</div>
-            <div style={{ fontSize: 13, color: '#6B2A4A', marginTop: 2 }}>{b.a_tu_medida.detalle}</div>
+            <div style={{ fontSize: 13, color: '#6B2A4A', marginTop: 2 }}>
+              {b.a_tu_medida.disponible === false ? 'Ya lo usaste este mes; vuelve el mes que viene.' : b.a_tu_medida.detalle}
+            </div>
           </div>
         )}
         <div className="cd-mut" style={{ fontSize: 12, marginTop: 10, lineHeight: 1.4 }}>{porque(b)}</div>

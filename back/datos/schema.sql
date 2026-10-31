@@ -26,7 +26,8 @@ create table if not exists eventos (
   user_id text not null references usuarios(id),
   fecha date not null,
   tipo text not null check (tipo in
-    ('pago_servicio','recarga','rechazo_fondos','uso_ticket','repago_ticket','comision','debito_wallet')),
+    ('pago_servicio','recarga','rechazo_fondos','uso_ticket','repago_ticket','comision','debito_wallet',
+     'walletback','ticket_gratis')),    -- walletback y ticket_gratis: beneficios del Club entregados
   servicio text,
   monto numeric(12,2) not null default 0,
   ticket_id bigint,
@@ -60,7 +61,8 @@ create table if not exists perfiles (
   segmento text not null,
   estado_mora text not null,
   quincena int[] not null,
-  actualizado date not null
+  actualizado date not null,
+  ajuste_cupo int not null default 0     -- cupo variable: ± tickets dentro del nivel
 );
 
 create table if not exists decisiones (

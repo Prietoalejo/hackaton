@@ -87,6 +87,19 @@ factor personal, acotado entre 50 % y 150 %:
   sin gasto administrativo, Nuevo walletback doble el primer mes, En enfriamiento walletback doble en el
   próximo pago de servicio, En riesgo "recupera tu beneficio completo", quincenero cuotas en su quincena.
 - Premia lo que reduce el riesgo, nunca usar más crédito. Pesos y topes editables en Configuración.
+- **Los beneficios se entregan**, no solo se muestran: el walletback se acredita a la wallet en cada cuota
+  pagada a tiempo (evento `walletback`); la "cuota sin gasto administrativo" se aplica una vez al mes al pagar
+  a tiempo; los tickets gratis se usan en el pago de estacionamiento (`POST /tickets` con `gratis: true`,
+  evento `ticket_gratis`) y no usan cupo ni generan cuota.
+
+### Cupo variable dentro del nivel
+El nivel fija la base (p. ej. Confiable 3 tickets + 1 servicio) y el ritmo de pago la mueve ±1
+(`ajuste_cupo_max`): puntual y anticipa → 4 + 2; en riesgo, con atrasos o en mora → 2 + 1. Nunca menos de 1.
+No cuenta la racha semanal (para que el cupo no cambie cada lunes). En Inicial solo puede quedarse igual.
+
+### Bajar de nivel
+El día que baja de nivel recibe un mensaje (`bajada_nivel`): su nuevo cupo y un consejo según la parte del
+score más débil (si tiene atrasos recientes, eso primero). La app muestra "Lo que mueve tu nivel".
 
 ### Trust Score (0–100)
 Puntualidad 40 + Constancia 20 + Antigüedad 15 + Anticipados 15 + Verificación 10 − Fricción (hasta 10). Todos los pesos son configurables.

@@ -24,6 +24,7 @@ export default function Comprobante() {
   const liberados = pagos.filter((p) => p.comprobante.ticket_disponible).map((p) => p.nombre ?? 'Ticket 1')
   const parcial = !varios && (pagos[0].deuda_restante ?? 0) > 0.0001
   const puntos = cs.reduce((s, x) => s + (x.puntos_club || 0), 0)
+  const walletback = cs.reduce((s, x) => s + (x.walletback || 0), 0)
   const club = cs[cs.length - 1].club
   // La racha cuenta días: pagar varias cuotas el mismo día suma 1 (o nada si hoy ya contaba)
   const subeRacha = cs[cs.length - 1].racha_despues - cs[0].racha_antes
@@ -92,6 +93,11 @@ export default function Comprobante() {
               <span className="cd-mut">Total pagado</span><span style={{ fontWeight: 800, fontSize: 19 }}>{bs(total)}</span>
             </div>
             {ahorro > 0 && <div className="cd-mut" style={{ fontSize: 12, marginTop: 6 }}>Ahorraste {bs(ahorro)} en gasto administrativo.</div>}
+            {walletback > 0 && (
+              <div style={{ marginTop: 10, background: '#F1FBD2', color: '#2C4F00', borderRadius: 12, padding: '8px 12px', fontSize: 14, fontWeight: 600 }}>
+                +{bs(walletback)} de walletback del Club a tu wallet
+              </div>
+            )}
             {parcial && <div className="cd-mut" style={{ fontSize: 12, marginTop: 6 }}>Te quedan {bs(pagos[0].deuda_restante)} por pagar de esta cuota.</div>}
             <MensajeError style={{ marginTop: 12 }}>{state.error && `No pudimos pagar el resto de las cuotas: ${state.error}`}</MensajeError>
           </div>
@@ -125,7 +131,7 @@ function Conceptos({ c, nombre, nivel }) {
           <span style={{ display: 'block' }}>Gasto administrativo</span>
           {c.descuento > 0 && (
             <span style={{ display: 'inline-block', marginTop: 6, fontSize: 12, fontWeight: 700, color: '#2C4F00', background: '#E9F9B4', padding: '4px 10px', borderRadius: 999 }}>
-              −{c.descuento_pct}% por ser {nivel}
+              {c.beneficio_sin_gasto ? 'Gratis · beneficio del Club' : `−${c.descuento_pct}% por ser ${nivel}`}
             </span>
           )}
         </span>
