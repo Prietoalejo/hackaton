@@ -163,12 +163,22 @@ def resumen(conn, hoy) -> dict:
     }
 
 
+PRIMER_MES = 4  # semanas que cuentan como "primer mes" en la comparación por cohorte
+
+
 def cohortes(conn, hoy) -> dict:
+    """Usuarios agrupados por el mes de su primer ticket.
+
+    Cada semana k (contada desde el primer ticket de cada usuario) trae el % y su base:
+    - repago_a_tiempo: cuotas usadas en la semana k, ya vencidas, pagadas a tiempo (base n_repago = cuotas)
+    - reuso: usuarios que volvieron a usar un ticket en la semana k (base n_reuso = usuarios)
+    `primer_mes` junta las semanas 1–4; `grupos` compara las cohortes de antes y desde que decide Credirecto.
+    """
     df = _tickets_df(conn)
     habilitados = conn.execute(select(func.count()).where(db.perfiles.c.habilitado)).scalar()
-    salida = {"hoy": hoy.isoformat(), "semanas": SEMANAS, "habilitados": habilitados,
-              "ritmo_desde": C.RITMO_DESDE.isoformat(), "cohortes": [],
-              "mejor_semana4": None, "peor_semana4": None}
+    salida = {"hoy": hoy.isoformat(), "semanas": SEMANAS, "primer_mes_semanas": PRIMER_MES,
+              "habilitados": habilitados, "ritmo_desde": C.RITMO_DESDE.isoformat(), "cohortes": [],
+              "grupos": None, "mejor_semana4": None, "peor_semana4": None}
     if df.empty:
         return salida
     hoy_ts = pd.Timestamp(hoy)
@@ -176,6 +186,19 @@ def cohortes(conn, hoy) -> dict:
     primeros["cohorte"] = primeros.primer_uso.dt.strftime("%Y-%m")
     df = df.join(primeros, on="user_id")
     df["semana_uso"] = (df.fecha_uso - df.primer_uso).dt.days // 7 + 1
+    df["vencida"] = (df.fecha_vencimiento <= hoy_ts) & ~df.estado.isin(["disputa", "pausa_tecnica"])
+    df["a_tiempo"] = df.vencida & (df.fecha_pago <= df.fecha_vencimiento)
+    df["reusa"] = df.fecha_uso > df.primer_uso
+    mes_ritmo = C.RITMO_DESDE.strftime("%Y-%m")
+
+    def primer_mes(tickets, usuarios):
+        """Semanas 1–4 juntas. Reuso solo entre quienes ya cumplieron su primer mes completo."""
+        mes = tickets[tickets.semana_uso <= PRIMER_MES]
+        vencen = mes[mes.vencida]
+        completos = usuarios[usuarios.primer_uso + pd.Timedelta(days=7 * PRIMER_MES) <= hoy_ts].index
+        reusan = mes[mes.reusa & mes.user_id.isin(completos)].user_id.nunique()
+        return {"repago_a_tiempo": _pct(int(vencen.a_tiempo.sum()), len(vencen)), "n_repago": len(vencen),
+                "reuso": _pct(reusan, len(completos)), "n_reuso": len(completos)}
 
     semana4 = {"repago_a_tiempo": [], "reuso": []}
     for cohorte, usuarios in primeros.groupby("cohorte"):
@@ -187,20 +210,26 @@ def cohortes(conn, hoy) -> dict:
             inicio_k = usuarios.primer_uso + pd.Timedelta(days=7 * (k - 1))
             observados = int((inicio_k <= hoy_ts).sum())
             if not observados:
-                semanas.append({"semana": k, "repago_a_tiempo": None, "reuso": None})
+                semanas.append({"semana": k, "repago_a_tiempo": None, "n_repago": 0, "reuso": None, "n_reuso": 0})
                 continue
-            vencen = tickets[(tickets.semana_uso == k) & (tickets.fecha_vencimiento <= hoy_ts)
-                             & ~tickets.estado.isin(["disputa", "pausa_tecnica"])]
-            a_tiempo = (vencen.fecha_pago <= vencen.fecha_vencimiento).sum()
-            reusan = tickets[(tickets.semana_uso == k) & (tickets.fecha_uso > tickets.primer_uso)]["user_id"].nunique()
-            fila = {"semana": k, "repago_a_tiempo": _pct(a_tiempo, len(vencen)), "reuso": _pct(reusan, observados)}
+            de_k = tickets[tickets.semana_uso == k]
+            vencen = de_k[de_k.vencida]
+            reusan = de_k[de_k.reusa].user_id.nunique()
+            fila = {"semana": k, "repago_a_tiempo": _pct(int(vencen.a_tiempo.sum()), len(vencen)),
+                    "n_repago": len(vencen), "reuso": _pct(reusan, observados), "n_reuso": observados}
             semanas.append(fila)
             if k == 4:
                 for clave in semana4:
                     if fila[clave] is not None:
                         semana4[clave].append({"etiqueta": etiqueta, "valor": fila[clave]})
         salida["cohortes"].append({"cohorte": cohorte, "etiqueta": etiqueta, "usuarios": len(usuarios),
-                                   "semanas": semanas})
+                                   "con_credirecto": cohorte >= mes_ritmo,
+                                   "primer_mes": primer_mes(tickets, usuarios), "semanas": semanas})
+    con = primeros.cohorte >= mes_ritmo
+    salida["grupos"] = {
+        "antes": {"usuarios": int((~con).sum()), **primer_mes(df[df.cohorte < mes_ritmo], primeros[~con])},
+        "con": {"usuarios": int(con.sum()), **primer_mes(df[df.cohorte >= mes_ritmo], primeros[con])},
+    }
     salida["mejor_semana4"] = {c: max(v, key=lambda x: x["valor"]) if v else None for c, v in semana4.items()}
     salida["peor_semana4"] = {c: min(v, key=lambda x: x["valor"]) if v else None for c, v in semana4.items()}
     return salida

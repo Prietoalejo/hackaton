@@ -75,14 +75,23 @@ Recarga los datos sintéticos y vuelve el reloj al 2026-10-31. Tarda ~1 min.
 
 ### `GET /cohortes`  (vista 02)
 ```json
-{"hoy": "2026-10-31", "semanas": 12, "habilitados": 312, "ritmo_desde": "2026-09-07",
+{"hoy": "2026-10-31", "semanas": 12, "primer_mes_semanas": 4, "habilitados": 312, "ritmo_desde": "2026-09-07",
  "cohortes": [
-   {"cohorte": "2026-05", "etiqueta": "May 2026", "usuarios": 58,
-    "semanas": [{"semana": 1, "repago_a_tiempo": 71.2, "reuso": 61.0}, {"semana": 12, "repago_a_tiempo": null, "reuso": null}]}],
+   {"cohorte": "2026-05", "etiqueta": "May 2026", "usuarios": 58, "con_credirecto": false,
+    "primer_mes": {"repago_a_tiempo": 80.0, "n_repago": 50, "reuso": 70.6, "n_reuso": 17},
+    "semanas": [{"semana": 1, "repago_a_tiempo": 71.2, "n_repago": 23, "reuso": 61.0, "n_reuso": 58},
+                {"semana": 12, "repago_a_tiempo": null, "n_repago": 0, "reuso": null, "n_reuso": 0}]}],
+ "grupos": {"antes": {"usuarios": 167, "repago_a_tiempo": 78.1, "n_repago": 456, "reuso": 79.6, "n_reuso": 167},
+            "con":   {"usuarios": 85,  "repago_a_tiempo": 83.1, "n_repago": 183, "reuso": 73.2, "n_reuso": 56}},
  "mejor_semana4": {"repago_a_tiempo": {"etiqueta": "Oct 2026", "valor": 91.0}, "reuso": {"etiqueta": "Oct 2026", "valor": 80.0}},
  "peor_semana4":  {"repago_a_tiempo": {"etiqueta": "May 2026", "valor": 72.0}, "reuso": {"etiqueta": "May 2026", "valor": 55.0}}}
 ```
-`null` = la cohorte aún no llega a esa semana (celda punteada "—").
+- Cohorte = usuarios agrupados por el mes de su primer ticket. `semana` k se cuenta desde el primer ticket de cada usuario.
+- `repago_a_tiempo`: % de las cuotas usadas esa semana (ya vencidas) pagadas a tiempo; base `n_repago` (cuotas).
+- `reuso`: % de usuarios que usaron otro ticket esa semana; base `n_reuso` (usuarios).
+- `primer_mes` junta las semanas 1–4 (reuso solo entre quienes ya cumplieron su primer mes).
+- `con_credirecto`: la cohorte es del mes de `ritmo_desde` o posterior. `grupos` junta las cohortes de antes y de después.
+- `null` = la cohorte aún no llega a esa semana (celda punteada "—").
 
 ### `GET /segmentos`  (vista 03)
 ```json

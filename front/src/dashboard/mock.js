@@ -297,17 +297,40 @@ function cohortes() {
     semanas: Array.from({ length: 12 }, (_, i) => {
       const w = i + 1
       return w > nSem
-        ? { semana: w, repago_a_tiempo: null, reuso: null }
-        : { semana: w, repago_a_tiempo: val('rep', rb, ub, w, ci), reuso: val('reu', rb, ub, w, ci) }
+        ? { semana: w, repago_a_tiempo: null, n_repago: 0, reuso: null, n_reuso: 0 }
+        : { semana: w, repago_a_tiempo: val('rep', rb, ub, w, ci), n_repago: Math.round(usuarios * 0.5),
+            reuso: val('reu', rb, ub, w, ci), n_reuso: usuarios }
     }),
-  }))
+  })).map((c, ci) => {
+    const mes = c.semanas.slice(0, 4).filter((s) => s.repago_a_tiempo !== null)
+    const prom = (k) => r1(mes.reduce((t, s) => t + s[k], 0) / mes.length)
+    return {
+      ...c, con_credirecto: ci >= 4,
+      primer_mes: { repago_a_tiempo: prom('repago_a_tiempo'), n_repago: mes.length * Math.round(c.usuarios * 0.5),
+        reuso: mes.length < 4 ? null : prom('reuso'), n_reuso: mes.length < 4 ? 0 : c.usuarios },
+    }
+  })
+  const grupo = (con) => {
+    const cs = lista.filter((c) => c.con_credirecto === con)
+    const pond = (k, n) => {
+      const ok = cs.filter((c) => c.primer_mes[k] !== null)
+      const total = ok.reduce((t, c) => t + c.primer_mes[n], 0)
+      return total ? r1(ok.reduce((t, c) => t + c.primer_mes[k] * c.primer_mes[n], 0) / total) : null
+    }
+    return {
+      usuarios: cs.reduce((t, c) => t + c.usuarios, 0),
+      repago_a_tiempo: pond('repago_a_tiempo', 'n_repago'), n_repago: cs.reduce((t, c) => t + c.primer_mes.n_repago, 0),
+      reuso: pond('reuso', 'n_reuso'), n_reuso: cs.reduce((t, c) => t + c.primer_mes.n_reuso, 0),
+    }
+  }
   const extremo = (campo, mejor) => {
     const s4 = lista.map((c) => ({ etiqueta: c.etiqueta, valor: c.semanas[3][campo] })).sort((a, b) => b.valor - a.valor)
     const x = mejor ? s4[0] : s4[s4.length - 1]
     return { etiqueta: x.etiqueta, valor: Math.round(x.valor) }
   }
   return {
-    hoy: estado.hoy, semanas: 12, habilitados: 312, ritmo_desde: '2026-09-07', cohortes: lista,
+    hoy: estado.hoy, semanas: 12, primer_mes_semanas: 4, habilitados: 312, ritmo_desde: '2026-09-07', cohortes: lista,
+    grupos: { antes: grupo(false), con: grupo(true) },
     mejor_semana4: { repago_a_tiempo: extremo('repago_a_tiempo', true), reuso: extremo('reuso', true) },
     peor_semana4: { repago_a_tiempo: extremo('repago_a_tiempo', false), reuso: extremo('reuso', false) },
   }
