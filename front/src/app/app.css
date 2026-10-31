@@ -1,0 +1,91 @@
+/* Estilos de la app Credirecto. Todas las clases llevan prefijo cd- para no chocar con el dashboard.
+   Copiados de los <helmet> de disenos/app/*.html */
+
+/* ---------- Banco de pruebas (fuera del teléfono) ---------- */
+.cd-raiz { min-height: 100vh; display: flex; gap: 32px; padding: 24px; align-items: flex-start; justify-content: center; background: #E7E8EE; font-family: 'Outfit', system-ui, sans-serif; color: #15152B; }
+.cd-panel { width: 320px; flex: none; display: flex; flex-direction: column; gap: 14px; position: sticky; top: 24px; }
+.cd-panel h1 { font-size: 20px; margin: 0; }
+.cd-pbox { background: #fff; border: 1px solid #DADCE4; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+.cd-pbox h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: #6B6B80; margin: 0; }
+.cd-pbox input { height: 38px; border: 1px solid #C9CBD6; border-radius: 8px; padding: 0 10px; font-size: 14px; }
+.cd-pbtn { min-height: 36px; border: 1px solid #C9CBD6; border-radius: 8px; background: #fff; font: 500 14px 'Outfit', sans-serif; padding: 6px 10px; text-align: left; cursor: pointer; color: #15152B; }
+.cd-pbtn:hover { background: #F3F4F8; }
+.cd-pbtn[aria-pressed="true"] { border-color: #FF1F5A; box-shadow: inset 0 0 0 1px #FF1F5A; }
+.cd-pbtn.prim { background: #15152B; color: #fff; border-color: #15152B; text-align: center; font-weight: 600; }
+.cd-pbtn:disabled { opacity: .6; cursor: default; }
+.cd-plinks { display: flex; flex-wrap: wrap; gap: 6px; }
+.cd-plinks a { font-size: 13px; padding: 4px 9px; border-radius: 999px; background: #F3F4F8; color: #15152B; text-decoration: none; border: 1px solid #DADCE4; }
+.cd-plinks a.activo { background: #15152B; color: #fff; border-color: #15152B; }
+.cd-perr { background: #FFE3EA; color: #D6104D; border-radius: 8px; padding: 8px 10px; font-size: 13px; }
+.cd-pdato { display: flex; justify-content: space-between; font-size: 13px; gap: 8px; }
+.cd-pdato span:first-child { color: #6B6B80; }
+
+.cd-telefono { flex: none; padding: 12px; background: #101016; border-radius: 58px; box-shadow: 0 30px 60px rgba(21,21,43,.25); }
+.cd-pantalla { position: relative; width: 390px; height: 844px; border-radius: 46px; overflow: hidden; background: #F3F4F8; font-family: 'Outfit', system-ui, sans-serif; color: #15152B; isolation: isolate; }
+.cd-pantalla button { cursor: pointer; font-family: inherit; }
+.cd-pantalla button:disabled { cursor: default; }
+.cd-scroll { scrollbar-width: none; }
+.cd-scroll::-webkit-scrollbar { display: none; }
+
+@media (max-width: 860px) {
+  .cd-raiz { flex-direction: column; align-items: center; padding: 16px; gap: 20px; }
+  .cd-panel { width: 100%; max-width: 414px; position: static; }
+}
+@media (max-width: 440px) {
+  .cd-raiz { padding: 12px 0; }
+  .cd-panel { padding: 0 12px; }
+  .cd-telefono { padding: 0; border-radius: 0; background: none; box-shadow: none; }
+  .cd-pantalla { border-radius: 0; }
+}
+
+/* ---------- Sistema visual de la app ---------- */
+.cd-cb { width: 50px; height: 50px; border-radius: 50%; background: #fff; border: 0; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(21,21,43,.07); color: #15152B; padding: 0; flex: none; }
+.cd-card { background: #fff; border-radius: 28px; box-shadow: 0 8px 28px rgba(21,21,43,.06); }
+.cd-h2 { font-size: 23px; font-weight: 600; margin: 0; }
+.cd-mut { color: #6B6B80; }
+.cd-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+
+/* Home (01/02) */
+.cd-fr { width: 254px; height: 290px; flex: none; background: #fff; border-radius: 32px; padding: 7px; box-shadow: 0 10px 30px rgba(21,21,43,.08); border: 0; cursor: pointer; text-align: left; font-family: inherit; color: inherit; }
+.cd-wa { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; }
+.cd-wa > span { width: 46px; height: 46px; border-radius: 50%; background: rgba(255,255,255,.22); display: flex; align-items: center; justify-content: center; }
+.cd-dot { height: 8px; border-radius: 4px; border: 0; padding: 0; cursor: pointer; transition: width .2s; }
+.cd-nav { position: absolute; left: 0; right: 0; bottom: 0; height: 92px; background: #fff; border-radius: 28px 28px 0 0; display: grid; grid-template-columns: 1fr 1fr 96px 1fr 1fr; align-items: center; box-shadow: 0 -6px 24px rgba(21,21,43,.06); padding: 0 6px 10px; z-index: 5; }
+.cd-ni { display: flex; flex-direction: column; align-items: center; gap: 4px; font: 500 13px 'Outfit', sans-serif; color: #6B6B80; text-decoration: none; background: none; border: 0; padding: 0; }
+.cd-masc { position: absolute; left: 50%; bottom: 40px; transform: translateX(-50%); width: 84px; height: 84px; border-radius: 50%; border: 2px dashed #B9BCCB; background: #F3F4F8; display: flex; align-items: center; justify-content: center; font: 500 11px 'Outfit', sans-serif; color: #6B6B80; z-index: 6; }
+
+/* Detalle (03) */
+.cd-tc { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 15px; color: #6B6B80; }
+.cd-ci { width: 66px; height: 66px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.cd-mv { background: #fff; border-radius: 22px; box-shadow: 0 6px 20px rgba(21,21,43,.05); padding: 14px 16px; display: flex; gap: 12px; align-items: center; }
+.cd-ar { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex: none; }
+.cd-chip { font-size: 11px; font-weight: 700; letter-spacing: .04em; padding: 3px 9px; border-radius: 999px; }
+.cd-sv { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; font-size: 13px; font-weight: 500; }
+.cd-si { width: 56px; height: 56px; border-radius: 18px; background: #F1FBD2; color: #3B6B00; display: flex; align-items: center; justify-content: center; }
+
+/* Pago con ticket (04) */
+.cd-tk { border-radius: 16px; padding: 10px 6px 8px; text-align: center; font-size: 13px; }
+.cd-ntc { position: relative; margin: 8px -6px 6px; }
+.cd-ntc > span { position: absolute; top: -7px; width: 12px; height: 12px; border-radius: 50%; background: #fff; }
+.cd-input { width: 100%; height: 44px; border: 0; border-radius: 14px; background: #F3F4F8; padding: 0 14px; font: 500 15px 'Outfit', sans-serif; color: #15152B; outline: none; }
+.cd-input:focus { box-shadow: inset 0 0 0 2px #FF1F5A; }
+
+/* Quincena (05) */
+.cd-d { height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 14px; font-weight: 500; }
+
+/* Racha (07) */
+.cd-dy { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; }
+.cd-pc { width: 136px; flex: none; border-radius: 28px; padding: 16px 12px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.cd-rb { margin-top: 8px; height: 36px; padding: 0 16px; border-radius: 999px; border: 0; font: 600 14px 'Outfit', sans-serif; }
+
+/* Notificaciones (10) */
+.cd-n { display: flex; gap: 12px; padding: 14px; border-radius: 24px; background: rgba(245,246,240,.82); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); color: #15152B; box-shadow: 0 8px 24px rgba(0,0,0,.2); border: 0; text-align: left; font-family: inherit; width: 100%; }
+.cd-ic { width: 40px; height: 40px; border-radius: 11px; background: #FF1F5A; color: #fff; display: flex; align-items: center; justify-content: center; font: 800 22px 'Outfit', sans-serif; flex: none; }
+.cd-hd { display: flex; justify-content: space-between; font-size: 13px; color: #4A4A5E; }
+.cd-tt { font-weight: 700; font-size: 15px; margin-top: 2px; }
+.cd-bd { font-size: 15px; line-height: 1.3; margin-top: 2px; }
+
+/* Aviso flotante y carga */
+.cd-toast { position: absolute; left: 16px; right: 16px; top: 14px; z-index: 50; background: #15152B; color: #fff; border-radius: 18px; padding: 12px 16px; font-size: 14px; line-height: 1.35; box-shadow: 0 10px 30px rgba(21,21,43,.3); animation: cd-entra .25s ease; }
+@keyframes cd-entra { from { transform: translateY(-12px); opacity: 0; } to { transform: none; opacity: 1; } }
+.cd-error { background: #FFE3EA; color: #D6104D; border-radius: 16px; padding: 10px 12px; font-size: 14px; line-height: 1.35; }

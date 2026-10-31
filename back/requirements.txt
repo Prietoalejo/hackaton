@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+pandas
+numpy
+supabase
+psycopg2-binary
+sqlalchemy
+python-dotenv
+pytest
+httpx

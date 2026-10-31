@@ -88,3 +88,57 @@ Dashboard (`disenos/dashboard/`): 01 Resumen (KPIs, Ritmo vs. regla actual, grá
 - Centraliza las reglas de negocio (niveles, score, cobros) en un solo módulo con la configuración, para que la vista Configuración de Ritmo las edite.
 - Usa los datos de ejemplo de arriba como mocks hasta que exista el backend.
 - Después de cada pantalla, compárala con su archivo en `disenos/`.
+
+---
+
+# Back (Ritmo) · cómo está hecho
+
+El back implementa las reglas de esta guía. Contrato JSON: `API.md`. Cómo correrlo: `README.md`.
+
+## Estructura
+
+```
+back/
+├── app/
+│   ├── main.py            # FastAPI: endpoints de API.md
+│   ├── config.py          # TODOS los parámetros; los de la vista Configuración se editan en caliente
+│   ├── db.py              # SQLAlchemy (psycopg2), tablas y helpers de lectura/escritura
+│   ├── reloj.py           # fecha simulada: nunca se usa datetime.now() en la lógica
+│   ├── metricas.py        # consultas de las vistas del dashboard
+│   ├── motor/             # funciones puras: score, habilitacion, niveles, segmentos, quincena, cobros, decisiones, perfil
+│   └── worker/mora.py     # gracia, comisión, mora; pagos y recargas; simulación de días
+├── datos/
+│   ├── schema.sql
+│   ├── comportamiento.py  # comportamiento determinista de los usuarios sintéticos
+│   └── generar.py         # 500 usuarios, historial 1 may – 31 oct 2026, dos mundos
+└── tests/                 # casos borde y reglas del motor (sin base de datos)
+```
+
+Las funciones de `motor/` son puras: reciben datos y la fecha `hoy`, no tocan la base.
+
+## Reglas implementadas (y decisiones donde la guía no lo decía)
+
+- **Habilitación**: cédula + vehículo + `req_pagos` pagos de servicios a tiempo + `req_dias` días. Configurable.
+- **Score**: pesos de la guía. Verificación = 5 por cédula + 5 por vehículo. Fricción = −1 por rechazo de
+  fondos y −1 por día de atraso en 90 días, con piso −10. Anticipado = pagar 1+ días antes del vencimiento.
+- **Niveles**: por score con margen de 5 para bajar. Además, repagos a tiempo para subir
+  (Básico 1, Confiable 3, Premium 10, sacado del "Camino a Premium 5 de 10") y 2 meses para Premium.
+- **Cuotas**: cuota = monto + gasto administrativo (10 %). Vencimiento = uso + 7 días; se puede mover a la
+  quincena si cae dentro del plazo máximo del nivel. Pagar antes del vencimiento aplica el descuento
+  del nivel sobre el gasto administrativo.
+- **Atraso**: días 1–2 gracia; día 3 comisión (5 % de la cuota, mín. $0,25, una vez); día 8 mora →
+  modo recuperación: no puede pedir crédito, se debita la wallet y cada recarga paga primero la deuda.
+  Al saldar, sale del modo recuperación y recupera los tickets de su nivel.
+- **Segmentos** (en orden): Sin crédito (no habilitado), En riesgo (deuda vencida, pagó con comisión o
+  2+ rechazos en 30 días, o el score cayó 5+ en 7 días), Nuevo (<30 días habilitado), En enfriamiento
+  (21+ días sin usar), Conductor diario (movilidad en 4+ días por semana), Puntual (el resto).
+- **Mensajes** (uno por día, por prioridad): aviso de mora, comisión, gracia, recordatorio (2 días antes),
+  mover a quincena (el día del uso), falta poco para subir (el día que paga y queda a un repago).
+  Van por el canal preferido del usuario; el aviso de mora va por push y Wisi.
+- **Premios**: racha (pagos a tiempo en la semana, meta 3 → ×1,5), ×1,5 por pagar antes, puntos del
+  Club (100 por pago), descuento por nivel, subida de nivel. Usar el crédito no se premia.
+- **Regla actual vs. Ritmo**: el generador simula los mismos usuarios con la regla actual (2 tickets,
+  7 días, solo estacionamiento, para todos) y guarda sus métricas en `metricas_regla_actual`.
+  Ritmo empieza a decidir el 7 sep 2026.
+- **Datos sintéticos**: 500 usuarios (u_0001…u_0500); `u_0142` María, `u_0333` Carmen y `u_0007` Pedro
+  son de historia y no se mueven solos al avanzar el reloj.
