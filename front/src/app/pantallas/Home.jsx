@@ -49,8 +49,8 @@ function HomeNormal() {
         <div style={{ display: 'flex', gap: 8 }}>
           <BotonCircular
             tamano={48}
-            aria-label={rachaOn ? 'Racha de pagos encendida' : 'Racha de pagos'}
-            onClick={() => (hab ? navegar('/app/racha') : avisar('Activa tu Credirecto para empezar tu racha de pagos.'))}
+            aria-label={rachaOn ? 'Club PagoDirecto: racha encendida' : 'Club PagoDirecto'}
+            onClick={() => navegar('/app/club')}
             style={rachaOn
               ? { boxShadow: 'inset 0 0 0 4px #FFD3DF, 0 4px 16px rgba(255,31,90,.22)', color: '#FF1F5A' }
               : { boxShadow: 'inset 0 0 0 4px #E6E7EE, 0 4px 16px rgba(21,21,43,.07)', color: '#E0124F' }}
@@ -132,7 +132,7 @@ function HomeNormal() {
           </button>
         </div>
         {hab && (
-          <Tarjeta role="button" tabIndex={0} onClick={() => navegar('/app/racha')}
+          <Tarjeta role="button" tabIndex={0} onClick={() => navegar('/app/club')}
             style={{ marginTop: 14, padding: 18, display: 'flex', gap: 14, alignItems: 'center', cursor: 'pointer' }}>
             <span style={{ width: 60, height: 60, borderRadius: 18, background: fondoCD('120% 90% at 90% 120%', 0.5, 30, 70), display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}><LogoCD /></span>
             <div style={{ flex: 1 }}>

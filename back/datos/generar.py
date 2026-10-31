@@ -394,7 +394,7 @@ def generar(engine=None) -> dict:
         _recrear_tablas(conn)
         guardada = db.leer_config(conn)
     if guardada:
-        C.aplicar(C.validar(guardada["valores"]))
+        C.aplicar(C.validar_guardada(guardada["valores"]))
 
     lote = construir()
     por_dia, usuarios, tickets = calcular_perfiles(lote)

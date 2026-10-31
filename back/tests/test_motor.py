@@ -212,9 +212,9 @@ def test_cupo_variable_dentro_del_nivel():
     assert cupo_nivel(2, -1) == {"tickets": 2, "servicios_cupo": 1}
     assert cupo_nivel(0, -1) == {"tickets": 1, "servicios_cupo": 0}
     bueno = {"pausa": False, "razones": [{"senal": "puntualidad", "efecto": 0.15}, {"senal": "anticipados", "efecto": 0.15}]}
-    solo_racha = {"pausa": False, "razones": [{"senal": "racha", "efecto": 0.10}, {"senal": "score", "efecto": 0.10}]}
+    poco = {"pausa": False, "razones": [{"senal": "score", "efecto": 0.10}]}
     riesgo = {"pausa": False, "razones": [{"senal": "riesgo", "efecto": -0.30}]}
-    assert ajuste_cupo(bueno) == 1 and ajuste_cupo(solo_racha) == 0 and ajuste_cupo(riesgo) == -1
+    assert ajuste_cupo(bueno) == 1 and ajuste_cupo(poco) == 0 and ajuste_cupo(riesgo) == -1
     assert ajuste_cupo({"pausa": True, "razones": []}) == -1
     with C.con_valores({"ajuste_cupo_max": 0}):
         assert ajuste_cupo(bueno) == 0                                     # se apaga desde Configuración
@@ -260,3 +260,12 @@ def test_consejo_prioriza_atrasos_recientes():
     base = [{"senal": "puntualidad", "aporte": 38, "max": 40}, {"senal": "anticipados", "aporte": 0, "max": 15}]
     assert senal_mas_debil(base + [{"senal": "friccion", "aporte": -1, "max": -10}]) == "anticipados"
     assert senal_mas_debil(base + [{"senal": "friccion", "aporte": -4, "max": -10}]) == "friccion"
+
+
+def test_racha_solo_multiplica_puntos_no_los_beneficios():
+    from app.motor.beneficios import factor_personal
+    lunes = HOY - timedelta(days=HOY.weekday())
+    tres_dias = [evento(lunes + timedelta(days=i), "repago_ticket", monto=5.0, a_tiempo=True) for i in range(3)]
+    assert racha(tres_dias, HOY)["multiplicador"]
+    perfil = {"trust_score": 70, "segmento": C.SEG_PUNTUAL}
+    assert "racha" not in {r["senal"] for r in factor_personal(perfil, tres_dias, [], HOY)["razones"]}

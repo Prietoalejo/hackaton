@@ -5,11 +5,11 @@ entrega fijo: lo multiplica por un factor personal que sube o baja según cómo 
 suma un beneficio "a tu medida" según cómo usa PagoDirecto. Premia lo que reduce el riesgo (pagar a
 tiempo, antes, con constancia), nunca usar más crédito.
 
-    factor = 1 + señales (puntualidad, anticipados, racha, score, riesgo), acotado a [mínimo, máximo]
+    factor = 1 + señales (puntualidad, anticipados, score, riesgo), acotado a [mínimo, máximo]
+    La racha no entra aquí: es del Club y solo multiplica los puntos (×1,5), para no premiar dos veces lo mismo.
     En modo recuperación el factor es 0: los beneficios quedan en pausa hasta saldar.
 """
 from app import config as C
-from app.motor.decisiones import racha
 from app.motor.score import en_ventana, es_anticipado
 
 
@@ -57,9 +57,6 @@ def factor_personal(perfil, eventos, tickets, hoy) -> dict:
         if anticipadas >= 0.5:
             senal("anticipados", v["bono_anticipados_pct"] / 100, f"Paga antes del vencimiento el {anticipadas:.0%} de sus cuotas")
 
-    if racha(eventos, hoy)["multiplicador"]:
-        senal("racha", v["bono_racha_pct"] / 100, "Tiene la racha de la semana completa")
-
     score = perfil.get("trust_score")
     if score is not None and score >= C.UMBRALES_NIVEL[3]:
         senal("score", v["bono_score_pct"] / 100, f"Trust Score alto ({score})")
@@ -106,13 +103,13 @@ def _a_tu_medida(perfil, factor) -> dict | None:
 def ajuste_cupo(factor) -> int:
     """Tickets (y pagos de servicios) que gana o pierde dentro de su nivel: ±ajuste_cupo_max.
 
-    Solo cuentan las señales de riesgo (puntualidad, anticipados, score, riesgo), no la racha de la
-    semana, para que el cupo no cambie cada lunes. En modo recuperación pierde cupo.
+    Cuentan las mismas señales de riesgo del factor (puntualidad, anticipados, score, riesgo); la racha
+    semanal no entra, así el cupo no cambia cada lunes. En modo recuperación pierde cupo.
     """
     tope = int(C.VALORES["ajuste_cupo_max"])
     if factor["pausa"]:
         return -tope
-    s = sum(r["efecto"] for r in factor["razones"] if r["senal"] != "racha")
+    s = sum(r["efecto"] for r in factor["razones"])
     if s >= C.CUPO_SUBE_DESDE:
         return tope
     if s <= C.CUPO_BAJA_DESDE:

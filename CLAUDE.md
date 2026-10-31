@@ -81,7 +81,7 @@ tienen el cupo de pagos de servicios, las rutas del Club, el motor de beneficios
 El beneficio de cada ruta **no es fijo**: la ruta da una base (walletback % y tickets gratis de estacionamiento
 al mes; valores supuestos, de 1 % / 0 en Turista a 4 % / 4 en Baqueano) y el motor la multiplica por un
 factor personal, acotado entre 50 % y 150 %:
-- \+ paga a tiempo ≥ 95 % (−15 % si < 80 %), + paga antes ≥ 50 % de sus cuotas (15 %), + racha completa (10 %),
+- \+ paga a tiempo ≥ 95 % (−15 % si < 80 %), + paga antes ≥ 50 % de sus cuotas (15 %),
   \+ Trust Score ≥ 80 (−10 % si < 40), − segmento En riesgo (30 %). Modo recuperación: beneficios en pausa (0 %).
 - Además, un beneficio **a su medida** por segmento: Conductor diario +1 ticket gratis, Puntual 1 cuota al mes
   sin gasto administrativo, Nuevo walletback doble el primer mes, En enfriamiento walletback doble en el
@@ -115,6 +115,9 @@ Puntualidad 40 + Constancia 20 + Antigüedad 15 + Anticipados 15 + Verificación
 Cédula verificada + vehículo verificado + 2 pagos de servicios a tiempo + 30 días en PagoDirecto (todo configurable).
 
 ### Premios
+**Un solo programa: el Club PagoDirecto.** Una sola moneda (puntos de la ruta) y la racha como acelerador;
+la racha vive dentro de la pantalla del Club (no tiene pantalla propia) y solo multiplica puntos: no entra
+en el factor de beneficios ni en el cupo.
 Credirecto **no tiene puntos propios**: suma a los puntos y la racha que ya existen en el **Club PagoDirecto**
 (Hitos / Beneficios / Puntos, progreso de la ruta). Cuota pagada a tiempo: +100 pts del Club y +1 en la racha.
 Pagar antes del vencimiento (o con la racha completa): pts ×1,5.
@@ -129,7 +132,7 @@ Pagar antes del vencimiento (o con la racha completa): pts ×1,5.
 
 ## Índice de pantallas
 
-App (`disenos/app/`): 01 home sin Credirecto (carrusel con checklist) · 02 home habilitado (carrusel con tickets) · 03 detalle (tickets, cuotas/movimientos, camino a Premium, servicios) · 04 pago con ticket · 05 mover cuota a la quincena · 06 comprobante de pago anticipado · 07 racha · 08 período de gracia · 09 modo recuperación · 10 notificaciones push.
+App (`disenos/app/`): 01 home sin Credirecto (carrusel con checklist) · 02 home habilitado (carrusel con tickets) · 03 detalle (tickets, cuotas/movimientos, camino a Premium, servicios) · 04 pago con ticket · 05 mover cuota a la quincena · 06 comprobante de pago anticipado · 07 racha (ahora dentro del Club) · 08 período de gracia · 09 modo recuperación · 10 notificaciones push.
 Además, **Club PagoDirecto** (`/app/club`, sin archivo de diseño; sigue las capturas de la app real): carrusel de rutas
 (deslizar a la izquierda) con mapa, paradas y progreso, y abajo las pestañas Hitos, Beneficios y Puntos. Se abre desde
 "Ver mi ruta" en el Home, la tarjeta del Club en Racha y la ruta que exige el siguiente nivel en Detalle.

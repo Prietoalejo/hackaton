@@ -8,7 +8,7 @@ import { useApp } from '../contexto.js'
 import { proximoTicket } from '../util.js'
 import { Avatar, Encabezado, Pantalla, Tarjeta } from '../componentes/Base.jsx'
 import { IcoCandado, IcoCheck, IcoLlama, LogoCD } from '../componentes/Iconos.jsx'
-import { BeneficiosRuta } from './Racha.jsx'
+import { BeneficiosRuta, RachaSemana } from './Racha.jsx'
 
 const ROSA = '#FF1F5A'
 
@@ -256,7 +256,7 @@ function Pasos({ n, alcanzadas, color, bloqueada }) {
 
 /** Hitos: misiones de una sola vez del Club y lo que suma Credirecto a la ruta */
 function Hitos() {
-  const { ficha, avisar } = useApp()
+  const { ficha, hoy, avisar } = useApp()
   const navegar = useNavigate()
   const vehiculo = ficha.checklist?.find((c) => c.requisito === 'vehiculo')?.ok
   const misiones = [
@@ -266,13 +266,13 @@ function Hitos() {
       accion: () => avisar('La verificación del vehículo se hace desde Mis vehículos en PagoDirecto.') },
   ]
   const pendientes = misiones.filter((m) => !m.hecha).reduce((s, m) => s + m.pts, 0)
-  const r = ficha.racha || { pagos: 0, meta: 3 }
   const club = ficha.club_puntos || { puntos_por_pago: 100, multiplicador: 1.5 }
   const cuota = ficha.habilitado ? proximoTicket(ficha) : null
 
   return (
     <div style={{ padding: '22px 16px 0' }}>
-      <div style={{ padding: '0 4px' }}>
+      <RachaSemana ficha={ficha} hoy={hoy} />
+      <div style={{ padding: '0 4px', marginTop: 22 }}>
         <div style={{ fontWeight: 700, fontSize: 20 }}>Hitos activos</div>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 2, fontSize: 15 }}>
           <span className="cd-mut">Complétalos y suma puntos a tu ruta</span>
@@ -295,9 +295,6 @@ function Hitos() {
             titulo="Paga tu cuota a tiempo" texto={`+${club.puntos_por_pago} pts por cuota; ×${String(club.multiplicador).replace('.', ',')} si pagas antes.`}
             derecha={`+${Math.round(club.puntos_por_pago * club.multiplicador)} pts`}
             boton={cuota ? 'Pagar' : 'Usar ticket'} onClick={() => navegar(cuota ? '/app/detalle' : '/app/pago')} />
-          <Mision icono={<IcoLlama encendida={r.pagos > 0} w={24} />} titulo="Completa tu racha"
-            texto={r.multiplicador ? 'Tienes el ×1,5 activo esta semana.' : `Paga a tiempo ${r.meta} días distintos esta semana.`}
-            derecha={`${r.pagos}/${r.meta} días`} boton="Ver racha" onClick={() => navegar('/app/racha')} hecha={r.multiplicador} />
         </>
       ) : (
         <Mision icono={<LogoCD w={30} h={20} color="#8CC20B" sw={3.4} />} oscuro titulo="Activa Credirecto"

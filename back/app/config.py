@@ -53,7 +53,6 @@ EDITABLES = [
     ("beneficio_max_pct", "Motor de beneficios del Club", "Beneficio máximo de la ruta", "%", 150, 5),
     ("bono_puntualidad_pct", "Motor de beneficios del Club", "Puntualidad (± si paga a tiempo o no)", "%", 15, 5),
     ("bono_anticipados_pct", "Motor de beneficios del Club", "Paga antes del vencimiento", "%", 15, 5),
-    ("bono_racha_pct", "Motor de beneficios del Club", "Racha de la semana completa", "%", 10, 5),
     ("bono_score_pct", "Motor de beneficios del Club", "Trust Score alto (± si es bajo)", "%", 10, 5),
     ("castigo_riesgo_pct", "Motor de beneficios del Club", "Segmento En riesgo", "%", 30, 5),
     # Cupo variable: ±tickets (y pagos de servicios) dentro del nivel según cómo paga
@@ -288,6 +287,11 @@ def validar(valores: dict) -> dict:
     if candidato["mora_dia"] <= candidato["gracia_dias"]:
         raise ValueError("La mora debe empezar después de los días de gracia.")
     return limpios
+
+
+def validar_guardada(valores: dict) -> dict:
+    """Como `validar`, pero para la configuración guardada: los parámetros que ya no existen se ignoran."""
+    return validar({k: v for k, v in valores.items() if k in DEFAULTS})
 
 
 def aplicar(valores: dict) -> None:

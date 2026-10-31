@@ -438,7 +438,7 @@ function configInicial() {
         n('ruta_confiable', 'Confiable desde', 3, 'nivel'), n('ruta_premium', 'Premium desde', 4, 'nivel')] },
       { titulo: 'Motor de beneficios del Club', campos: [n('beneficio_min_pct', 'Beneficio mínimo de la ruta', 50, '%'),
         n('beneficio_max_pct', 'Beneficio máximo de la ruta', 150, '%'), n('bono_puntualidad_pct', 'Puntualidad (± si paga a tiempo o no)', 15, '%'),
-        n('bono_anticipados_pct', 'Paga antes del vencimiento', 15, '%'), n('bono_racha_pct', 'Racha de la semana completa', 10, '%'),
+        n('bono_anticipados_pct', 'Paga antes del vencimiento', 15, '%'),
         n('bono_score_pct', 'Trust Score alto (± si es bajo)', 10, '%'), n('castigo_riesgo_pct', 'Segmento En riesgo', 30, '%')] },
       { titulo: 'Pagos de servicios por nivel', campos: [n('servicios_inicial', 'Inicial', 0, ''), n('servicios_basico', 'Básico', 0, ''),
         n('servicios_confiable', 'Confiable', 1, ''), n('servicios_premium', 'Premium', 3, '')] },

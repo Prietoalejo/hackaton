@@ -27,7 +27,7 @@ def _cargar_config():
         with db.get_engine().begin() as conn:
             guardada = db.leer_config(conn)
         if guardada:
-            C.aplicar(C.validar(guardada["valores"]))
+            C.aplicar(C.validar_guardada(guardada["valores"]))
     except Exception:   # base vacía: se usan los valores por defecto hasta el primer /reset
         pass
 
